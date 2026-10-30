@@ -1,0 +1,22 @@
+*.local
+.env
+.env.*
+!.env.example
+!.env.*.example
+.venv/
+.tools/
+.cache/
+artifacts/
+node_modules/
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+*.log
+*.tsbuildinfo
+Thumbs.db
+.DS_Store
+# Keep the supplied assessment documents local unless their owner approves publication.
+/*.pdf

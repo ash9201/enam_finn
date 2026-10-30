@@ -1,0 +1,61 @@
+# Foundation only. Creating these services does not pass the dependency gate.
+# Use the free plan and fill actual URLs after Render assigns them.
+services:
+  - type: web
+    name: finn-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.lock && pip install --no-deps -e .
+    startCommand: uvicorn finn.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health/live
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: FINN_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_LITE_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_REASONING_MODEL
+        value: gemini-3.8-flash
+      - key: FINN_ENABLE_SEMANTIC_SEARCH
+        value: "false"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: finn-documents
+      - key: FINN_ALLOWED_ORIGINS
+        sync: false
+  - type: web
+    name: finn-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --no-fund --no-audit && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: commit
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.2
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
