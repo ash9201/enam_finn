@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timedelta, timezone
 import hashlib
+import os
 import re
 
 from bs4 import BeautifulSoup
@@ -107,7 +107,7 @@ def classify_filing(description: str) -> tuple[str, int, str]:
     )
 
 
-def sync_start(store, kind: str) -> dict:
+def sync_start(store, kind: str, origin: str = "local_manual") -> dict:
     old = store.rows("finn_sync_status", id="eq." + kind, limit=1)
     record = {
         "id": kind,
@@ -117,14 +117,21 @@ def sync_start(store, kind: str) -> dict:
         "last_success_at": old[0]["last_success_at"] if old else None,
         "captured_since": old[0]["captured_since"] if old else None,
         "error": None,
-        "details": {},
+        "details": execution_details(origin),
     }
     store.upsert("finn_sync_status", [record])
     return record
 
 
-def sync_filings(store, companies: list[dict]) -> dict:
-    record = sync_start(store, "filings")
+def execution_details(origin: str) -> dict:
+    return {
+        "execution_origin": origin,
+        "automation_verified": origin in ["supabase_cron", "github_actions"],
+    }
+
+
+def sync_filings(store, companies: list[dict], *, origin: str = "local_manual") -> dict:
+    record = sync_start(store, "filings", origin)
     try:
         with public_client() as client:
             feed = announcement_feed(client)
@@ -175,6 +182,7 @@ def sync_filings(store, companies: list[dict]) -> dict:
             "captured_since": record["captured_since"] or record["started_at"],
             "error": " ".join(issues) if issues else None,
             "details": {
+                **execution_details(origin),
                 "portfolio_companies": len(companies),
                 "feed_items": len(feed["items"]),
                 "portfolio_filings": len(filings),
@@ -193,8 +201,8 @@ def sync_filings(store, companies: list[dict]) -> dict:
         raise
 
 
-def sync_prices(store, companies: list[dict]) -> dict:
-    sync_start(store, "prices")
+def sync_prices(store, companies: list[dict], *, origin: str = "local_manual") -> dict:
+    sync_start(store, "prices", origin)
     failed = []
     for company in companies:
         attempted = now()
@@ -237,6 +245,7 @@ def sync_prices(store, companies: list[dict]) -> dict:
         "finished_at": now(),
         "error": None if not failed else "Some portfolio prices could not be refreshed.",
         "details": {
+            **execution_details(origin),
             "portfolio_companies": len(companies),
             "updated": len(companies) - len(failed),
             "failed_symbols": failed,
@@ -253,6 +262,7 @@ def main():
     parser.add_argument("--mode", choices=["all", "filings", "prices"], default="all")
     args = parser.parse_args()
     load_local_env()
+    origin = os.getenv("FINN_SYNC_ORIGIN", "local_manual")
     with open_store() as store:
         companies = store.rows(
             "finn_companies", portfolio="eq.true", select="symbol,name,isin", order="symbol"
@@ -262,12 +272,14 @@ def main():
         failed = False
         if args.mode in ["all", "filings"]:
             try:
-                print("Filings:", sync_filings(store, companies), flush=True)
+                result = sync_filings(store, companies, origin=origin)
+                print("Filings:", result, flush=True)
+                failed = failed or result["state"] != "completed"
             except Exception as exc:
                 failed = True
                 print("Filings failed:", safe_error(exc), flush=True)
         if args.mode in ["all", "prices"]:
-            result = sync_prices(store, companies)
+            result = sync_prices(store, companies, origin=origin)
             print("Prices:", result, flush=True)
             failed = failed or result["state"] != "completed"
         if failed:

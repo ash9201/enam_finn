@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import uuid
 import hmac
+from typing import Literal
 from concurrent.futures import ThreadPoolExecutor
 
 import httpx
@@ -16,8 +17,82 @@ from finn.corpus import now
 from finn.research import DEFAULT_QUESTION
 from finn.services import DependencyError, MissingConfiguration
 from finn.store import open_store
+from finn.source_sync import run_sync
 
 router = APIRouter()
+
+
+def require_sync_operator(key: str | None):
+    _, secret, _ = supabase_configuration()
+    if not secret or not key or not hmac.compare_digest(secret, key):
+        raise HTTPException(403, "Server operator access required.")
+
+
+class SourceSyncRequest(BaseModel):
+    mode: Literal["all", "filings", "prices"] = "all"
+    trigger: Literal["operator", "cron"] = "operator"
+
+
+@router.post("/internal/source-sync", status_code=202, include_in_schema=False)
+def start_source_sync(
+    request: SourceSyncRequest, x_finn_sync_key: str | None = Header(default=None)
+):
+    require_sync_operator(x_finn_sync_key)
+    try:
+        with open_store() as store:
+            # Do not add a periodic refresh behind a long research backlog.
+            jobs.expire_stale_jobs(store)
+            active = store.rows(
+                "finn_research_jobs", state="in.(queued,running)", select="id", limit=1
+            )
+            if active:
+                raise HTTPException(
+                    409, "Research is active; retry source sync on the next schedule."
+                )
+            token = str(uuid.uuid4())
+            origin = "supabase_cron" if request.trigger == "cron" else "cloud_operator"
+            acquired = store.rpc(
+                "finn_acquire_source_sync",
+                {
+                    "p_token": token,
+                    "p_mode": request.mode,
+                    "p_origin": origin,
+                },
+            )
+            if not acquired:
+                raise HTTPException(409, "A source sync is already queued or running.")
+        try:
+            jobs.executor.submit(run_sync, token, request.mode, origin)
+        except Exception as exc:
+            with open_store() as store:
+                store.patch(
+                    "finn_source_sync_job",
+                    {
+                        "state": "failed",
+                        "error": jobs.safe_error(exc),
+                        "finished_at": now(),
+                    },
+                    id="eq.1",
+                    token="eq." + token,
+                )
+            raise HTTPException(503, "The sync worker could not start. Retry later.") from None
+        return {
+            "job_id": token,
+            "state": "queued",
+            "completion": "Check source-sync status; acceptance is not completion.",
+        }
+    except (DependencyError, MissingConfiguration) as exc:
+        raise HTTPException(503, jobs.safe_error(exc)) from None
+
+
+@router.get("/internal/source-sync", include_in_schema=False)
+def source_sync_status(x_finn_sync_key: str | None = Header(default=None)):
+    require_sync_operator(x_finn_sync_key)
+    try:
+        with open_store() as store:
+            return {"jobs": store.rows("finn_source_sync_job", id="eq.1")}
+    except (DependencyError, MissingConfiguration) as exc:
+        raise HTTPException(503, jobs.safe_error(exc)) from None
 
 
 @router.get("/internal/source-connectivity", include_in_schema=False)

@@ -79,3 +79,16 @@ exports/share links. Export those separately, redact credentials, and never bund
   cells/geometry. Added native-handle cleanup, serialisation, source-preserving decode
   fallback, and real page/table/saving progress. Local full extraction fell from
   about 60 seconds to 7 seconds; deployed cold performance still needs checking.
+
+### Singapore frontend verified; Supabase Cron fallback
+
+- Confirmed that the user switched the production frontend and local canonical API
+  URL to Singapore. Deployed product browser checks passed at phone/desktop sizes.
+- User explicitly approved Supabase Cron after public standard-runner GitHub jobs
+  remained blocked by the account billing lock. Paid budgets remain zero; GitHub
+  source scheduling remains off to avoid duplicate automatic runs.
+- Added a server-authenticated sync endpoint, private singleton lease/job, shared
+  serial executor, per-source completion/error reporting, Vault-backed pg_net dispatch,
+  and local-only credential SQL generation. No new service or model calls are needed.
+- Added five failure/security/worker tests; 69 tests pass locally. Real Cron execution,
+  cloud NSE/Yahoo fetching and deployed policy checks await the owner's SQL setup.

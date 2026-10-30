@@ -23,6 +23,7 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      FINN_SYNC_ORIGIN: github_actions
       REQUESTED_MODE: ${{ inputs.mode }}
       SCHEDULE: ${{ github.event.schedule }}
     steps:

@@ -4,6 +4,11 @@ The deployment/dependency gate was verified on 30 October 2026. A reasoning-mode
 passed a bounded minimal retry; later complex requests exposed repeated latency. The
 working prototype therefore records actual model routing and uses a bounded fallback.
 
+**Latest:** Singapore is now the frontend's deployed API. Deployed mobile/desktop
+browser checks passed after the switch. Local tests: **69 passed**. The Supabase Cron
+fallback is implemented and locally tested; its SQL configuration and real scheduled
+fetch are pending. Earlier deployment failures below are retained as history.
+
 ## Verified behaviour
 
 - One company (INFY) completed generic discovery → primary PDF extraction → Supabase
@@ -136,3 +141,17 @@ A local manual source refresh completed successfully while GitHub remained locke
 15/15 EOD snapshots for **30 October 2026**, 19 portfolio filings from 2,158 feed items,
 no unrecognised timestamps. Its execution origin is recorded as `local_manual` with
 `automation_verified=false`; this is not a passed GitHub source-sync run.
+
+### Singapore switch and Cron fallback
+
+The deployed frontend JavaScript and local canonical API setting both reference
+Singapore. Product browser tests passed against that deployment, including real
+persisted jobs, citations, mobile/desktop layout, settings, missing-ticker handling,
+and the explicitly labelled offline snapshot.
+
+The user approved Supabase Cron because GitHub remains account-locked. Added the
+private authenticated endpoint, cross-service database lease, serial worker, separate
+source outcomes, Vault-backed dispatch, and expected half-hour/EOD schedules. Five
+new tests cover denied access, duplicate/busy requests, actual worker submission and
+independent source failures. SQL setup and scheduled-fetch verification are still
+required; implementation is not being counted as working automation yet.
