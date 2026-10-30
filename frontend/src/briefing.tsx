@@ -32,7 +32,13 @@ type Sync = {
   state: string
   last_success_at: string | null
   error: string | null
-  details: { updated?: number; portfolio_companies?: number; coverage?: string }
+  details: {
+    updated?: number
+    portfolio_companies?: number
+    coverage?: string
+    automation_verified?: boolean
+    execution_origin?: string
+  }
   captured_since: string | null
 }
 type Company = { symbol: string; name: string; sector: string }
@@ -512,8 +518,13 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
             <p>
               Recent NSE RSS and filings captured since monitoring began
               {filingsSync?.captured_since ? ` (${dateTime(filingsSync.captured_since)})` : ''}.
-              Earlier history may be incomplete. Announcement checks run on a schedule; EOD signals
-              use the latest completed session, independently of the filing window.{' '}
+              Earlier history may be incomplete.{' '}
+              {filingsSync?.details.automation_verified === false
+                ? 'The last refresh was manual; automatic announcement updates are not yet verified. '
+                : filingsSync?.details.automation_verified === true
+                  ? 'Announcements are checked on a schedule. '
+                  : 'Coverage reflects the last completed scan shown above. '}
+              EOD signals use the latest completed session, independently of the filing window.{' '}
               {missingPrices > 0
                 ? `${missingPrices} of ${companies.length} prices need attention.`
                 : `${prices.length} portfolio prices available.`}

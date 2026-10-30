@@ -101,7 +101,8 @@ workflows were retried using only `ubuntu-latest`. Jobs now register, but GitHub
 no runner and reports: "The job was not started because your account is locked due to
 a billing issue." This remains an account-level gate. CI is re-enabled, while the
 scheduled-source variable remains off until a real source job succeeds. A support
-draft is in [GITHUB_ACTIONS_SUPPORT.md](GITHUB_ACTIONS_SUPPORT.md); it has not been sent.
+draft is available locally at `artifacts/support/github-actions-account-lock.md`; it
+has not been sent.
 
 Singapore can reach Screener. A completely unprepared TCS request completed live:
 one 361-page annual report, two transcripts, retrieval, and three verified claims.
@@ -115,3 +116,23 @@ using native text extraction plus aligned financial-page/table processing. Both 
 all 361 pages from the same original PDF, and all table candidates remain unvalidated.
 These are local measurements, not a claimed cloud latency. Cold research on another
 unprepared ticker is the next deployment check.
+
+
+### Second live company and fresh source data
+
+After the optimized parser deployed to Singapore, HINDUNILVR was tested as another
+unprepared company from a different sector. It completed live discovery, a 246-page
+annual report, two transcripts and two cited claims in **173.2 seconds**, with
+`cached=false`. Its quotes were inspected; no numerical table comparisons were made.
+TCS had previously completed the same live path with three supported claims. These
+are separate-company tests; 173 seconds is not a controlled speedup measurement.
+
+The Singapore API also passed the actual frontend-origin POST preflight and denied
+an unrelated origin/operator access without the server key. The user has been asked
+to update the static frontend API URL; the Virginia service is retained until browser
+verification of that change.
+
+A local manual source refresh completed successfully while GitHub remained locked:
+15/15 EOD snapshots for **30 October 2026**, 19 portfolio filings from 2,158 feed items,
+no unrecognised timestamps. Its execution origin is recorded as `local_manual` with
+`automation_verified=false`; this is not a passed GitHub source-sync run.

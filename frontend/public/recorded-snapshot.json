@@ -1,6 +1,6 @@
 {
   "mode": "recorded_demo_snapshot",
-  "exported_at": "2026-10-30T10:32:42.966696+00:00",
+  "exported_at": "2026-10-30T16:36:02.967257+00:00",
   "notice": "Recorded demo data. Live saved updates could not be loaded. Original source and session dates remain authoritative.",
   "tables": {
     "finn_companies": [
@@ -161,6 +161,30 @@
         "coverage": {}
       },
       {
+        "symbol": "TCS",
+        "name": "Tata Consultancy Services Limited",
+        "isin": "INE467B01029",
+        "portfolio": false,
+        "sector": null,
+        "manifest": [
+          "2aed4db7-e1a8-54d5-a23b-5ae6a6aee322",
+          "51863a0a-7de1-5f78-8a47-5f638f2ad5ab",
+          "c284815f-5093-54c5-8b0c-f9de79a335dc"
+        ],
+        "corpus_fingerprint": "246df33a6610643c2bf6bed17083a222fcad727b26639840d5924740d52f90f8",
+        "source_checked_at": "2026-10-30T16:16:04.387494+00:00",
+        "coverage": {
+          "notes": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "transcripts": 2,
+          "annual_reports": 1,
+          "target_transcripts": 2,
+          "target_annual_reports": 1
+        }
+      },
+      {
         "symbol": "CCL",
         "name": "CCL Products (India) Limited",
         "isin": "INE421D01022",
@@ -173,6 +197,30 @@
         ],
         "corpus_fingerprint": "7db5392ad73a64518207ee5a2d6f1cab09f47dbf2a44c8fd12a72f0e27502698",
         "source_checked_at": "2026-10-30T09:39:29.857595+00:00",
+        "coverage": {
+          "notes": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "transcripts": 2,
+          "annual_reports": 1,
+          "target_transcripts": 2,
+          "target_annual_reports": 1
+        }
+      },
+      {
+        "symbol": "HINDUNILVR",
+        "name": "Hindustan Unilever Limited",
+        "isin": "INE030A01027",
+        "portfolio": false,
+        "sector": null,
+        "manifest": [
+          "16e1b6e2-3a03-5d37-b605-b6c252ef83a0",
+          "27848ca9-0dcb-59c1-87cb-bbf796c5c891",
+          "880e852c-570d-5c9e-9da2-4ec2cbb95915"
+        ],
+        "corpus_fingerprint": "fc1ed72d9c7d7e41b95d9d9a8c56bb5dbc7c0bd39a143e352a0e8a58e7ab3b19",
+        "source_checked_at": "2026-10-30T16:30:05.335569+00:00",
         "coverage": {
           "notes": [
             "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
@@ -211,6 +259,160 @@
     ],
     "finn_filings": [
       {
+        "id": "7a01a925479e4cca660d5a85f1b21e06ba21e3a2c4a29cbb19d632db1f7f4ea5",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange about Link of Recording |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNPHARMA456_30102026201207_IntimationSE20261030_Q2FY27_Call_Recording_Signed.pdf",
+        "published_at": "2026-10-30T14:43:58+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Management commentary is available for further company research.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
+      },
+      {
+        "id": "118f6e28e059cea8ab9273d8736b76f12f519f51def7158ed07256c8b52b29f2",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Statement of utilization of issue proceeds",
+        "description": "Statement of utilization of issue proceeds |SUBJECT: Statement of utilization of issue proceeds",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195733_SE_Utilisation_of_issue_proceeds.pdf",
+        "published_at": "2026-10-30T14:27:43+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
+      },
+      {
+        "id": "97d62e46f1228d7c99074e583172e70efecf1679c1d37ea77e50fe2d59f7d8d6",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Security Cover",
+        "description": "Security Cover |SUBJECT: Security Cover",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195206_SE_SC.pdf",
+        "published_at": "2026-10-30T14:22:44+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
+      },
+      {
+        "id": "9a9f9b134c23c115f0251bf687ef0788b1e67204d877c126e6d3a28c1b8a9b75",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Investor Presentation",
+        "description": "Reliance Industries Limited has informed the Exchange about Investor Presentation |SUBJECT: Investor Presentation",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194557_SE_30102026_IP.pdf",
+        "published_at": "2026-10-30T14:17:12+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
+      },
+      {
+        "id": "2a45c5988feaad10e0c362760e90f520600ae21246592f8bdd3c0a6b17ddbbab",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Press Release",
+        "description": "In continuation of our letter of today's date on the Unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026, we attach a copy of media release being issued by the Company. |SUBJECT: Press Release",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194315_SE_30102026_MR.pdf",
+        "published_at": "2026-10-30T14:13:24+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "ca507348e652b9ce065cd04b5cc42942dbe4f66edca6f970ccde759c5cb1311d",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis. |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193935_SE_30102026_Results.pdf",
+        "published_at": "2026-10-30T14:10:11+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "e70eb7bfdf989222a09ab8640faa5198b16f0ab6a29de04519bdb94e4f47e6b2",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis. |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193952_SE_30102026_Results.pdf",
+        "published_at": "2026-10-30T14:10:11+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "b14564c4b962a11a922e3aa3c170bbe506fe1be95eeff23bf4d7ffdc99bc072d",
+        "symbol": "INFY",
+        "company_name": "Infosys Limited",
+        "title": "Updates",
+        "description": "Infosys Limited has informed the Exchange regarding 'Infosys Announces Expansion of Pocharam Development Center in Hyderabad'. |SUBJECT: Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/INFY_30102026185037_PR_30102026.pdf",
+        "published_at": "2026-10-30T13:20:50+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "e63113a269b26327eaf5ad1a04f49a868ab6109b75959f2433fb03f1290620b4",
+        "symbol": "TATASTEEL",
+        "company_name": "Tata Steel Limited",
+        "title": "Analyst/Investor Meet Para A-XBRL",
+        "description": "Tata Steel Limited has informed the Exchange about Schedule of Analysts or Institutional Investors Meet |SUBJECT: Analyst/Investor Meet Para A-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/SAIIM_234_WebXMLFile_20261030_184218556.xml",
+        "published_at": "2026-10-30T13:12:20+00:00",
+        "category": "investor_meeting",
+        "priority": 0,
+        "review_reason": "Meeting notice; no new business information is established by the notice alone.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "4acda523600ffd86faa1974eef256ebd4597fb602cc96d784cb8455a7499f050",
+        "symbol": "TATASTEEL",
+        "company_name": "Tata Steel Limited",
+        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "description": "Tata Steel Limited has informed the Exchange about Schedule of meet for 2QFY27 Earnings Discussion |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/NIDHIFADNAVIS_30102026183553_BSENSECombined.pdf",
+        "published_at": "2026-10-30T13:09:44+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Management commentary is available for further company research.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+      },
+      {
+        "id": "e445c62d50061beaea90f22311ebdb517b8427a06cfa8a3e01edecd6965b3274",
+        "symbol": "TATASTEEL",
+        "company_name": "Tata Steel Limited",
+        "title": "Confirmation of Redemption/Payment of Interest and Principal",
+        "description": "Confirmation of Redemption/Payment of Interest and Principal |SUBJECT: Confirmation of Redemption/Payment of Interest and Principal",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/NIDHIFADNAVIS_30102026170023_BSENSECP.pdf",
+        "published_at": "2026-10-30T11:32:04+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.537716+00:00"
+      },
+      {
         "id": "5894336cfb51e11c040bd6bac462151e1860a07f4655097e0a454ccc7cf5dc81",
         "symbol": "BHARTIARTL",
         "company_name": "Bharti Airtel Limited",
@@ -222,7 +424,7 @@
         "priority": 0,
         "review_reason": "Publication notice; the actual results filing carries the financial detail.",
         "first_seen_at": "2026-10-30T10:16:28.856876+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.510082+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.537716+00:00"
       },
       {
         "id": "abc40e08c4e1a9b013c3cd24acde3f473a38f90fa90d6a1e4140ea1b657adf0f",
@@ -236,7 +438,7 @@
         "priority": 0,
         "review_reason": "Scheduled auditor rotation; expand to inspect the governance disclosure.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.511086+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
       },
       {
         "id": "d801bc8500cc6a8c929235f31d435877629645f87f8eb6e78f11b1cc01f2fc71",
@@ -250,7 +452,7 @@
         "priority": 3,
         "review_reason": "New results may change the financial picture. Review the original filing.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.511086+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
       },
       {
         "id": "5338cb87a5d8bf936215aa3f8d4bdbb797151b83e4e3a610f3d62fac4142a342",
@@ -264,7 +466,7 @@
         "priority": 2,
         "review_reason": "Review the terms and potential effect on capital or funding.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.51217+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
       },
       {
         "id": "2203898650310cf432479e390b8f4827f949d7385540a3b546731a5002b54a18",
@@ -278,7 +480,7 @@
         "priority": 0,
         "review_reason": "Routine disclosure; available here if you need the original.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.51217+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
       },
       {
         "id": "7ccc7e5847c29395a59b9e81029570aa56050dd0f1e150989cc2f5cfae836ecf",
@@ -292,7 +494,7 @@
         "priority": 2,
         "review_reason": "A business development worth assessing in the context of the company.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.51355+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.539716+00:00"
       },
       {
         "id": "f3d6ab692a442268001fb77f9617f2025d803a155f774108d74bb5930be44df0",
@@ -306,7 +508,7 @@
         "priority": 3,
         "review_reason": "Review the scope and potential exposure in the original disclosure.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.51355+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.539716+00:00"
       },
       {
         "id": "2525b565b5c690af5549eb991197ae5e53d42bf6b23c110a46cd7986bef503f7",
@@ -320,339 +522,343 @@
         "priority": 2,
         "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
         "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T10:16:28.514931+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.541723+00:00"
       }
     ],
     "finn_price_snapshots": [
       {
         "symbol": "APLAPOLLO",
         "data": {
-          "close": 2195.0,
+          "close": 2165.10009765625,
           "ticker": "APLAPOLLO.NS",
-          "volume": 1214686,
+          "volume": 1101722,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:18.139637+00:00",
+          "fetched_at": "2026-10-30T16:27:18.371640+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 1.8533318207863774,
-          "price_change_pct": 1.371632129595568,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 655406.65
+          "last_session": "2026-10-30",
+          "volume_ratio": 1.6103230506337607,
+          "price_change_pct": -1.3621823391230081,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 684162.1
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:14.353397+00:00",
-        "last_success_at": "2026-10-30T09:50:18.139637+00:00"
+        "last_attempt_at": "2026-10-30T16:27:12.144118+00:00",
+        "last_success_at": "2026-10-30T16:27:18.37164+00:00"
       },
       {
         "symbol": "BHARTIARTL",
         "data": {
-          "close": 1972.0999755859375,
+          "close": 1973.699951171875,
           "ticker": "BHARTIARTL.NS",
-          "volume": 6859219,
+          "volume": 7221261,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:19.833031+00:00",
+          "fetched_at": "2026-10-30T16:27:19.685022+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.7487845575446249,
-          "price_change_pct": 1.231969626855589,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 9160470.7
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.8012172514423997,
+          "price_change_pct": 0.08113055148037951,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 9012862.6
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:18.813139+00:00",
-        "last_success_at": "2026-10-30T09:50:19.833031+00:00"
+        "last_attempt_at": "2026-10-30T16:27:19.445077+00:00",
+        "last_success_at": "2026-10-30T16:27:19.685022+00:00"
       },
       {
         "symbol": "CCL",
         "data": {
-          "close": 946.2999877929688,
+          "close": 932.0,
           "ticker": "CCL.NS",
-          "volume": 183587,
+          "volume": 354209,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:21.590295+00:00",
+          "fetched_at": "2026-10-30T16:27:20.520467+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.799864588498039,
-          "price_change_pct": 0.8311121782598629,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 229522.6
+          "last_session": "2026-10-30",
+          "volume_ratio": 1.5239436353091607,
+          "price_change_pct": -1.511147413868219,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 232429.2
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:20.083435+00:00",
-        "last_success_at": "2026-10-30T09:50:21.590295+00:00"
+        "last_attempt_at": "2026-10-30T16:27:20.259839+00:00",
+        "last_success_at": "2026-10-30T16:27:20.520467+00:00"
       },
       {
         "symbol": "HDFCBANK",
         "data": {
-          "close": 683.2999877929688,
+          "close": 692.7999877929688,
           "ticker": "HDFCBANK.NS",
-          "volume": 31422790,
+          "volume": 21292736,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:22.803893+00:00",
+          "fetched_at": "2026-10-30T16:27:21.035617+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.9719732578158402,
-          "price_change_pct": -0.2918429936707101,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 32328862.7
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.6703796086790524,
+          "price_change_pct": 1.3903117473607285,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 31762207.15
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:22.193512+00:00",
-        "last_success_at": "2026-10-30T09:50:22.803893+00:00"
+        "last_attempt_at": "2026-10-30T16:27:20.755696+00:00",
+        "last_success_at": "2026-10-30T16:27:21.035617+00:00"
       },
       {
         "symbol": "INFY",
         "data": {
-          "close": 1146.5,
+          "close": 1185.0,
           "ticker": "INFY.NS",
-          "volume": 14048472,
+          "volume": 13029753,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:23.424261+00:00",
+          "fetched_at": "2026-10-30T16:27:21.830672+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.8361858083745022,
-          "price_change_pct": 2.0789720944109025,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 16800658.25
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.7731209847566903,
+          "price_change_pct": 3.3580462276493694,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 16853446.3
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:23.043274+00:00",
-        "last_success_at": "2026-10-30T09:50:23.424261+00:00"
+        "last_attempt_at": "2026-10-30T16:27:21.57414+00:00",
+        "last_success_at": "2026-10-30T16:27:21.830672+00:00"
       },
       {
         "symbol": "ITC",
         "data": {
-          "close": 265.0,
+          "close": 265.6000061035156,
           "ticker": "ITC.NS",
-          "volume": 23257133,
+          "volume": 16292770,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:24.437129+00:00",
+          "fetched_at": "2026-10-30T16:27:22.352797+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 1.0165829289479364,
-          "price_change_pct": 2.1194605009633882,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 22877752.85
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.6986724277459143,
+          "price_change_pct": 0.22641739755306922,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 23319612.1
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:23.721558+00:00",
-        "last_success_at": "2026-10-30T09:50:24.437129+00:00"
+        "last_attempt_at": "2026-10-30T16:27:22.078929+00:00",
+        "last_success_at": "2026-10-30T16:27:22.352797+00:00"
       },
       {
         "symbol": "KPITTECH",
         "data": {
-          "close": 543.7000122070312,
+          "close": 530.25,
           "ticker": "KPITTECH.NS",
-          "volume": 1796946,
+          "volume": 1237812,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:25.478826+00:00",
+          "fetched_at": "2026-10-30T16:27:22.837730+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.6470202328622702,
-          "price_change_pct": -1.5927579715780515,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 2777264.0
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.45852575988341154,
+          "price_change_pct": -2.473792883033765,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 2699547.35
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:24.706885+00:00",
-        "last_success_at": "2026-10-30T09:50:25.478826+00:00"
+        "last_attempt_at": "2026-10-30T16:27:22.593589+00:00",
+        "last_success_at": "2026-10-30T16:27:22.83773+00:00"
       },
       {
         "symbol": "LT",
         "data": {
-          "close": 3837.10009765625,
+          "close": 3871.699951171875,
           "ticker": "LT.NS",
-          "volume": 1754505,
+          "volume": 1761610,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:27.840005+00:00",
+          "fetched_at": "2026-10-30T16:27:23.620300+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.8081345500348898,
-          "price_change_pct": 0.9417843466253517,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 2171055.55
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.8264815845104644,
+          "price_change_pct": 0.9017188146006161,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 2131457.05
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:25.889442+00:00",
-        "last_success_at": "2026-10-30T09:50:27.840005+00:00"
+        "last_attempt_at": "2026-10-30T16:27:23.357843+00:00",
+        "last_success_at": "2026-10-30T16:27:23.6203+00:00"
       },
       {
         "symbol": "M&M",
         "data": {
-          "close": 2890.0,
+          "close": 2840.300048828125,
           "ticker": "M&M.NS",
-          "volume": 1887874,
+          "volume": 1859267,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:29.875790+00:00",
+          "fetched_at": "2026-10-30T16:27:24.134540+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.7385411391544665,
-          "price_change_pct": 0.700376261898028,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 2556220.5
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.7475672822998333,
+          "price_change_pct": -1.7197214938365013,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 2487089.85
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:29.157024+00:00",
-        "last_success_at": "2026-10-30T09:50:29.87579+00:00"
-      },
-      {
-        "symbol": "NTPC",
-        "data": {
-          "close": 310.5,
-          "ticker": "NTPC.NS",
-          "volume": 7682889,
-          "provider": "Yahoo Finance via yfinance",
-          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:31.927374+00:00",
-          "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.8512557452906294,
-          "price_change_pct": 2.2222222222222143,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 9025359.35
-        },
-        "error": null,
-        "last_attempt_at": "2026-10-30T09:50:30.497518+00:00",
-        "last_success_at": "2026-10-30T09:50:31.927374+00:00"
+        "last_attempt_at": "2026-10-30T16:27:23.866873+00:00",
+        "last_success_at": "2026-10-30T16:27:24.13454+00:00"
       },
       {
         "symbol": "POLYCAB",
         "data": {
-          "close": 7745.0,
+          "close": 7787.0,
           "ticker": "POLYCAB.NS",
-          "volume": 325369,
+          "volume": 346328,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:33.156363+00:00",
+          "fetched_at": "2026-10-30T16:27:25.185395+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.6162371030536,
-          "price_change_pct": 0.8463541666666741,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 527993.2
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.7496744385797209,
+          "price_change_pct": 0.5422853453841192,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 461971.2
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:32.229246+00:00",
-        "last_success_at": "2026-10-30T09:50:33.156363+00:00"
+        "last_attempt_at": "2026-10-30T16:27:24.874108+00:00",
+        "last_success_at": "2026-10-30T16:27:25.185395+00:00"
       },
       {
         "symbol": "RELIANCE",
         "data": {
-          "close": 1167.4000244140625,
+          "close": 1164.9000244140625,
           "ticker": "RELIANCE.NS",
-          "volume": 20939623,
+          "volume": 14722247,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:34.488018+00:00",
+          "fetched_at": "2026-10-30T16:27:25.656547+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 1.3643898599326296,
-          "price_change_pct": 0.8117464951694631,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 15347243.2
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.969547770814962,
+          "price_change_pct": -0.21415110054111564,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 15184653.55
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:33.456649+00:00",
-        "last_success_at": "2026-10-30T09:50:34.488018+00:00"
+        "last_attempt_at": "2026-10-30T16:27:25.407303+00:00",
+        "last_success_at": "2026-10-30T16:27:25.656547+00:00"
       },
       {
         "symbol": "SUNPHARMA",
         "data": {
-          "close": 1761.0,
+          "close": 1777.699951171875,
           "ticker": "SUNPHARMA.NS",
-          "volume": 1107854,
+          "volume": 5125487,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:35.777522+00:00",
+          "fetched_at": "2026-10-30T16:27:26.155190+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.6939914191185317,
-          "price_change_pct": 0.19914651493599944,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 1596351.15
+          "last_session": "2026-10-30",
+          "volume_ratio": 3.42249081974856,
+          "price_change_pct": 0.9483220426959038,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 1497589.7
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:34.789302+00:00",
-        "last_success_at": "2026-10-30T09:50:35.77803+00:00"
+        "last_attempt_at": "2026-10-30T16:27:25.907948+00:00",
+        "last_success_at": "2026-10-30T16:27:26.15519+00:00"
       },
       {
         "symbol": "TATASTEEL",
         "data": {
-          "close": 169.4600067138672,
+          "close": 167.60000610351562,
           "ticker": "TATASTEEL.NS",
-          "volume": 13728789,
+          "volume": 15606595,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:36.842894+00:00",
+          "fetched_at": "2026-10-30T16:27:26.650302+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 0.5707671702615864,
-          "price_change_pct": 0.11224814592691867,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 24053221.2
+          "last_session": "2026-10-30",
+          "volume_ratio": 0.6689006579704682,
+          "price_change_pct": -1.0976044710609312,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 23331708.25
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:36.120927+00:00",
-        "last_success_at": "2026-10-30T09:50:36.842894+00:00"
+        "last_attempt_at": "2026-10-30T16:27:26.392167+00:00",
+        "last_success_at": "2026-10-30T16:27:26.650302+00:00"
       },
       {
         "symbol": "TITAN",
         "data": {
-          "close": 4434.0,
+          "close": 4436.5,
           "ticker": "TITAN.NS",
-          "volume": 958380,
+          "volume": 1137347,
           "provider": "Yahoo Finance via yfinance",
           "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
-          "fetched_at": "2026-10-30T09:50:38.372864+00:00",
+          "fetched_at": "2026-10-30T16:27:27.133645+00:00",
           "volume_note": null,
-          "last_session": "2026-10-29",
-          "volume_ratio": 1.188103272676693,
-          "price_change_pct": 2.215359962647545,
-          "complete_sessions": 63,
-          "previous_20_mean_volume": 806647.05
+          "last_session": "2026-10-30",
+          "volume_ratio": 1.4303636435778693,
+          "price_change_pct": 0.0563824988723427,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 795145.35
         },
         "error": null,
-        "last_attempt_at": "2026-10-30T09:50:37.243087+00:00",
-        "last_success_at": "2026-10-30T09:50:38.372864+00:00"
+        "last_attempt_at": "2026-10-30T16:27:26.875315+00:00",
+        "last_success_at": "2026-10-30T16:27:27.133645+00:00"
+      },
+      {
+        "symbol": "NTPC",
+        "data": {
+          "close": 316.25,
+          "ticker": "NTPC.NS",
+          "volume": 15451850,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T16:27:24.608354+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-30",
+          "volume_ratio": 1.7535619004451302,
+          "price_change_pct": 1.85185185185186,
+          "complete_sessions": 64,
+          "previous_20_mean_volume": 8811693.5
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T16:27:24.368286+00:00",
+        "last_success_at": "2026-10-30T16:27:24.608354+00:00"
       }
     ],
     "finn_sync_status": [
       {
+        "id": "filings",
+        "state": "completed",
+        "started_at": "2026-10-30T16:27:09.153117+00:00",
+        "finished_at": "2026-10-30T16:27:10.82527+00:00",
+        "last_success_at": "2026-10-30T16:27:10.82527+00:00",
+        "captured_since": "2026-10-30T09:50:11.134086+00:00",
+        "error": null,
+        "details": {
+          "coverage": "Recent NSE RSS plus filings captured since monitoring started. Earlier history may be incomplete.",
+          "feed_items": 2158,
+          "execution_origin": "local_manual",
+          "portfolio_filings": 19,
+          "invalid_timestamps": 0,
+          "automation_verified": false,
+          "portfolio_companies": 15
+        }
+      },
+      {
         "id": "prices",
         "state": "completed",
-        "started_at": "2026-10-30T09:50:14.091892+00:00",
-        "finished_at": "2026-10-30T09:50:39.089373+00:00",
-        "last_success_at": "2026-10-30T09:50:39.089373+00:00",
+        "started_at": "2026-10-30T16:27:11.598426+00:00",
+        "finished_at": "2026-10-30T16:27:27.385184+00:00",
+        "last_success_at": "2026-10-30T16:27:27.385184+00:00",
         "captured_since": null,
         "error": null,
         "details": {
           "updated": 15,
           "failed_symbols": [],
-          "portfolio_companies": 15
-        }
-      },
-      {
-        "id": "filings",
-        "state": "completed",
-        "started_at": "2026-10-30T10:16:26.608558+00:00",
-        "finished_at": "2026-10-30T10:16:28.845212+00:00",
-        "last_success_at": "2026-10-30T10:16:28.845212+00:00",
-        "captured_since": "2026-10-30T09:50:11.134086+00:00",
-        "error": null,
-        "details": {
-          "coverage": "Recent NSE RSS plus filings captured since monitoring started. Earlier history may be incomplete.",
-          "feed_items": 960,
-          "portfolio_filings": 8,
-          "invalid_timestamps": 0,
+          "execution_origin": "local_manual",
+          "automation_verified": false,
           "portfolio_companies": 15
         }
       }
