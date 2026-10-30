@@ -5,9 +5,11 @@ passed a bounded minimal retry; later complex requests exposed repeated latency.
 working prototype therefore records actual model routing and uses a bounded fallback.
 
 **Latest:** Singapore is now the frontend's deployed API. Deployed mobile/desktop
-browser checks passed after the switch. Local tests: **69 passed**. The Supabase Cron
-fallback is implemented and locally tested; its SQL configuration and real scheduled
-fetch are pending. Earlier deployment failures below are retained as history.
+browser checks passed after the switch. Local tests: **78 passed**. Supabase Cron is
+configured; actual dispatch, cold wake-up, RLS/private access and filings passed.
+The first run refreshed 14/15 prices (one Yahoo rate limit); a separately labelled
+operator retry recovered 15/15. A fresh complete scheduled run is pending after the
+bounded retry/recovery changes. Earlier failures below are retained as history.
 
 ## Verified behaviour
 
@@ -155,3 +157,22 @@ source outcomes, Vault-backed dispatch, and expected half-hour/EOD schedules. Fi
 new tests cover denied access, duplicate/busy requests, actual worker submission and
 independent source failures. SQL setup and scheduled-fetch verification are still
 required; implementation is not being counted as working automation yet.
+
+### First actual Cron execution (31 October IST)
+
+The temporary self-removing schedule ran at 01:12 IST. Vault/pg_net dispatch succeeded,
+the API woke and accepted work at 01:12:45, and actual fetching finished at 01:13:06.
+Both regular schedules are active; private job RLS and anonymous read/write/function
+denials pass. The completed NSE feed contained one genuine nonportfolio disclosure,
+matching a separate local read after the feed's date rollover. Saved earlier filings
+were preserved. A regular half-hour invocation is also monitored independently.
+
+Yahoo rate-limited APLAPOLLO; 14 other prices refreshed, and the run correctly remained
+partial. Its old price retained its date and an explicit fetch error. A separate
+cloud-operator retry subsequently refreshed all 15; original scheduled failure and
+manual recovery reports are preserved separately under `artifacts/release/`.
+
+Added one bounded rate-limit retry and recovery of overdue/partial EOD work on later
+announcement ticks. Nine additional tests cover retry exhaustion, market cutoff,
+weekends, Monday before/after close, and preserving operator-requested mode. No
+financial data, source provenance, or execution origin is fabricated to pass acceptance.

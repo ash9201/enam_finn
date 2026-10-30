@@ -2,10 +2,37 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+
 from finn import jobs
 from finn.briefing import sync_filings, sync_prices
 from finn.corpus import now
 from finn.store import open_store
+from finn.sources import IST
+
+
+def scheduled_mode(store, requested: str, trigger: str, *, current_time=None) -> str:
+    """An announcement tick can recover a missed/partial EOD run after its due time.
+
+    Weekend/holiday reads preserve the source's actual last session. The cutoff is a
+    refresh deadline, not an assertion that the exchange traded on that date.
+    """
+    if requested != "filings" or trigger != "cron":
+        return requested
+    current_time = (current_time or datetime.now(IST)).astimezone(IST)
+    cutoff = current_time.replace(hour=18, minute=15, second=0, microsecond=0)
+    if current_time < cutoff:
+        cutoff -= timedelta(days=1)
+    while cutoff.weekday() >= 5:
+        cutoff -= timedelta(days=1)
+    rows = store.rows("finn_sync_status", id="eq.prices", limit=1)
+    try:
+        refreshed = datetime.fromisoformat(rows[0]["last_success_at"].replace("Z", "+00:00"))
+        if rows[0]["state"] == "completed" and refreshed >= cutoff:
+            return requested
+    except (IndexError, KeyError, TypeError, ValueError):
+        pass
+    return "all"
 
 
 def run_sync(token: str, mode: str, origin: str):

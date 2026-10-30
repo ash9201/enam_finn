@@ -316,11 +316,24 @@ def parse_announcement_date(value: str) -> str:
 
 def price_probe(company: dict) -> dict:
     import yfinance as yf
+    from yfinance.exceptions import YFRateLimitError
 
     ticker = yf.Ticker(company["symbol"] + ".NS")
-    frame = ticker.history(
-        period="3mo", interval="1d", auto_adjust=False, actions=True, raise_errors=True
-    )
+    for attempt in range(2):
+        try:
+            frame = ticker.history(
+                period="3mo",
+                interval="1d",
+                auto_adjust=False,
+                actions=True,
+                raise_errors=True,
+                timeout=20,
+            )
+            break
+        except YFRateLimitError:
+            if attempt == 1:
+                raise
+            time.sleep(5)
     if frame.empty:
         raise ValueError("Yahoo returned no daily bars.")
     current_ist = datetime.now(IST)
@@ -352,6 +365,7 @@ def price_probe(company: dict) -> dict:
     )
     return {
         "provider": "Yahoo Finance via yfinance",
+        "history_fetch_attempts": attempt + 1,
         "ticker": company["symbol"] + ".NS",
         "complete_sessions": len(complete),
         "last_session": complete.index[-1].date().isoformat(),

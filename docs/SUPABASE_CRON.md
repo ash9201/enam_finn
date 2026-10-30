@@ -36,6 +36,12 @@ seeing a successful Cron SQL run, or receiving HTTP 202 is insufficient.
 - One database lease covers all API instances. Duplicate calls return 409. Requests
   while research is active return 409 and wait for the next scheduled invocation;
   this protects the serial worker/free memory. There is no implicit immediate retry.
+- Announcement ticks also check whether the latest due weekday EOD refresh is missing
+  or incomplete. They retry due prices alongside filings, so a busy daily invocation
+  does not leave prices waiting for the next weekday's daily job. This checks refresh
+  deadlines, not an exchange holiday calendar; original trading dates stay visible.
+- An explicit Yahoo rate-limit exception gets one retry after five seconds. A second
+  failure remains a visible failed refresh; there is no fabricated replacement.
 - A restart can interrupt in-process work. An interrupted lease expires after 45 minutes,
   so a tick may be skipped before retry. Failed/incomplete scans retain dated earlier
   data with their failure state; they never appear as an empty successful scan.
@@ -56,6 +62,11 @@ The Supabase Cron dashboard shows dispatch runs; source status in FINN shows fet
 results. pg_net responses expire after approximately six hours, so a later check may
 need a new scheduled invocation to obtain HTTP evidence. Recent response metadata is
 project-wide; it must be assessed alongside the FINN job and source results.
+For a fresh full-source acceptance run, execute `supabase/checks/recheck_source_sync.sql`
+in SQL Editor. It uses the existing Vault entries and removes its own temporary schedule.
+The first real check on 31 October IST refreshed filings and 14/15 prices, with one
+honestly reported Yahoo rate limit. A separate operator retry refreshed 15/15; this
+operator recovery is not relabelled as a successful automatic full-source run.
 
 To stop only FINN schedules, run in SQL Editor:
 

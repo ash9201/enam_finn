@@ -17,7 +17,7 @@ from finn.corpus import now
 from finn.research import DEFAULT_QUESTION
 from finn.services import DependencyError, MissingConfiguration
 from finn.store import open_store
-from finn.source_sync import run_sync
+from finn.source_sync import run_sync, scheduled_mode
 
 router = APIRouter()
 
@@ -51,18 +51,19 @@ def start_source_sync(
                 )
             token = str(uuid.uuid4())
             origin = "supabase_cron" if request.trigger == "cron" else "cloud_operator"
+            mode = scheduled_mode(store, request.mode, request.trigger)
             acquired = store.rpc(
                 "finn_acquire_source_sync",
                 {
                     "p_token": token,
-                    "p_mode": request.mode,
+                    "p_mode": mode,
                     "p_origin": origin,
                 },
             )
             if not acquired:
                 raise HTTPException(409, "A source sync is already queued or running.")
         try:
-            jobs.executor.submit(run_sync, token, request.mode, origin)
+            jobs.executor.submit(run_sync, token, mode, origin)
         except Exception as exc:
             with open_store() as store:
                 store.patch(
@@ -79,6 +80,7 @@ def start_source_sync(
         return {
             "job_id": token,
             "state": "queued",
+            "mode": mode,
             "completion": "Check source-sync status; acceptance is not completion.",
         }
     except (DependencyError, MissingConfiguration) as exc:

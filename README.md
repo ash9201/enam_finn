@@ -7,8 +7,11 @@ with real sources. The original [plan](docs/PLAN.md) records scope and trade-off
 **Current deployment:** the frontend now uses Singapore and passes deployed phone/desktop
 browser checks. Unprepared TCS and HINDUNILVR research completed live. GitHub refuses
 standard public Ubuntu jobs because of an account billing lock. A user-approved
-[Supabase Cron fallback](docs/SUPABASE_CRON.md) is implemented, pending its SQL setup and
-live scheduled-fetch acceptance check. See [acceptance](docs/ACCEPTANCE.md).
+[Supabase Cron fallback](docs/SUPABASE_CRON.md) is configured and ran live: filings
+completed and 14/15 prices refreshed; one Yahoo rate limit was visible. A separately
+labelled operator retry recovered all 15 prices. Bounded rate-limit retry and overdue
+EOD recovery are implemented; a fresh complete scheduled acceptance run is pending.
+See [acceptance](docs/ACCEPTANCE.md).
 
 ## What works
 

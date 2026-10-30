@@ -92,3 +92,15 @@ exports/share links. Export those separately, redact credentials, and never bund
   and local-only credential SQL generation. No new service or model calls are needed.
 - Added five failure/security/worker tests; 69 tests pass locally. Real Cron execution,
   cloud NSE/Yahoo fetching and deployed policy checks await the owner's SQL setup.
+
+### Cron executes; transient provider failure and recovery (31 October IST)
+
+- Verified the owner's SQL setup: two active schedules, successful self-removing
+  Cron dispatch, HTTP 202 after API wake-up, private-table RLS and denied anonymous
+  read/write/function access. Actual results were partial: filings and 14/15 prices.
+- One Yahoo rate limit retained the original dated APLAPOLLO bar with an explicit
+  error. A bounded operator rerun recovered 15/15. Saved both reports separately;
+  did not relabel operator activity as scheduled activity.
+- Added one rate-limit retry and late EOD recovery on subsequent announcement ticks,
+  protecting the once-daily refresh against research contention or transient failures.
+  78 tests pass. Prepared a credential-free self-removing full-source Cron recheck.

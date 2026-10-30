@@ -1,10 +1,12 @@
 from contextlib import contextmanager
+from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
 
 from finn import api, source_sync
 from finn.main import app
+from finn.corpus import now
 
 
 class SyncStore:
@@ -19,6 +21,8 @@ class SyncStore:
             return [{"id": "busy"}] if self.active else []
         if table == "finn_source_sync_job":
             return [{"state": "queued"}]
+        if table == "finn_sync_status":
+            return [{"state": "completed", "last_success_at": now()}]
         return [{"symbol": str(i)} for i in range(15)]
 
     def rpc(self, name, values):
@@ -120,3 +124,33 @@ def test_source_failure_still_runs_prices_and_cannot_become_completed(monkeypatc
         table == "finn_sync_status" and values["state"] == "failed"
         for table, values, _ in store.patches
     )
+
+
+@pytest.mark.parametrize(
+    "when,last_success,state,expected",
+    [
+        ("2026-10-30T18:17:00+05:30", "2026-10-29T18:20:00+05:30", "completed", "all"),
+        ("2026-10-30T18:47:00+05:30", "2026-10-29T18:20:00+05:30", "partial", "all"),
+        ("2026-10-30T18:17:00+05:30", "2026-10-30T18:16:00+05:30", "completed", "filings"),
+        ("2026-10-31T01:17:00+05:30", "2026-10-30T18:16:00+05:30", "completed", "filings"),
+        ("2026-11-02T10:17:00+05:30", "2026-10-30T18:16:00+05:30", "completed", "filings"),
+        ("2026-11-02T18:17:00+05:30", "2026-10-30T18:16:00+05:30", "completed", "all"),
+    ],
+)
+def test_announcement_ticks_recover_due_eod_without_inventing_weekend_sessions(
+    when, last_success, state, expected
+):
+    class Store:
+        def rows(self, *args, **kwargs):
+            return [{"state": state, "last_success_at": last_success}]
+
+    assert (
+        source_sync.scheduled_mode(
+            Store(), "filings", "cron", current_time=datetime.fromisoformat(when)
+        )
+        == expected
+    )
+
+
+def test_operator_filings_refresh_does_not_implicitly_refresh_prices():
+    assert source_sync.scheduled_mode(None, "filings", "operator") == "filings"

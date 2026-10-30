@@ -39,8 +39,9 @@ def test_exchange_timestamps_support_both_observed_formats():
         parse_announcement_date("not a timestamp")
 
 
-def price_fixture(monkeypatch, split_index=None):
+def price_fixture(monkeypatch, split_index=None, failures=0):
     import yfinance
+    from yfinance.exceptions import YFRateLimitError
 
     frame = pd.DataFrame(
         {
@@ -54,11 +55,35 @@ def price_fixture(monkeypatch, split_index=None):
         frame.iloc[split_index, frame.columns.get_loc("Stock Splits")] = 2
 
     class Ticker:
+        attempts = 0
+
         def history(self, **kwargs):
+            self.attempts += 1
+            if self.attempts <= failures:
+                raise YFRateLimitError()
             return frame
 
     monkeypatch.setattr(yfinance, "Ticker", lambda symbol: Ticker())
     return price_probe({"symbol": "TEST"})
+
+
+def test_one_rate_limit_recovers_with_a_bounded_retry(monkeypatch):
+    waits = []
+    monkeypatch.setattr("finn.sources.time.sleep", waits.append)
+    result = price_fixture(monkeypatch, failures=1)
+    assert waits == [5]
+    assert result["history_fetch_attempts"] == 2
+    assert result["volume_ratio"] == 3
+
+
+def test_persistent_rate_limit_is_not_replaced_with_an_old_or_invented_bar(monkeypatch):
+    from yfinance.exceptions import YFRateLimitError
+
+    waits = []
+    monkeypatch.setattr("finn.sources.time.sleep", waits.append)
+    with pytest.raises(YFRateLimitError):
+        price_fixture(monkeypatch, failures=2)
+    assert waits == [5]
 
 
 def test_volume_baseline_excludes_current_day_and_older_history(monkeypatch):
