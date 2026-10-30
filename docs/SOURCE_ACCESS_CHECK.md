@@ -1,5 +1,10 @@
 # Bounded source-access check: Singapore
 
+**Update:** the Singapore test succeeded for unprepared TCS and HINDUNILVR, including
+live documents and cited answers. The frontend API URL switch and browser verification
+are the next step. The setup recipe below records the single regional test already
+performed; do not create another copy.
+
 The current Virginia API can use Supabase and Gemini, including a new uncached answer,
 but cannot connect to Screener for unfamiliar-company discovery. The identical TCS
 index adapter finds annual reports and transcripts locally. IPv4 did not fix the
@@ -48,17 +53,15 @@ primary-source discovery route. Do not create more regional copies speculatively
 
 ## GitHub automation is a separate issue
 
-The user reported GitHub's failed-payment/spending-limit banner. Increasing a paid
-budget to $1 is not a zero-charge guarantee. FINN's repository variable
-`FINN_ENABLE_SCHEDULED_SYNC` has temporarily been set to `false`; no new hosted workflow
-will be dispatched by the agent until the free allowance/account restriction is clear.
-The automatic `foundation.yml` workflow is also temporarily disabled, so documentation
-pushes cannot start a potentially billable private runner. Re-enable it together with
-scheduled updates once the free gate is verified. Local tests/build remain available.
-Restore paid Actions budgets to $0 with **Stop usage when budget limit is reached**.
+The user made the repository public and restored paid Actions budgets to $0 with
+**Stop usage when budget limit is reached**. CI is re-enabled. Both workflows were
+retried on standard `ubuntu-latest` runners; GitHub still reports an account billing
+lock before runner assignment. Public visibility did not clear that account lock.
 
-Check included compute usage separately from billable-usage filters and inspect any
-failed-payment/account restriction. Standard hosted runners in public repositories
-are free, while private repositories draw from an included allowance before billable
-usage: [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
-The private repository has not been made public.
+`FINN_ENABLE_SCHEDULED_SYNC` remains `false` until a real automated source run succeeds.
+Local tests/build and manual source updates work; the latest manual run is explicitly
+labelled in public sync metadata and the app. A Supabase Cron fallback in the existing
+project has been proposed while the user resolves GitHub's restriction. Standard
+public runners are free: [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+The support draft is local at `artifacts/support/github-actions-account-lock.md` and
+has not been sent.
