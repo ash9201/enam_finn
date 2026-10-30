@@ -83,7 +83,12 @@ GitHub accepted the source workflow and the required secrets/variable were verif
 but push CI and workflow dispatch both ended in `startup_failure` with zero jobs. Actions
 is enabled, all three workflow files register as active, and no runner/code executed.
 Consequently automated updates and hosted CI are **not verified as working**. The exact
-account/run banner and Render region have been requested from the user.
+account/run banner and Render region have been supplied by the user: GitHub reports a
+failed-payment/spending-limit restriction; Render is in Virginia. The user raised the
+Actions budget to $1 but reiterated no intention to spend. Scheduled sync was therefore
+temporarily disabled pending verification of free included usage; automatic hosted CI
+is also temporarily disabled to avoid a potentially billable private runner. See the bounded
+[source-access check](SOURCE_ACCESS_CHECK.md).
 
 A 1.8 MB phone walkthrough is recorded at
 `artifacts/demo/finn-phone-demo.webm`. Keep the above issues visible in the submission

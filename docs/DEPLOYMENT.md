@@ -42,7 +42,7 @@ Backend environment variables:
 | `FINN_ALLOWED_ORIGINS` | Set to the real frontend origin in step 4 |
 
 Deploy and copy the actual API URL shown by Render. Open `/health/live`; expect
-`service: finn-api` and `status: ok`. Readiness deliberately says `foundation_only`.
+`service: finn-api` and `status: ok`. Readiness deliberately says `configuration_only`.
 Before step 4, browser requests from the production frontend will not be allowed.
 
 ## 3. Create the frontend
