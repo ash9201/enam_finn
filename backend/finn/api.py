@@ -2,17 +2,67 @@ from __future__ import annotations
 
 import re
 import uuid
+import hmac
+from concurrent.futures import ThreadPoolExecutor
 
-from fastapi import APIRouter, HTTPException, Query
+import httpx
+
+from fastapi import APIRouter, HTTPException, Query, Header
 from pydantic import BaseModel, Field, field_validator
 
 from finn import jobs
+from finn.config import supabase_configuration
 from finn.corpus import now
 from finn.research import DEFAULT_QUESTION
 from finn.services import DependencyError, MissingConfiguration
 from finn.store import open_store
 
 router = APIRouter()
+
+
+@router.get("/internal/source-connectivity", include_in_schema=False)
+def source_connectivity(x_finn_admin_key: str | None = Header(default=None)):
+    """Fixed-source diagnostics, restricted to the server credential holder.
+
+    No arbitrary URLs, document contents, credentials, or model calls are returned.
+    IPv4 probing distinguishes an unavailable route from a source HTTP rejection.
+    """
+    _, secret, _ = supabase_configuration()
+    if not secret or not x_finn_admin_key or not hmac.compare_digest(secret, x_finn_admin_key):
+        raise HTTPException(403, "Server operator access required.")
+    urls = {
+        "nse_directory": "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
+        "document_index": "https://www.screener.in/company/TCS/consolidated/",
+        "model_host": "https://generativelanguage.googleapis.com/",
+    }
+
+    def probe(item):
+        name, url, ipv4 = item
+        transport = httpx.HTTPTransport(local_address="0.0.0.0") if ipv4 else None
+        try:
+            with httpx.Client(transport=transport, timeout=8, follow_redirects=True) as client:
+                with client.stream("GET", url) as response:
+                    return {
+                        "source": name,
+                        "mode": "ipv4" if ipv4 else "default",
+                        "http_status": response.status_code,
+                    }
+        except (httpx.HTTPError, OSError) as exc:
+            return {
+                "source": name,
+                "mode": "ipv4" if ipv4 else "default",
+                "error_type": type(exc).__name__,
+            }
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        return {
+            "checks": list(
+                pool.map(
+                    probe,
+                    [(name, url, ipv4) for name, url in urls.items() for ipv4 in [False, True]],
+                )
+            )
+        }
 
 
 class ResearchRequest(BaseModel):
