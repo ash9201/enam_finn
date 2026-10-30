@@ -1,0 +1,41 @@
+name: Portfolio source sync
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+    - cron: '45 12 * * 1-5' # 18:15 IST, after the EOD completeness cutoff
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Sources to refresh
+        type: choice
+        options: [all, filings, prices]
+        default: all
+permissions:
+  contents: read
+concurrency:
+  group: finn-portfolio-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: ${{ vars.FINN_ENABLE_SCHEDULED_SYNC == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      REQUESTED_MODE: ${{ inputs.mode }}
+      SCHEDULE: ${{ github.event.schedule }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.lock && pip install --no-deps -e .
+      - name: Refresh real portfolio sources
+        shell: bash
+        run: |
+          mode="filings"
+          if [ "$SCHEDULE" = "45 12 * * 1-5" ]; then mode="prices"; fi
+          if [ -n "$REQUESTED_MODE" ]; then mode="$REQUESTED_MODE"; fi
+          python -m finn.briefing --mode "$mode"

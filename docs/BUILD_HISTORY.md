@@ -27,3 +27,25 @@ exports/share links. Export those separately, redact credentials, and never bund
 - Prepared Render free-tier configuration, CI/manual feasibility workflows, and setup
   instructions. No public URL or successful deployment has been invented.
 - Stopped at the Milestone 0 deployment gate; later milestones remain unstarted.
+
+## 30 October 2026 — first Push/Pull prototype
+
+- The user deployed the foundation and authorised continuation. Verified real frontend,
+  API, CORS, public-cache reads and a later idle-request latency; preserved model timeout
+  and retry evidence instead of erasing failures.
+- Added keyword-first company research with page/chunk provenance, content-hash PDFs,
+  private storage, persisted jobs, restart recovery, source-filtered retrieval and
+  validated citations. Applied the same engine to INFY before expanding to POLYCAB/CCL.
+- Fixed narrative column interleaving without weakening table guards. Source-quote
+  alignment returns original source characters; tests reject merged ambiguous numbers.
+- Added RLS migrations and server-only policy audit. The user applied them with RLS on;
+  live anonymous access tests verified the intended boundaries.
+- Built real portfolio sync, explainable filing categories, EOD alerts, a watchlist,
+  windows, routine expansion, settings and source-to-research navigation.
+- Handled observed NSE timestamp variants and incomplete RSS, exposing incomplete
+  coverage rather than substituting a fake feed. All 15 price snapshots were retrieved.
+- Added a statement/evidence comparison with exact quotes and conservative period
+  handling. Stronger-model latency led to a bounded, recorded smaller-model fallback.
+- Added a public-only recorded snapshot with a visible historical-data notice, automated
+  source workflow gated by repository configuration, browser acceptance and submission
+  notes. Conversation exports/share links are still a separate submission artifact.

@@ -6,34 +6,40 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from finn import __version__
 from finn.config import configuration_status, load_local_env
+from finn.api import router
 
 
 load_local_env()
-app = FastAPI(title="FINN foundation", version=__version__)
-origins = [origin.strip() for origin in os.getenv("FINN_ALLOWED_ORIGINS", "http://localhost:5173").split(",") if origin.strip()]
+app = FastAPI(title="FINN API", version=__version__)
+origins = [
+    origin.strip()
+    for origin in os.getenv("FINN_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
 if os.getenv("FINN_ENV", "development") == "development":
     origins = list(dict.fromkeys(origins + ["http://localhost:5173", "http://127.0.0.1:5173"]))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+app.include_router(router)
 
 
 @app.get("/health/live")
 def live() -> dict:
     # Liveness must not depend on a third-party service or wake-up-time model call.
-    return {"status": "ok", "service": "finn-api", "version": __version__, "milestone": 0}
+    return {"status": "ok", "service": "finn-api", "version": __version__, "milestone": 2}
 
 
 @app.get("/health/ready")
 def ready() -> dict:
     return {
-        "status": "foundation_only",
+        "status": "configuration_only",
         "configuration": configuration_status(),
         "dependencies_verified": False,
-        "note": "Configuration is not verification. Run the private feasibility CLI; investor workflows are gated.",
+        "note": "Configuration is not live dependency verification. Run the private feasibility CLI for detailed checks.",
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }

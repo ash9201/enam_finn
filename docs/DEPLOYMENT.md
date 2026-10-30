@@ -1,8 +1,8 @@
 # Milestone 0: Render setup
 
-The local foundation and live source/model/Supabase checks pass. **Public deployment
-and cold-start verification remain pending.** Use the GitHub repository you created;
-no Render hostname or deployed URL is assumed to exist.
+The user has deployed both services, and dependency, browser/CORS and public-cache
+checks pass. This guide records how the services are configured. The existing URLs
+remain in local configuration; no hostname is invented. See [acceptance](ACCEPTANCE.md).
 
 ## 1. Push the source
 
@@ -82,7 +82,8 @@ frontend verify both **Check API connection** and **Check public cache**.
 
 The Supabase migration and its access boundaries have already been tested. Keep the
 PDF bucket private and do not add anonymous write policies to fix a frontend problem.
-The frontend only reads the harmless `finn_public_status` row in this milestone.
+The connection view reads `finn_public_status`; the working app also reads portfolio
+metadata and explicitly published research through read-only policies.
 
 `render.yaml` supplies equivalent Blueprint configuration. Its `sync: false` values
 must be filled by you; actual API URLs and frontend origins still need to be set
@@ -107,5 +108,5 @@ After at least 15 minutes without API traffic, reopen the frontend and check the
 Record wake-up time; the static page/public cache should remain usable. Do not add
 artificial keep-alive traffic to disguise cold starts.
 
-Milestone 0 is complete only after real deployed frontend/API connectivity, CORS,
-public-cache access, and cold-start behaviour pass. Later milestones have not started.
+Those Milestone 0 checks have passed. Push/Pull implementation is now present; verify
+the current release with the product browser checks and [acceptance notes](ACCEPTANCE.md).

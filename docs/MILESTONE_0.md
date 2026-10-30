@@ -3,8 +3,9 @@
 Verified on **30 October 2026** against real public sources and the user's Gemini and
 Supabase project. No credentials are recorded here.
 
-**External dependencies and the local foundation pass. Public deployment and cold-start
-checks remain pending; Milestone 0 is not fully complete.**
+**The dependency/deployment gate has since passed and the user authorised continuation.**
+The original findings below preserve the first checkpoint; current results are in
+[working-prototype acceptance](ACCEPTANCE.md). A later idle API request took 43.19 seconds.
 
 | Check | Result | Evidence |
 | --- | --- | --- |

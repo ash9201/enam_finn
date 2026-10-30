@@ -1,7 +1,7 @@
 {
   "name": "finn-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "engines": {
     "node": ">=24 <25"
@@ -10,7 +10,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "test:browser": "node scripts/verify-foundation.mjs",
-    "preview": "vite preview --host 127.0.0.1"
+    "test:product": "node scripts/verify-product.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "record:demo": "node scripts/record-demo.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -23,6 +25,7 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.1.0",
     "typescript": "~5.9.2",
     "vite": "^7.1.0"

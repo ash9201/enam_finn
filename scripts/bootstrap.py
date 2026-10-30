@@ -3,6 +3,7 @@
 Usage: python scripts/bootstrap.py
 No system-wide Node installation or PATH/profile changes are made.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -28,7 +29,9 @@ def main() -> None:
     if sys.version_info[:2] != (3, 12):
         raise SystemExit("Use Python 3.12 for this project.")
     if platform.system() != "Windows" or platform.machine().upper() not in {"AMD64", "X86_64"}:
-        raise SystemExit("This portable bootstrap is for Windows x64; use installed Node 24/Python 3.12 elsewhere.")
+        raise SystemExit(
+            "This portable bootstrap is for Windows x64; use installed Node 24/Python 3.12 elsewhere."
+        )
 
     tools = ROOT / ".tools"
     tools.mkdir(exist_ok=True)
@@ -37,11 +40,15 @@ def main() -> None:
     node = Path(toolchain.get("node", tools / "not-installed"))
     if not node.is_file():
         releases = json.loads(download("https://nodejs.org/dist/index.json"))
-        release = next(item for item in releases if item["version"].startswith("v24.") and item["lts"])
+        release = next(
+            item for item in releases if item["version"].startswith("v24.") and item["lts"]
+        )
         version = release["version"]
         filename = f"node-{version}-win-x64.zip"
         checksums = download(f"https://nodejs.org/dist/{version}/SHASUMS256.txt").decode()
-        expected = next(line.split()[0] for line in checksums.splitlines() if line.split()[-1] == filename)
+        expected = next(
+            line.split()[0] for line in checksums.splitlines() if line.split()[-1] == filename
+        )
         archive_bytes = download(f"https://nodejs.org/dist/{version}/{filename}")
         if hashlib.sha256(archive_bytes).hexdigest() != expected:
             raise SystemExit("Node archive SHA-256 did not match the official checksum.")
@@ -61,7 +68,12 @@ def main() -> None:
         venv.EnvBuilder(with_pip=True).create(ROOT / ".venv")
     subprocess.run([str(python), "-m", "pip", "install", "-e", ".[dev]"], cwd=ROOT, check=True)
     environment = {**os.environ, "PATH": str(node.parent) + os.pathsep + os.environ.get("PATH", "")}
-    subprocess.run([str(node.parent / "npm.cmd"), "install", "--no-fund", "--no-audit"], cwd=ROOT / "frontend", env=environment, check=True)
+    subprocess.run(
+        [str(node.parent / "npm.cmd"), "install", "--no-fund", "--no-audit"],
+        cwd=ROOT / "frontend",
+        env=environment,
+        check=True,
+    )
     print("Toolchain ready. See README.md for local commands.", flush=True)
 
 

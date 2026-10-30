@@ -1,0 +1,1055 @@
+{
+  "mode": "recorded_demo_snapshot",
+  "exported_at": "2026-10-30T10:32:42.966696+00:00",
+  "notice": "Recorded demo data. Live saved updates could not be loaded. Original source and session dates remain authoritative.",
+  "tables": {
+    "finn_companies": [
+      {
+        "symbol": "POLYCAB",
+        "name": "Polycab India Limited",
+        "isin": "INE455K01017",
+        "portfolio": true,
+        "sector": "Electrical equipment",
+        "manifest": [
+          "0a883adc-1b3e-5ccc-98f2-cfd05458bb48",
+          "5e3aeefa-e03d-5e26-95cb-fdaabc7638bc",
+          "afba7ec0-5e2e-5ec9-9868-9647d0fbe601"
+        ],
+        "corpus_fingerprint": "66a6bf0b637c5f6828f7a75d25d99aa0e559891abdcd790631154625650c7775",
+        "source_checked_at": "2026-10-30T09:44:41.097731+00:00",
+        "coverage": {
+          "notes": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "transcripts": 2,
+          "annual_reports": 1,
+          "target_transcripts": 2,
+          "target_annual_reports": 1
+        }
+      },
+      {
+        "symbol": "RELIANCE",
+        "name": "Reliance Industries Limited",
+        "isin": "INE002A01018",
+        "portfolio": true,
+        "sector": "Energy & retail",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "HDFCBANK",
+        "name": "HDFC Bank Limited",
+        "isin": "INE040A01034",
+        "portfolio": true,
+        "sector": "Banking",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "LT",
+        "name": "Larsen & Toubro Limited",
+        "isin": "INE018A01030",
+        "portfolio": true,
+        "sector": "Engineering",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "M&M",
+        "name": "Mahindra & Mahindra Limited",
+        "isin": "INE101A01026",
+        "portfolio": true,
+        "sector": "Automotive",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "BHARTIARTL",
+        "name": "Bharti Airtel Limited",
+        "isin": "INE397D01024",
+        "portfolio": true,
+        "sector": "Telecommunications",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "name": "Sun Pharmaceutical Industries Limited",
+        "isin": "INE044A01036",
+        "portfolio": true,
+        "sector": "Pharmaceuticals",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "ITC",
+        "name": "ITC Limited",
+        "isin": "INE154A01025",
+        "portfolio": true,
+        "sector": "Consumer goods",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "NTPC",
+        "name": "NTPC Limited",
+        "isin": "INE733E01010",
+        "portfolio": true,
+        "sector": "Power",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "TATASTEEL",
+        "name": "Tata Steel Limited",
+        "isin": "INE081A01020",
+        "portfolio": true,
+        "sector": "Metals",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "TITAN",
+        "name": "Titan Company Limited",
+        "isin": "INE280A01028",
+        "portfolio": true,
+        "sector": "Consumer discretionary",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "KPITTECH",
+        "name": "KPIT Technologies Limited",
+        "isin": "INE04I401011",
+        "portfolio": true,
+        "sector": "Automotive software",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "APLAPOLLO",
+        "name": "APL Apollo Tubes Limited",
+        "isin": "INE702C01027",
+        "portfolio": true,
+        "sector": "Industrial products",
+        "manifest": [],
+        "corpus_fingerprint": null,
+        "source_checked_at": null,
+        "coverage": {}
+      },
+      {
+        "symbol": "CCL",
+        "name": "CCL Products (India) Limited",
+        "isin": "INE421D01022",
+        "portfolio": true,
+        "sector": "Consumer exports",
+        "manifest": [
+          "0c33862a-a537-5802-a287-d05de50563ca",
+          "687bfb49-785b-5acc-8857-cb60b5da02f4",
+          "8137fbef-69f3-5b44-b83f-0da69fc30992"
+        ],
+        "corpus_fingerprint": "7db5392ad73a64518207ee5a2d6f1cab09f47dbf2a44c8fd12a72f0e27502698",
+        "source_checked_at": "2026-10-30T09:39:29.857595+00:00",
+        "coverage": {
+          "notes": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "transcripts": 2,
+          "annual_reports": 1,
+          "target_transcripts": 2,
+          "target_annual_reports": 1
+        }
+      },
+      {
+        "symbol": "INFY",
+        "name": "Infosys Limited",
+        "isin": "INE009A01021",
+        "portfolio": true,
+        "sector": "IT services",
+        "manifest": [
+          "138e36ce-faae-5e1d-a785-730317edf4c7",
+          "c3446d58-8def-5253-bab7-219f78200f45",
+          "dd569765-4f05-5a6d-8a93-957266d341d5"
+        ],
+        "corpus_fingerprint": "715f7797a8b691df0267af8376ac7ca5e0ebe2ebc6160276a0ea10a54935d447",
+        "source_checked_at": "2026-10-30T09:42:30.215031+00:00",
+        "coverage": {
+          "notes": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "transcripts": 2,
+          "annual_reports": 1,
+          "target_transcripts": 2,
+          "target_annual_reports": 1
+        }
+      }
+    ],
+    "finn_filings": [
+      {
+        "id": "5894336cfb51e11c040bd6bac462151e1860a07f4655097e0a454ccc7cf5dc81",
+        "symbol": "BHARTIARTL",
+        "company_name": "Bharti Airtel Limited",
+        "title": "Copy of Newspaper Publication",
+        "description": "Bharti Airtel Limited has informed the Exchange about Copy of Newspaper Publication |SUBJECT: Copy of Newspaper Publication",
+        "source_url": "https://nsearchives.nseindia.com/corporate/BHARTIARTL_30102026152337_STXintimationOctober302026.pdf",
+        "published_at": "2026-10-30T09:53:54+00:00",
+        "category": "publication",
+        "priority": 0,
+        "review_reason": "Publication notice; the actual results filing carries the financial detail.",
+        "first_seen_at": "2026-10-30T10:16:28.856876+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.510082+00:00"
+      },
+      {
+        "id": "abc40e08c4e1a9b013c3cd24acde3f473a38f90fa90d6a1e4140ea1b657adf0f",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "General Updates",
+        "description": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor Rotation |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026151827_BMOutcome30102026_Conclusion.pdf",
+        "published_at": "2026-10-30T09:48:46+00:00",
+        "category": "routine",
+        "priority": 0,
+        "review_reason": "Scheduled auditor rotation; expand to inspect the governance disclosure.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.511086+00:00"
+      },
+      {
+        "id": "d801bc8500cc6a8c929235f31d435877629645f87f8eb6e78f11b1cc01f2fc71",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "Unaudited Financial Results for the quarter and half year ended 30 September 2026 |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026141321_BMOutcomeFinancialoct26signed.pdf",
+        "published_at": "2026-10-30T08:45:10+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.511086+00:00"
+      },
+      {
+        "id": "5338cb87a5d8bf936215aa3f8d4bdbb797151b83e4e3a610f3d62fac4142a342",
+        "symbol": "HDFCBANK",
+        "company_name": "HDFC Bank Limited",
+        "title": "Alteration Of Capital and Fund Raising-XBRL",
+        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of Securities |SUBJECT: Alteration Of Capital and Fund Raising-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/ALTERATION_OF_CAPITAL_AND_FUND_RAISING_797_WebXMLFile_20261030_133011636.xml",
+        "published_at": "2026-10-30T08:00:12+00:00",
+        "category": "capital",
+        "priority": 2,
+        "review_reason": "Review the terms and potential effect on capital or funding.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.51217+00:00"
+      },
+      {
+        "id": "2203898650310cf432479e390b8f4827f949d7385540a3b546731a5002b54a18",
+        "symbol": "HDFCBANK",
+        "company_name": "HDFC Bank Limited",
+        "title": "ESOP/ESOS/ESPS",
+        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of 4675598  Shares. |SUBJECT: ESOP/ESOS/ESPS",
+        "source_url": "https://nsearchives.nseindia.com/corporate/HDFCBANK_30102026132409_SELetterESOP30102026.pdf",
+        "published_at": "2026-10-30T07:54:25+00:00",
+        "category": "routine",
+        "priority": 0,
+        "review_reason": "Routine disclosure; available here if you need the original.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.51217+00:00"
+      },
+      {
+        "id": "7ccc7e5847c29395a59b9e81029570aa56050dd0f1e150989cc2f5cfae836ecf",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "General Updates",
+        "description": "NTPC Limited has informed the Exchange about declaration of Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited. |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/NTPC_30102026123023_2021030_NGELCOD.pdf",
+        "published_at": "2026-10-30T07:04:39+00:00",
+        "category": "business_update",
+        "priority": 2,
+        "review_reason": "A business development worth assessing in the context of the company.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.51355+00:00"
+      },
+      {
+        "id": "f3d6ab692a442268001fb77f9617f2025d803a155f774108d74bb5930be44df0",
+        "symbol": "POLYCAB",
+        "company_name": "Polycab India Limited",
+        "title": "Corporate Insolvency Resolution Process",
+        "description": "Polycab India Limited has informed the Exchange about the order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07, 2026 |SUBJECT: Corporate Insolvency Resolution Process",
+        "source_url": "https://nsearchives.nseindia.com/corporate/POLYCAB_30102026121954_SECIRP30102026.pdf",
+        "published_at": "2026-10-30T06:50:09+00:00",
+        "category": "litigation",
+        "priority": 3,
+        "review_reason": "Review the scope and potential exposure in the original disclosure.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.51355+00:00"
+      },
+      {
+        "id": "2525b565b5c690af5549eb991197ae5e53d42bf6b23c110a46cd7986bef503f7",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Press Release",
+        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange regarding a press release dated October 30, 2026, titled \"ILUMYA® (tildrakizumab-asmn) approved in the U.S. for the Treatment of Adults with Active Psoriatic Arthritis\". |SUBJECT: Press Release",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026080437_SE_Intimation_of_Press_Release_ILUMYA_PsA_Approval.pdf",
+        "published_at": "2026-10-30T02:35:47+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T10:16:28.514931+00:00"
+      }
+    ],
+    "finn_price_snapshots": [
+      {
+        "symbol": "APLAPOLLO",
+        "data": {
+          "close": 2195.0,
+          "ticker": "APLAPOLLO.NS",
+          "volume": 1214686,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:18.139637+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 1.8533318207863774,
+          "price_change_pct": 1.371632129595568,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 655406.65
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:14.353397+00:00",
+        "last_success_at": "2026-10-30T09:50:18.139637+00:00"
+      },
+      {
+        "symbol": "BHARTIARTL",
+        "data": {
+          "close": 1972.0999755859375,
+          "ticker": "BHARTIARTL.NS",
+          "volume": 6859219,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:19.833031+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.7487845575446249,
+          "price_change_pct": 1.231969626855589,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 9160470.7
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:18.813139+00:00",
+        "last_success_at": "2026-10-30T09:50:19.833031+00:00"
+      },
+      {
+        "symbol": "CCL",
+        "data": {
+          "close": 946.2999877929688,
+          "ticker": "CCL.NS",
+          "volume": 183587,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:21.590295+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.799864588498039,
+          "price_change_pct": 0.8311121782598629,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 229522.6
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:20.083435+00:00",
+        "last_success_at": "2026-10-30T09:50:21.590295+00:00"
+      },
+      {
+        "symbol": "HDFCBANK",
+        "data": {
+          "close": 683.2999877929688,
+          "ticker": "HDFCBANK.NS",
+          "volume": 31422790,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:22.803893+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.9719732578158402,
+          "price_change_pct": -0.2918429936707101,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 32328862.7
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:22.193512+00:00",
+        "last_success_at": "2026-10-30T09:50:22.803893+00:00"
+      },
+      {
+        "symbol": "INFY",
+        "data": {
+          "close": 1146.5,
+          "ticker": "INFY.NS",
+          "volume": 14048472,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:23.424261+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.8361858083745022,
+          "price_change_pct": 2.0789720944109025,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 16800658.25
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:23.043274+00:00",
+        "last_success_at": "2026-10-30T09:50:23.424261+00:00"
+      },
+      {
+        "symbol": "ITC",
+        "data": {
+          "close": 265.0,
+          "ticker": "ITC.NS",
+          "volume": 23257133,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:24.437129+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 1.0165829289479364,
+          "price_change_pct": 2.1194605009633882,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 22877752.85
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:23.721558+00:00",
+        "last_success_at": "2026-10-30T09:50:24.437129+00:00"
+      },
+      {
+        "symbol": "KPITTECH",
+        "data": {
+          "close": 543.7000122070312,
+          "ticker": "KPITTECH.NS",
+          "volume": 1796946,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:25.478826+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.6470202328622702,
+          "price_change_pct": -1.5927579715780515,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 2777264.0
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:24.706885+00:00",
+        "last_success_at": "2026-10-30T09:50:25.478826+00:00"
+      },
+      {
+        "symbol": "LT",
+        "data": {
+          "close": 3837.10009765625,
+          "ticker": "LT.NS",
+          "volume": 1754505,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:27.840005+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.8081345500348898,
+          "price_change_pct": 0.9417843466253517,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 2171055.55
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:25.889442+00:00",
+        "last_success_at": "2026-10-30T09:50:27.840005+00:00"
+      },
+      {
+        "symbol": "M&M",
+        "data": {
+          "close": 2890.0,
+          "ticker": "M&M.NS",
+          "volume": 1887874,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:29.875790+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.7385411391544665,
+          "price_change_pct": 0.700376261898028,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 2556220.5
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:29.157024+00:00",
+        "last_success_at": "2026-10-30T09:50:29.87579+00:00"
+      },
+      {
+        "symbol": "NTPC",
+        "data": {
+          "close": 310.5,
+          "ticker": "NTPC.NS",
+          "volume": 7682889,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:31.927374+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.8512557452906294,
+          "price_change_pct": 2.2222222222222143,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 9025359.35
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:30.497518+00:00",
+        "last_success_at": "2026-10-30T09:50:31.927374+00:00"
+      },
+      {
+        "symbol": "POLYCAB",
+        "data": {
+          "close": 7745.0,
+          "ticker": "POLYCAB.NS",
+          "volume": 325369,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:33.156363+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.6162371030536,
+          "price_change_pct": 0.8463541666666741,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 527993.2
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:32.229246+00:00",
+        "last_success_at": "2026-10-30T09:50:33.156363+00:00"
+      },
+      {
+        "symbol": "RELIANCE",
+        "data": {
+          "close": 1167.4000244140625,
+          "ticker": "RELIANCE.NS",
+          "volume": 20939623,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:34.488018+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 1.3643898599326296,
+          "price_change_pct": 0.8117464951694631,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 15347243.2
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:33.456649+00:00",
+        "last_success_at": "2026-10-30T09:50:34.488018+00:00"
+      },
+      {
+        "symbol": "SUNPHARMA",
+        "data": {
+          "close": 1761.0,
+          "ticker": "SUNPHARMA.NS",
+          "volume": 1107854,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:35.777522+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.6939914191185317,
+          "price_change_pct": 0.19914651493599944,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 1596351.15
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:34.789302+00:00",
+        "last_success_at": "2026-10-30T09:50:35.77803+00:00"
+      },
+      {
+        "symbol": "TATASTEEL",
+        "data": {
+          "close": 169.4600067138672,
+          "ticker": "TATASTEEL.NS",
+          "volume": 13728789,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:36.842894+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 0.5707671702615864,
+          "price_change_pct": 0.11224814592691867,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 24053221.2
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:36.120927+00:00",
+        "last_success_at": "2026-10-30T09:50:36.842894+00:00"
+      },
+      {
+        "symbol": "TITAN",
+        "data": {
+          "close": 4434.0,
+          "ticker": "TITAN.NS",
+          "volume": 958380,
+          "provider": "Yahoo Finance via yfinance",
+          "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+          "fetched_at": "2026-10-30T09:50:38.372864+00:00",
+          "volume_note": null,
+          "last_session": "2026-10-29",
+          "volume_ratio": 1.188103272676693,
+          "price_change_pct": 2.215359962647545,
+          "complete_sessions": 63,
+          "previous_20_mean_volume": 806647.05
+        },
+        "error": null,
+        "last_attempt_at": "2026-10-30T09:50:37.243087+00:00",
+        "last_success_at": "2026-10-30T09:50:38.372864+00:00"
+      }
+    ],
+    "finn_sync_status": [
+      {
+        "id": "prices",
+        "state": "completed",
+        "started_at": "2026-10-30T09:50:14.091892+00:00",
+        "finished_at": "2026-10-30T09:50:39.089373+00:00",
+        "last_success_at": "2026-10-30T09:50:39.089373+00:00",
+        "captured_since": null,
+        "error": null,
+        "details": {
+          "updated": 15,
+          "failed_symbols": [],
+          "portfolio_companies": 15
+        }
+      },
+      {
+        "id": "filings",
+        "state": "completed",
+        "started_at": "2026-10-30T10:16:26.608558+00:00",
+        "finished_at": "2026-10-30T10:16:28.845212+00:00",
+        "last_success_at": "2026-10-30T10:16:28.845212+00:00",
+        "captured_since": "2026-10-30T09:50:11.134086+00:00",
+        "error": null,
+        "details": {
+          "coverage": "Recent NSE RSS plus filings captured since monitoring started. Earlier history may be incomplete.",
+          "feed_items": 960,
+          "portfolio_filings": 8,
+          "invalid_timestamps": 0,
+          "portfolio_companies": 15
+        }
+      }
+    ],
+    "finn_research_cache": [
+      {
+        "id": "a0c82000-839d-4578-a8e6-8b9d4334d6b2",
+        "cache_key": "234a36d62090cd152590efb622d6e801a6702406e6afa70101e5a57630f23c2d",
+        "symbol": "INFY",
+        "question": "Trace one earlier management statement against later earnings-call evidence.",
+        "corpus_fingerprint": "715f7797a8b691df0267af8376ac7ca5e0ebe2ebc6160276a0ea10a54935d447",
+        "model": "gemini-3.5-flash-lite",
+        "prompt_version": "management-evidence-v1",
+        "result": {
+          "id": "a0c82000-839d-4578-a8e6-8b9d4334d6b2",
+          "model": "gemini-3.5-flash-lite",
+          "usage": {
+            "serviceTier": "standard",
+            "totalTokenCount": 5799,
+            "promptTokenCount": 5455,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 5455
+              }
+            ],
+            "candidatesTokenCount": 344
+          },
+          "cached": false,
+          "claims": [
+            {
+              "citation": {
+                "id": "ccf43ac7-db97-5ed8-a73e-d35c0121bea7",
+                "kind": "transcript",
+                "quote": "Margin guidance is maintained at 20% to 22%. This assumes headwind from wage hikes productivity pa ss-throughs, AI investments and 50 basis point impact from acquisitions of Optimum Healthcare and Stratus.",
+                "pdf_page": 33,
+                "fetched_at": "2026-10-30T09:42:22.761803+00:00",
+                "source_url": "https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=95f8af86-dc92-49dc-a7cf-ecce287f8cce.pdf",
+                "document_id": "138e36ce-faae-5e1d-a785-730317edf4c7",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/95f8af86-dc92-49dc-a7cf-ecce287f8cce.pdf",
+                "published_at": null,
+                "document_label": "Jul 2026",
+                "reporting_period": null
+              },
+              "statement": "Margin guidance is maintained at 20% to 22%."
+            },
+            {
+              "citation": {
+                "id": "5584d4fe-57df-5f16-9d38-86b11980b6bb",
+                "kind": "transcript",
+                "quote": "Our margin continues to remain at 21%. I think it is a strong performance on the back of all the efforts that we have put in Project Maximus.",
+                "pdf_page": 6,
+                "fetched_at": "2026-10-30T09:42:11.942248+00:00",
+                "source_url": "https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=7982fc61-7765-4981-ab3d-6aec36ba2137.pdf",
+                "document_id": "c3446d58-8def-5253-bab7-219f78200f45",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachLive/7982fc61-7765-4981-ab3d-6aec36ba2137.pdf",
+                "published_at": null,
+                "document_label": "Oct 2026",
+                "reporting_period": null
+              },
+              "statement": "Our margin continues to remain at 21%."
+            }
+          ],
+          "status": "answered",
+          "symbol": "INFY",
+          "coverage": {
+            "notes": [
+              "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+              "Financial table candidates are not approved for comparisons."
+            ],
+            "transcripts": 2,
+            "annual_reports": 1,
+            "target_transcripts": 2,
+            "target_annual_reports": 1
+          },
+          "question": "Trace one earlier management statement against later earnings-call evidence.",
+          "comparison": {
+            "basis": "not_comparable",
+            "later": {
+              "citation": {
+                "id": "5584d4fe-57df-5f16-9d38-86b11980b6bb",
+                "kind": "transcript",
+                "quote": "Our margin continues to remain at 21%. I think it is a strong performance on the back of all the efforts that we have put in Project Maximus.",
+                "pdf_page": 6,
+                "fetched_at": "2026-10-30T09:42:11.942248+00:00",
+                "source_url": "https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=7982fc61-7765-4981-ab3d-6aec36ba2137.pdf",
+                "document_id": "c3446d58-8def-5253-bab7-219f78200f45",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachLive/7982fc61-7765-4981-ab3d-6aec36ba2137.pdf",
+                "published_at": null,
+                "document_label": "Oct 2026",
+                "reporting_period": null
+              },
+              "statement": "Our margin continues to remain at 21%."
+            },
+            "earlier": {
+              "citation": {
+                "id": "ccf43ac7-db97-5ed8-a73e-d35c0121bea7",
+                "kind": "transcript",
+                "quote": "Margin guidance is maintained at 20% to 22%. This assumes headwind from wage hikes productivity pa ss-throughs, AI investments and 50 basis point impact from acquisitions of Optimum Healthcare and Stratus.",
+                "pdf_page": 33,
+                "fetched_at": "2026-10-30T09:42:22.761803+00:00",
+                "source_url": "https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=95f8af86-dc92-49dc-a7cf-ecce287f8cce.pdf",
+                "document_id": "138e36ce-faae-5e1d-a785-730317edf4c7",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/95f8af86-dc92-49dc-a7cf-ecce287f8cce.pdf",
+                "published_at": null,
+                "document_label": "Jul 2026",
+                "reporting_period": null
+              },
+              "statement": "Margin guidance is maintained at 20% to 22%."
+            },
+            "verdict": "not_assessable",
+            "assessment": "At least one quote describes guidance. These excerpts do not establish an outcome for the same completed target period, so delivery cannot be assessed from them alone."
+          },
+          "limitations": [
+            "A comparison is not a company-wide judgment. Index labels are shown separately from verified publication dates.",
+            "Financial table comparisons remain disabled.",
+            "Some summaries use verbatim source wording where a paraphrase could not be validated."
+          ],
+          "company_name": "Infosys Limited",
+          "generated_at": "2026-10-30T10:22:59.875989+00:00",
+          "model_fallback": false,
+          "retrieval_mode": "keyword",
+          "requested_model": "gemini-3.5-flash-lite",
+          "source_checked_at": "2026-10-30T09:42:30.215031+00:00",
+          "presentation_version": "extractive-comparison-v2",
+          "financial_comparisons_enabled": false
+        },
+        "is_public": true,
+        "created_at": "2026-10-30T10:22:59.875989+00:00"
+      },
+      {
+        "id": "a6461594-4955-4984-918a-7e81faf49183",
+        "cache_key": "e3fded1f8c896b8d603a5656cea1799f6933f5d39f272bec2fdfdf84451e612e",
+        "symbol": "POLYCAB",
+        "question": "Explain the core business and its main services or products.",
+        "corpus_fingerprint": "66a6bf0b637c5f6828f7a75d25d99aa0e559891abdcd790631154625650c7775",
+        "model": "gemini-3.5-flash-lite",
+        "prompt_version": "grounded-claims-v3-reading-order",
+        "result": {
+          "id": "a6461594-4955-4984-918a-7e81faf49183",
+          "model": "gemini-3.5-flash-lite",
+          "usage": {
+            "serviceTier": "standard",
+            "totalTokenCount": 3777,
+            "promptTokenCount": 3445,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 3445
+              }
+            ],
+            "candidatesTokenCount": 332
+          },
+          "cached": false,
+          "claims": [
+            {
+              "citation": {
+                "id": "8eb6b74b-35fe-5afc-8096-f584ac87207c",
+                "kind": "annual_report",
+                "quote": "Wires and Cables: Manufacture and sale of wires and cables",
+                "pdf_page": 388,
+                "fetched_at": "2026-10-30T09:42:49.948057+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "document_id": "0a883adc-1b3e-5ccc-98f2-cfd05458bb48",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The business manufactures and sells wires and cables."
+            },
+            {
+              "citation": {
+                "id": "8eb6b74b-35fe-5afc-8096-f584ac87207c",
+                "kind": "annual_report",
+                "quote": "Fast moving electrical goods (FMEG): Fans, LED lighting and luminaires, switches, switchgears, solar",
+                "pdf_page": 388,
+                "fetched_at": "2026-10-30T09:42:49.948057+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "document_id": "0a883adc-1b3e-5ccc-98f2-cfd05458bb48",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The fast moving electrical goods segment offers fans, LED lighting and luminaires, switches, switchgears, and solar products."
+            },
+            {
+              "citation": {
+                "id": "99b20b82-31c7-5cec-a346-3730c53d2c0a",
+                "kind": "annual_report",
+                "quote": "The Special Cables (SPC) business represents a niche, technology-driven segment focused on high-performance cable solutions for critical applications across railways, defence, and automotive, including electric mobility.",
+                "pdf_page": 143,
+                "fetched_at": "2026-10-30T09:42:49.948057+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "document_id": "0a883adc-1b3e-5ccc-98f2-cfd05458bb48",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/ff6bcced-1327-449f-8a82-6fd651a0124f.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The special cables business provides high-performance cable solutions for critical applications in railways, defence, and automotive sectors including electric mobility."
+            }
+          ],
+          "status": "answered",
+          "symbol": "POLYCAB",
+          "coverage": {
+            "notes": [
+              "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+              "Financial table candidates are not approved for comparisons."
+            ],
+            "transcripts": 2,
+            "annual_reports": 1,
+            "target_transcripts": 2,
+            "target_annual_reports": 1
+          },
+          "question": "Explain the core business and its main services or products.",
+          "limitations": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "company_name": "Polycab India Limited",
+          "generated_at": "2026-10-30T09:44:45.299356+00:00",
+          "retrieval_mode": "keyword",
+          "source_checked_at": "2026-10-30T09:44:41.097731+00:00",
+          "financial_comparisons_enabled": false
+        },
+        "is_public": true,
+        "created_at": "2026-10-30T09:44:45.299356+00:00"
+      },
+      {
+        "id": "31010d84-0e57-4f54-a92f-c69505f1de62",
+        "cache_key": "294bcb462d0f759f4ac4d34b8b27699fb2d6f5534060e96a05e6e763461fdc32",
+        "symbol": "INFY",
+        "question": "Explain the core business and its main services or products.",
+        "corpus_fingerprint": "715f7797a8b691df0267af8376ac7ca5e0ebe2ebc6160276a0ea10a54935d447",
+        "model": "gemini-3.5-flash-lite",
+        "prompt_version": "grounded-claims-v3-reading-order",
+        "result": {
+          "id": "31010d84-0e57-4f54-a92f-c69505f1de62",
+          "model": "gemini-3.5-flash-lite",
+          "usage": {
+            "serviceTier": "standard",
+            "totalTokenCount": 2365,
+            "promptTokenCount": 2010,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 2010
+              }
+            ],
+            "candidatesTokenCount": 355
+          },
+          "cached": false,
+          "claims": [
+            {
+              "citation": {
+                "id": "196d9a80-e5f1-5784-8093-ff08b3822a0a",
+                "kind": "annual_report",
+                "quote": "Infosys is an IT consulting and software services organization.",
+                "pdf_page": 157,
+                "fetched_at": "2026-10-30T09:41:03.432592+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "document_id": "dd569765-4f05-5a6d-8a93-957266d341d5",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "Infosys operates as an information technology consulting and software services organization."
+            },
+            {
+              "citation": {
+                "id": "209bba80-a53c-5fc2-97f5-074e49fd771b",
+                "kind": "annual_report",
+                "quote": "- Custom Software Development Services",
+                "pdf_page": 21,
+                "fetched_at": "2026-10-30T09:41:03.432592+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "document_id": "dd569765-4f05-5a6d-8a93-957266d341d5",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The business provides custom software development services."
+            },
+            {
+              "citation": {
+                "id": "bbd4d2b8-2c0b-59e4-ba3a-b35d6c6d9be6",
+                "kind": "annual_report",
+                "quote": "Business segments of the Group are primarily enterprises in Financial Services and Insurance, enterprises in Manufacturing, enterprises in Retail, Consumer Packaged Goods and Logistics, enterprises in the Energy, Utilities, Resources and Services, enterprises in Communication, Telecom OEM and Media, enterprises in Hi-Tech, enterprises in Life Sciences and Healthcare and all other segments.",
+                "pdf_page": 356,
+                "fetched_at": "2026-10-30T09:41:03.432592+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "document_id": "dd569765-4f05-5a6d-8a93-957266d341d5",
+                "document_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/19dd605c-2b6b-4084-8dca-9d578a3eb7a0.pdf",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The group's business segments serve enterprises across financial services and insurance, manufacturing, retail, consumer packaged goods, and logistics, energy, utilities, resources and services, communication, telecom OEM and media, hi-tech, and life sciences and healthcare."
+            }
+          ],
+          "status": "answered",
+          "symbol": "INFY",
+          "coverage": {
+            "notes": [
+              "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+              "Financial table candidates are not approved for comparisons."
+            ],
+            "transcripts": 2,
+            "annual_reports": 1,
+            "target_transcripts": 2,
+            "target_annual_reports": 1
+          },
+          "question": "Explain the core business and its main services or products.",
+          "limitations": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "company_name": "Infosys Limited",
+          "generated_at": "2026-10-30T09:42:35.251572+00:00",
+          "retrieval_mode": "keyword",
+          "source_checked_at": "2026-10-30T09:42:30.215031+00:00",
+          "financial_comparisons_enabled": false
+        },
+        "is_public": true,
+        "created_at": "2026-10-30T09:42:35.251572+00:00"
+      },
+      {
+        "id": "45e8d3e8-8f25-4e5e-bf78-c8d5ddb8f793",
+        "cache_key": "46e2bbcfd2390412a7c04877e356261da0848e128ac961d4f4491b22ac35a2bd",
+        "symbol": "CCL",
+        "question": "Explain the core business and its main services or products.",
+        "corpus_fingerprint": "7db5392ad73a64518207ee5a2d6f1cab09f47dbf2a44c8fd12a72f0e27502698",
+        "model": "gemini-3.5-flash-lite",
+        "prompt_version": "grounded-claims-v3-reading-order",
+        "result": {
+          "id": "45e8d3e8-8f25-4e5e-bf78-c8d5ddb8f793",
+          "model": "gemini-3.5-flash-lite",
+          "usage": {
+            "serviceTier": "standard",
+            "totalTokenCount": 2784,
+            "promptTokenCount": 2668,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 2668
+              }
+            ],
+            "candidatesTokenCount": 116
+          },
+          "cached": false,
+          "claims": [
+            {
+              "citation": {
+                "id": "79f931f3-11fe-5fda-92c5-26035a526e54",
+                "kind": "annual_report",
+                "quote": "The business is principally engaged in the manufacture and sale of coffee and coffee-related products.",
+                "pdf_page": 63,
+                "fetched_at": "2026-10-30T09:38:11.914516+00:00",
+                "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/c4447dc9-9eb8-4a28-b7cb-e8cbc71f426e.pdf",
+                "document_id": "687bfb49-785b-5acc-8857-cb60b5da02f4",
+                "published_at": null,
+                "document_label": "Annual Report 2026",
+                "reporting_period": null
+              },
+              "statement": "The business is principally engaged in the manufacture and sale of coffee and coffee-related products."
+            }
+          ],
+          "status": "answered",
+          "symbol": "CCL",
+          "coverage": {
+            "notes": [
+              "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+              "Financial table candidates are not approved for comparisons."
+            ],
+            "transcripts": 2,
+            "annual_reports": 1,
+            "target_transcripts": 2,
+            "target_annual_reports": 1
+          },
+          "question": "Explain the core business and its main services or products.",
+          "limitations": [
+            "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
+            "Financial table candidates are not approved for comparisons."
+          ],
+          "company_name": "CCL Products (India) Limited",
+          "generated_at": "2026-10-30T09:39:34.251684+00:00",
+          "retrieval_mode": "keyword",
+          "source_checked_at": "2026-10-30T09:39:29.857595+00:00",
+          "financial_comparisons_enabled": false
+        },
+        "is_public": true,
+        "created_at": "2026-10-30T09:39:34.251684+00:00"
+      }
+    ]
+  }
+}

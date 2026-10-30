@@ -1,125 +1,157 @@
 # FINN
 
-An investor attention inbox with primary-source research. This checkout currently
-implements **Milestone 0 only**: live dependency probes and a deployment foundation.
-There is no simulated investor feed, research answer fallback, or prepared portfolio.
+A mobile-first investor attention inbox and primary-source company research prototype
+for the ENAM AI Engineer challenge. The first working release includes **Push and Pull**
+with real sources. The original [plan](docs/PLAN.md) records scope and trade-offs.
 
-The approved [plan](docs/PLAN.md) includes the hybrid-search and financial-table
-amendments. Later milestones remain gated until external dependencies are verified.
+## What works
 
-## Local setup (Windows)
+- **Briefing:** real NSE portfolio filings, explainable priority, routine disclosures
+  collapsed, 24-hour/seven-day/custom windows, and review state saved in the browser.
+- **EOD alerts:** configurable daily-move and volume thresholds, with the volume baseline
+  excluding the current session. Split-affected comparisons are suppressed.
+- **Portfolio:** 15 verified NSE companies, real saved EOD closes, sector labels and
+  explicit session/refresh dates. This is a mock watchlist, without trading or P&L.
+- **Research:** any valid NSE ticker with accessible primary reports/transcripts uses
+  the same generic pipeline. Prepared examples: INFY, POLYCAB and CCL, each with one
+  annual report and two transcripts. Answers have page-level source quotes.
+- **Narrative/evidence:** one prepared INFY comparison traces earlier guidance against
+  later call evidence, without pretending one quarter settles a full-year target.
+- **Resilience:** persistent jobs, content-hash document versions, answer caches, limited
+  model calls, explicit errors, and a visibly dated recorded-demo snapshot if live
+  saved updates cannot be read. Failed live research never becomes a fabricated answer.
+
+No news/broker summaries or model-memory company facts supply Pull answers. Screener
+is a primary-link index only. Raw PDFs and full source text are private in Supabase;
+only company metadata and explicitly published prepared answers are anonymous-readable.
+
+## Architecture
+
+React/TypeScript/Vite/Tailwind on Render static hosting; Python 3.12/FastAPI on a free
+Render web service; Supabase Postgres/Storage; GitHub Actions for source ingestion.
+The frontend reads saved public results without waking Python. On-demand research
+uses persisted jobs and polls their progress. No external vector service or RAG framework.
+
+Postgres full-text search is implemented with company, document-kind, and date filters.
+The schema reserves model-tagged 768-dimensional pgvector fields for later semantic
+retrieval/RRF. **Semantic search is not enabled**: fix extraction and measure retrieval
+quality before spending time/quota embedding the corpus.
+
+Gemini 3.5 Flash-Lite handles ordinary answers. Gemini 3.8 Flash is preferred for deeper
+analysis but was intermittently slow in live testing; a bounded Flash-Lite fallback
+records the actual model and keeps the same source/chronology guards. Model reservations
+in Postgres cap normal use below the user's stated free-tier limits; provider quotas
+can still reject requests. Caches avoid repeating model calls for identical evidence.
+
+PDF processing keeps layout text for tables and reading-order text for narrative.
+Every document retains original/final URLs, hash, fetch time and page numbers. Unknown
+publication/reporting dates stay unknown. Table cells are **candidates**, not approved
+facts. Financial table comparisons remain disabled. A quote repaired for PDF whitespace
+is replaced with the original source slice; split/ambiguous numbers cannot validate a
+new figure. Citation matching does not mechanically prove semantic entailment: prepared
+claims are also reviewed against their primary evidence.
+
+## Run locally
 
 ```powershell
 python scripts/bootstrap.py
-Copy-Item .env.example .env.local  # only if the local file does not already exist
-```
-
-The bootstrap installs dependencies into `.venv` and a checksum-verified portable
-Node 24 runtime into `.tools`; it does not alter system PATH or install Node globally.
-Both directories and `.env.local` are ignored. Python 3.12 is required.
-
-Fill `.env.local` with your actual values, never in chat or tracked files:
-
-- `GEMINI_API_KEY`
-- `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_PUBLISHABLE_KEY`
-- The user's `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-  names are also accepted. **No secret may use `NEXT_PUBLIC_` or `VITE_`.**
-
-Apply [the foundation migration](supabase/migrations/0001_dependency_foundation.sql)
-in the Supabase SQL Editor. It enables pgvector and creates only isolated dependency
-tables, a public read-only status row, and a private `finn-documents` PDF bucket.
-No source corpus or investor-workflow tables are deployed by this migration.
-
-Run in two terminals:
-
-```powershell
+# Create .env.local from .env.example only if it does not already exist.
 .\.venv\Scripts\python.exe -m uvicorn finn.main:app --host 127.0.0.1 --port 8000
 ```
+
+In a second terminal:
 
 ```powershell
 python scripts/npm.py run dev
 ```
 
-Open `http://localhost:5173`. The foundation page can check the API and read the public
-Supabase status using the publishable key. It does not pretend these checks verify all
-external dependencies. Vite loads root `.env.local` and explicitly exposes only the
-public Supabase URL/key and API base URL; the build rejects public-prefixed secrets.
+Open `http://localhost:5173`. `/` is Briefing, `/?view=research` is Research,
+`/?view=portfolio` is Portfolio, and `/?view=foundation` retains connection diagnostics.
+The bootstrap uses a SHA-256-verified workspace-local Node 24 and `.venv`; it does not
+change system PATH or PowerShell execution policy. On other platforms use Node 24 and
+Python 3.12 directly with the same package manifests.
 
-## Acceptance checks
+Local `.env.local` supports `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
+`SUPABASE_PUBLISHABLE_KEY`, and `GEMINI_API_KEY`. Existing public aliases
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` also work. Secrets must
+never have `VITE_` or `NEXT_PUBLIC_` prefixes. Vite explicitly exposes only public values.
+
+Apply the SQL migrations in numeric order through the Supabase SQL Editor. **Keep RLS
+on.** Migrations preserve private source/jobs/usage tables and grant public read-only
+access to the intended mock portfolio and prepared outputs. They create no paid resources.
+
+For a new database, first prepare one company end to end before scaling:
+
+```powershell
+.\.venv\Scripts\python.exe -m finn.ingest --symbol INFY --publish
+.\.venv\Scripts\python.exe -m finn.ingest --portfolio
+.\.venv\Scripts\python.exe -m finn.ingest --symbol POLYCAB --publish
+.\.venv\Scripts\python.exe -m finn.ingest --symbol CCL --publish
+.\.venv\Scripts\python.exe -m finn.briefing --mode all
+```
+
+Re-ingestion of unchanged PDFs reuses extraction and preserves content integrity.
+Do not run corpus refreshes repeatedly as a unit test. A full source/model feasibility
+check is available via `python -m finn.feasibility --symbol INFY`.
+
+## Verification
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
 python scripts/npm.py run build
 .\.venv\Scripts\python.exe scripts/check_frontend_secrets.py
-.\.venv\Scripts\python.exe -m finn.feasibility --symbol INFY --check-embeddings
-```
-
-For repeatable browser checks with the two local servers running:
-
-```powershell
 python scripts/npm.py exec -- playwright install chromium
+python scripts/npm.py run test:product
 python scripts/npm.py run test:browser
 ```
 
-This uses real API/public-cache connections. Phone and desktop screenshots/checks go
-to the ignored `artifacts/milestone-0/browser` directory.
+Browser checks use real local API/cache connections; run both local servers first.
+They cover phone/desktop layout, source drawers, windows/settings, 15-company data,
+persisted research jobs, and an unknown ticker. Screenshots/results are in ignored
+`artifacts/`. `test:browser` checks the separate connection-diagnostics view.
+`python scripts/npm.py run record:demo` records a short phone walkthrough as a local
+WebM file. Set `FINN_BROWSER_URL` to record or test the deployed frontend.
 
-Live probes use the same generic ticker/document-discovery functions for any NSE
-symbol. The initial acceptance company is INFY. A full run makes one request to each
-configured generation model; `--check-embeddings` adds one optional embedding request.
-Do not use the live suite as a repeated unit test or consume the scarce reasoning quota
-unnecessarily. A successful request proves access, not the full daily quota.
+`python scripts/export_snapshot.py` exports only anonymously readable public data into
+`frontend/public/recorded-snapshot.json`. This is a recorded demo, not live data; the UI
+must show the recorded-data banner when using it. Preserve original dates when updating it.
 
-The report is `artifacts/milestone-0/feasibility.md` (and JSON). Downloaded primary PDFs,
-page text, hashes, original/final URLs, and sampled table candidates are saved alongside
-it, all ignored by Git. Missing credentials are `blocked`; failed live requests are
-`failed`. The command exits nonzero until all required checks pass. Partial `--only`
-runs cannot pass the overall gate. Use a separate `--output` path for partial reruns
-so the full live report is preserved.
+## Deployment and automation
 
-Table extraction is a bounded financial-page sample, **not a verified financial data
-set**. All cells remain unvalidated candidates. Document-index labels are preserved
-separately from reporting/publication dates, which stay unknown until verified from
-the source. Financial comparisons are disabled. No keyword/semantic investor retrieval
-or full research pipeline is enabled in this milestone.
+Use [Render setup](docs/DEPLOYMENT.md) and `render.yaml`. Existing deployed origins and
+API URLs remain valid. Backend CORS permits GET and POST from the configured frontend
+origin; it does not permit arbitrary origins. `/health/live` is process liveness,
+while `/health/ready` reports configuration presence, not a blanket dependency guarantee.
 
-## Deploying the foundation
+In GitHub Actions repository settings configure:
 
-The user has created the GitHub repository and Render account. No deployed service or
-URL is assumed to exist. Follow [the exact Render setup guide](docs/DEPLOYMENT.md).
+- Secrets: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`.
+- Repository variable: `FINN_ENABLE_SCHEDULED_SYNC=true`.
 
-1. Use the GitHub repository you created and push the source, excluding the supplied PDFs,
-   `.env.local`, `.venv`, `.tools`, and `artifacts`. Keep this boundary when exporting
-   the repository or build history.
-2. Connect that repository to Render and create a Blueprint from `render.yaml`.
-   The API has `plan: free`; the frontend uses static hosting. Do not add a paid disk,
-   paid database, or paid worker.
-3. Fill backend secrets with the canonical server-only names listed in the Blueprint.
-   After Render assigns the real API URL, use it as the frontend's `VITE_API_BASE_URL`.
-   Frontend Supabase variables are `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_PUBLISHABLE_KEY` only. Never copy the whole `.env.local` into frontend
-   settings. Rebuild the frontend after changing its public build variables.
-4. Set backend `FINN_ALLOWED_ORIGINS` to the actual frontend origin, with no path or
-   wildcard. The API runs with `FINN_ENV=production` and does not allow arbitrary origins.
-5. Put the assigned URLs into `FINN_DEPLOYED_API_URL` and `FINN_DEPLOYED_WEB_URL` locally
-   and rerun the full feasibility suite when ready. Test a cold start after 15 minutes
-   idle and the frontend's public-cache button in a browser.
+`portfolio-sync.yml` checks announcements at minutes 17/47 and EOD prices at **18:15 IST**
+on weekdays. GitHub scheduling can be delayed; actual sync state and timestamps are
+shown. The job is disabled until explicitly enabled and needs no Gemini key. It runs
+independently of a sleeping Render API. Use workflow dispatch for an immediate sync.
 
-`/health/live` is process liveness; `/health/ready` reports configuration presence and
-explicitly does **not** claim external dependencies have been verified. There is no
-public endpoint that runs expensive model calls, reads secrets, or accepts PDF URLs.
+If an API request is blocked in the browser, check site-specific content-blocking rules
+and the configured CORS origin. Do not put server secrets in frontend settings or
+make private tables/buckets public to resolve a connection issue.
 
-The GitHub workflows provide offline foundation tests and a **manual** live feasibility
-run. There is no scheduled ingestion yet. The latter needs repository secrets matching
-`.env.example` and actual deployment URL variables. Retain no credentials in logs.
+## Known limits and deliberate omissions
 
-Keep a working local copy of downloaded evidence and a redacted feasibility report;
-free API/server/storage availability is not guaranteed. Historical evidence must always
-keep its original timestamps when reused.
+- NSE RSS offers a recent window; captured history builds over time and is not a full
+  historical archive. Incomplete XML is retried, then only complete valid items are
+  processed with a partial-coverage warning. Bad timestamps are not invented.
+- Free API hosting can sleep; model calls can time out or hit quotas. The public saved
+  briefing/research and labelled recorded snapshot keep the first screen useful.
+- No comprehensive OCR, trading, broker integration, real-time prices, P&L, authentication,
+  voice, external notification delivery, or complete financial dashboard.
+- Large PDFs above the prototype's 50 MB/700-page processing bounds are rejected with
+  an explicit coverage error. Password-protected or image-only documents are unsupported.
+- No automatic financial comparisons from ambiguous tables. The narrative example is
+  statement-level evidence review, not a company-wide management score.
+- Exact-quote checks are necessary but not sufficient; review financial interpretations.
 
-## Handoff and build history
-
-See [Milestone 0 findings](docs/MILESTONE_0.md) and [build log](docs/BUILD_HISTORY.md).
-The build log is a summary, not a substitute for the assignment's required coding-agent
-conversation exports/share links. Export those separately and redact credentials before
-submission. The covering note and investor demo are later milestones.
+See [acceptance notes](docs/ACCEPTANCE.md), [build history](docs/BUILD_HISTORY.md), and
+[submission draft](docs/SUBMISSION.md). The build log does not replace the assignment's
+required coding-agent conversation exports/share links; export and redact those separately.

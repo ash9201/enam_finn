@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "finn-prototype"
-version = "0.1.0"
-description = "FINN milestone-zero dependency and deployment foundation"
+version = "0.2.0"
+description = "FINN portfolio attention inbox and primary-source company research"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "fastapi>=0.115,<1",
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "reportlab>=4,<5", "PyYAML>=6,<7"]
+dev = ["pytest>=8,<10", "reportlab>=4,<5", "PyYAML>=6,<7", "ruff==0.17.3"]
 
 [tool.setuptools.packages.find]
 where = ["backend"]
@@ -28,3 +28,7 @@ where = ["backend"]
 testpaths = ["tests"]
 addopts = "-q"
 
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

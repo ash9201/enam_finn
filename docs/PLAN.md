@@ -1,8 +1,12 @@
 # FINN implementation plan
 
 Status: approved direction with the user's retrieval/extraction amendments incorporated.
-Current authorisation: **Milestone 0 only**. Do not begin later milestones until the
-main external dependencies have been verified and the user has reviewed the gate.
+Milestone 0 dependency/deployment checks have been verified and the user has authorised
+continuation. The first working prototype now includes portfolio Push, primary-source
+Pull, three prepared companies, and one conservative narrative/evidence comparison.
+One-company acceptance preceded scaling. Semantic search remains deferred pending a
+benefit benchmark; keyword retrieval is working. Model timeouts and fallback choices
+are preserved in the evidence, not hidden behind fabricated answers.
 
 ## Requirements and product
 
@@ -100,7 +104,9 @@ revisions. Fetch/capture errors remain errors; cached/historical results carry t
 original dates and explicit labels. Do not bypass access controls.
 
 Gemini 3.5 Flash-Lite handles bulk classification/extraction and ordinary grounded
-answers. Gemini 3.8 Flash handles the deeper comparison. The user reports 15 RPM/500
+answers. Gemini 3.8 Flash is preferred for the deeper comparison, with a bounded,
+explicit Flash-Lite fallback when unavailable. Actual model identity is recorded and
+the same source checks apply. The user reports 15 RPM/500
 RPD and 5 RPM/20 RPD respectively; verify real access without claiming a probe proves
 full daily capacity. Use structured output, bounded inputs/concurrency, retry delays,
 and document/task/prompt/model-aware caching. Respect zero budget and do not enable
@@ -115,12 +121,12 @@ company facts.
 
 | Milestone | Work | Acceptance |
 | --- | --- | --- |
-| 0 (current) | Feasibility and deployment foundation | Public price/feed/document access; one annual report and transcript discovered generically for one ticker; page/table extraction inspected; minimal model calls; Supabase DB/vector/FTS/storage probes; health endpoints/static frontend; deployed checks if accounts available. Record pass/fail/blocked per dependency. |
-| 1 (gated) | One-company research pipeline, then data scaling | Prove discovery → extraction → metadata-filtered keyword retrieval → grounded cited answer and repeatability for one company before expanding to 15 portfolio/three research companies. |
-| 2 (gated) | Push | Windows, collapsed routine filings, hand-checked alert arithmetic, visible missing/stale data, idempotent ingestion. |
-| 3 (gated) | Pull and optional hybrid retrieval | Same generic pipeline for two previously unprepared tickers; invalid/missing sources abstain; semantic failure falls back to keyword; compare retrieval quality before extra tuning. |
-| 4 (gated) | Narrative versus evidence | At least one manually verified comparison, with chronology and compatible metric/period/unit/basis. |
-| 5 (gated) | Harden and package | Phone QA; throttling, unavailable/malformed documents, empty/weekend windows, restart/retry and cached-data labels; documentation, recording, build history, covering note. |
+| 0 (verified) | Feasibility and deployment foundation | Public price/feed/document access; one annual report and transcript discovered generically for one ticker; page/table extraction inspected; minimal model calls; Supabase DB/vector/FTS/storage probes; health endpoints/static frontend; deployed checks. Record pass/fail/blocked per dependency. |
+| 1 (working) | One-company research pipeline, then data scaling | Prove discovery → extraction → metadata-filtered keyword retrieval → grounded cited answer and repeatability for one company before expanding to 15 portfolio/three research companies. |
+| 2 (working) | Push | Windows, collapsed routine filings, hand-checked alert arithmetic, visible missing/stale data, idempotent ingestion. |
+| 3 (working; semantic deferred) | Pull and optional hybrid retrieval | Same generic pipeline for two previously unprepared tickers; invalid/missing sources abstain; compare retrieval quality before extra tuning. |
+| 4 (conservative example working) | Narrative versus evidence | One manually verified statement pair; delivery remains not assessable without a compatible completed-period outcome. |
+| 5 (verification and packaging) | Harden and package | Phone QA; throttling, unavailable/malformed documents, empty/weekend windows, restart/retry and cached-data labels; documentation, recording, build history, covering note. |
 
 Milestone 0 requires actual dependency evidence, not just scaffold code or documented
 API capabilities. Missing credentials/deployment access leave the gate open. Do not
