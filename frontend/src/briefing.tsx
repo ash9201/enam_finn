@@ -397,7 +397,9 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
                       <p className="fine-print">
                         {price.data.source_note}{' '}
                         {price.data.source_url?.startsWith('https://nsearchives.nseindia.com/') && (
-                          <a href={price.data.source_url} target="_blank" rel="noopener noreferrer">NSE source ↗</a>
+                          <a href={price.data.source_url} target="_blank" rel="noopener noreferrer">
+                            NSE source ↗
+                          </a>
                         )}
                       </p>
                     )}

@@ -7,10 +7,9 @@ with real sources. The original [plan](docs/PLAN.md) records scope and trade-off
 **Current deployment:** the frontend now uses Singapore and passes deployed phone/desktop
 browser checks. Unprepared TCS and HINDUNILVR research completed live. GitHub refuses
 standard public Ubuntu jobs because of an account billing lock. A user-approved
-[Supabase Cron fallback](docs/SUPABASE_CRON.md) is configured and ran live: filings
-completed and 14/15 prices refreshed; one Yahoo rate limit was visible. A separately
-labelled operator retry recovered all 15 prices. Bounded rate-limit retry and overdue
-EOD recovery are implemented; a fresh complete scheduled acceptance run is pending.
+[Supabase Cron fallback](docs/SUPABASE_CRON.md) passed a real full-source scheduled run:
+announcements completed and all **15/15 prices** refreshed, with freshness and private
+access checks passing. Bounded rate-limit retries and overdue EOD recovery are implemented.
 See [acceptance](docs/ACCEPTANCE.md).
 
 ## What works
@@ -19,6 +18,8 @@ See [acceptance](docs/ACCEPTANCE.md).
   collapsed, 24-hour/seven-day/custom windows, and review state saved in the browser.
 - **EOD alerts:** configurable daily-move and volume thresholds, with the volume baseline
   excluding the current session. Split-affected comparisons are suppressed.
+  An incomplete latest Yahoo bar is recovered from the exact-date NSE daily file,
+  with explicit provenance; older sessions never replace newer saved data.
 - **Portfolio:** 15 verified NSE companies, real saved EOD closes, sector labels and
   explicit session/refresh dates. This is a mock watchlist, without trading or P&L.
 - **Research:** any valid NSE ticker with accessible primary reports/transcripts uses
@@ -175,3 +176,5 @@ make private tables/buckets public to resolve a connection issue.
 See [acceptance notes](docs/ACCEPTANCE.md), [build history](docs/BUILD_HISTORY.md), and
 [submission draft](docs/SUBMISSION.md). The build log does not replace the assignment's
 required coding-agent conversation exports/share links; export and redact those separately.
+The [demo script](docs/DEMO_SCRIPT.md) and [release checklist](docs/RELEASE_CHECKLIST.md)
+cover the final walkthrough and remaining manual submission items.

@@ -104,3 +104,36 @@ exports/share links. Export those separately, redact credentials, and never bund
 - Added one rate-limit retry and late EOD recovery on subsequent announcement ticks,
   protecting the once-daily refresh against research contention or transient failures.
   78 tests pass. Prepared a credential-free self-removing full-source Cron recheck.
+
+### Full scheduled refresh accepted (31 October IST)
+
+- Confirmed the user's recheck as an actual Cron job: full-source work completed at
+  03:23:18 IST, with all 15 prices and the announcement scan successful. Verified
+  both active schedules, current source dates, private job RLS and anonymous denials.
+  The one-time check removed itself; regular half-hour runs also succeeded.
+- Preserved the original partial run and operator recovery separately. Only the new
+  genuine scheduled run closes the full-source acceptance gate. GitHub source jobs
+  remain off; no paid runner or service was enabled.
+- Refreshed the public-only dated fallback snapshot and prepared the release checklist,
+  demo script and updated covering draft. Actual conversation export and physical-phone
+  review remain manual; no submission email has been sent.
+
+### Stronger session integrity and primary-source recovery
+
+- The release export caught an error missed by the initial freshness check: recent
+  fetch timestamps accompanied older sessions because Yahoo returned a null latest
+  close. Corrected the acceptance interpretation instead of shipping a false claim.
+- Restored only strictly newer, previously verified saved records, retaining original
+  dates with explicit failed-refresh markers; kept before/after evidence. The source
+  is marked failed for genuine automatic overdue-EOD recovery.
+- Added bounded NSE daily-archive recovery with exact date/EQ symbol/ISIN/hash checks,
+  visible latest/history provider labels, no backwards session updates and no silently
+  skipped baseline sessions. All 15 official records verified locally; none seeded
+  as a fake cloud source success. Eighty-seven tests now pass.
+- Reviewed real filing descriptions and corrected an earnings-discussion notice's
+  availability claim; retained its original ID, source and publication time.
+- The ordinary 03:47 IST Cron tick automatically recovered the failed EOD status through
+  the new NSE adapter on Singapore: 15/15 records, actual 30 October sessions and source
+  links, no errors. The strengthened read-only verification passes price integrity as
+  well as dispatch, completion, freshness and access. No extra user SQL or local quote
+  seeding was used. Exported the public fallback only after that result.

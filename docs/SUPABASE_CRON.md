@@ -42,6 +42,12 @@ seeing a successful Cron SQL run, or receiving HTTP 202 is insufficient.
   deadlines, not an exchange holiday calendar; original trading dates stay visible.
 - An explicit Yahoo rate-limit exception gets one retry after five seconds. A second
   failure remains a visible failed refresh; there is no fabricated replacement.
+- Missing closing price/volume in the latest completed Yahoo row cannot silently drop
+  the displayed session backwards. FINN checks NSE's official dated UDiFF archive for
+  the same date, EQ symbol and ISIN. Latest close/volume then carry the NSE source link
+  and archive hash; previous-20-session history remains explicitly attributed to Yahoo.
+  Invalid baseline bars, unavailable archives, identifier/date mismatches or backwards
+  session updates fail visibly and preserve the previous dated saved value.
 - A restart can interrupt in-process work. An interrupted lease expires after 45 minutes,
   so a tick may be skipped before retry. Failed/incomplete scans retain dated earlier
   data with their failure state; they never appear as an empty successful scan.
@@ -67,6 +73,15 @@ in SQL Editor. It uses the existing Vault entries and removes its own temporary 
 The first real check on 31 October IST refreshed filings and 14/15 prices, with one
 honestly reported Yahoo rate limit. A separate operator retry refreshed 15/15; this
 operator recovery is not relabelled as a successful automatic full-source run.
+
+The subsequent real Cron recheck passed at **03:23 IST on 31 October 2026**: both
+sources completed, 15/15 prices refreshed, source freshness passed, private access was
+denied, and the temporary check removed itself. The two intended schedules remain
+active. Earlier partial results remain in the acceptance/build history.
+That early check was subsequently strengthened to validate actual trading sessions.
+After a Yahoo null-close issue was caught, the regular **03:47 IST** tick exercised
+the NSE adapter on Singapore and recovered all 15 true 30 October sessions with source
+links. The final verifier includes session integrity, not just recent fetch timestamps.
 
 To stop only FINN schedules, run in SQL Editor:
 

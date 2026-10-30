@@ -26,6 +26,8 @@ I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL 
 retrieval ships first; pgvector fields and metadata are ready for a measured hybrid/RRF
 extension. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
 cached, with an explicitly recorded fallback when its free-tier service is unavailable.
+Supabase Cron drives automatic source updates, verified through a real completed
+filing scan and 15-company price refresh. The original GitHub source workflow is retained.
 
 Reliability choices include source hashes, page-level provenance, exact source-slice
 citation checks, RLS/private PDFs, saved research, visible fetch failures, and a clearly
@@ -35,6 +37,12 @@ do not become financial comparisons.
 I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
 Next I would expand independently verified financial extraction and four-quarter
 statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
+The local suite has 87 passing tests and deployed phone/desktop browser checks passed.
+GitHub-hosted CI could not start because of an account restriction; it is not presented
+as a passing hosted check. Free-hosting cold starts and upstream failures remain visible.
+When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date
+official daily file, validates the symbol/ISIN, and displays that source explicitly.
+An older response cannot overwrite a newer saved trading session.
 
 Best,
 [Your name]
@@ -44,8 +52,8 @@ Before sending: verify the prototype on a phone/incognito session; ensure review
 access the repository; include the actual build-history export and recording; remove
 placeholders above. This file is a draft, not a sent email.
 
-Current gate: complete the Supabase Cron deployment/acceptance check documented in
-[SUPABASE_CRON.md](SUPABASE_CRON.md). Live unfamiliar-ticker discovery now passes on
-Singapore and the frontend uses that API. GitHub hosted CI remains blocked by an
-account-level billing lock; local tests pass. Disclose any remaining automation or
-hosted-CI limitation before treating this as a final submission.
+Technical acceptance: Supabase Cron passed the real full-source check documented in
+[SUPABASE_CRON.md](SUPABASE_CRON.md). Live unfamiliar-ticker discovery passes on
+Singapore and the frontend uses that API. Final manual items are the real-device
+review, name/attachments, and the required redacted conversation export; see
+[RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). This draft has not been sent.

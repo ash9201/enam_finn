@@ -71,11 +71,23 @@ def classify_filing(description: str) -> tuple[str, int, str]:
             3 if "downgrad" in text else 1,
             "A rating change can affect funding risk; distinguish a downgrade from a reaffirmation.",
         )
+    if (
+        re.search(r"schedule|invitation|intimation", text)
+        and re.search(r"(?:earnings|conference|analyst|investor).*(?:call|meet|discussion)", text)
+        and not re.search(r"transcript|recording", text)
+    ):
+        return (
+            "investor_meeting",
+            0,
+            "Scheduled discussion; management commentary is not established by the notice alone.",
+        )
     if re.search(r"transcript|earnings call|conference call|analyst.*call", text):
         return (
             "earnings_call",
             1,
-            "Management commentary is available for further company research.",
+            "Management commentary is available for further company research."
+            if re.search(r"transcript|recording", text)
+            else "Call-related disclosure; inspect whether it is a notice, recording or transcript.",
         )
     if re.search(r"investor.*meet|analyst.*meet|investor conference", text):
         return (

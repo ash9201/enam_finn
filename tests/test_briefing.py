@@ -19,6 +19,11 @@ from finn.sources import parse_announcement_date, price_probe
         ("Credit rating downgrade", "credit_rating", 3),
         ("Credit rating reaffirmed", "credit_rating", 1),
         ("Earnings call transcript", "earnings_call", 1),
+        (
+            "Schedule of meet for 2QFY27 Earnings Discussion |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+            "investor_meeting",
+            0,
+        ),
         ("Investor meeting schedule", "investor_meeting", 0),
         ("ESOP allotment", "routine", 0),
         ("General updates with an unfamiliar disclosure", "unclassified", 2),

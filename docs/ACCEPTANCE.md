@@ -5,11 +5,10 @@ passed a bounded minimal retry; later complex requests exposed repeated latency.
 working prototype therefore records actual model routing and uses a bounded fallback.
 
 **Latest:** Singapore is now the frontend's deployed API. Deployed mobile/desktop
-browser checks passed after the switch. Local tests: **78 passed**. Supabase Cron is
-configured; actual dispatch, cold wake-up, RLS/private access and filings passed.
-The first run refreshed 14/15 prices (one Yahoo rate limit); a separately labelled
-operator retry recovered 15/15. A fresh complete scheduled run is pending after the
-bounded retry/recovery changes. Earlier failures below are retained as history.
+browser checks passed after the switch. Local tests: **87 passed**. Supabase Cron is
+configured and passed a real full-source scheduled refresh: **15/15 prices**, completed
+filings, correct schedules, current source timestamps, and denied anonymous/private
+access. Earlier failures and the first transient rate limit below are retained as history.
 
 ## Verified behaviour
 
@@ -69,11 +68,11 @@ Semantic retrieval remains a measured follow-up, not a claimed feature. pgvector
 model/dimension metadata are reserved in Supabase. Comprehensive OCR, full historical
 exchange coverage, financial-table comparisons, and a four-quarter tracker remain out.
 
-Local release checks: **64 tests passed**, production build and emitted-secret scan
+Earlier foundation release checks: **64 tests passed**, production build and emitted-secret scan
 passed; phone/desktop product and connection-browser checks passed. Empty windows
 recover through an explicit seven-day action. Live DB boundaries were verified.
 
-## Current external deployment issues — not a final submission gate pass
+## Deployment history and earlier failures
 
 The updated frontend/API deployed successfully. Product browser checks passed against
 the actual Render frontend. A new, uncached question completed on Render with five
@@ -176,3 +175,58 @@ Added one bounded rate-limit retry and recovery of overdue/partial EOD work on l
 announcement ticks. Nine additional tests cover retry exhaustion, market cutoff,
 weekends, Monday before/after close, and preserving operator-requested mode. No
 financial data, source provenance, or execution origin is fabricated to pass acceptance.
+
+### Full scheduled acceptance passed (31 October IST)
+
+Cron job 4 dispatched at **03:23 IST**; the API finished at **03:23:18 IST**. Its origin
+is `supabase_cron`, mode `all`, state `completed`. All 15 prices refreshed with no
+failed symbols. The announcement feed had two valid entries and zero portfolio
+matches in its current window; earlier stored filings were preserved. Both source
+statuses were completed with actual automation metadata. This first check validated
+fetch completion rather than the underlying session dates; the follow-up below
+documents the discovered gap and subsequent correction.
+
+`scripts/verify_cron.py` passed access, schedule, actual dispatch, HTTP acceptance,
+completion and freshness checks. Private job RLS is enabled; anonymous reads, writes,
+schedule diagnostics and lease-function execution are denied. The temporary check
+removed itself, leaving only the two intended schedules. Several regular half-hour
+announcement jobs have independently succeeded. GitHub source scheduling stays off.
+
+The initial partial scheduled run and successful operator recovery remain separate
+artifacts; the acceptance result is a subsequent real scheduler run, not relabelled
+manual activity. Hosted GitHub CI remains account-restricted; local tests pass.
+
+### Session-date validation follow-up
+
+The release export exposed a gap in that initial check: it had verified recent fetch
+timestamps, while Yahoo's latest 30 October row had a volume but a null close. Dropping
+that row returned 29 October quotes and had replaced newer saved sessions. This was
+not accepted as current data. Restored the original verified 30 October snapshot with
+explicit failed-refresh markers, preserved before/after evidence, and marked the source
+failed so the existing overdue-EOD scheduler will retry it.
+
+The adapter now validates the latest bar, uses only the matching official NSE daily
+archive (date, EQ series, symbol, ISIN, finite values, size bounds), and preserves its
+source URL/hash. It never substitutes an older bar silently. Prior history is still
+Yahoo and is labelled separately; missing comparison-window bars block calculation.
+Older responses cannot overwrite newer stored dates. All 15 official NSE rows were
+verified locally without seeding cloud quote records. Cloud scheduled recovery and
+the final price-source browser result are recorded below.
+
+A real call-notice review also corrected an earnings-discussion schedule previously
+described as available commentary; original filing sources and dates were preserved.
+See [focused evaluation](EVALUATION.md) for the bounded review and remaining limits.
+
+### Regular scheduled primary-source recovery passed
+
+At **03:47 IST on 31 October**, the ordinary announcement tick detected the failed
+EOD status, requested mode `all`, and finished at **03:47:33 IST**. This was the regular
+schedule, not an operator call or another temporary SQL test. The Singapore API
+downloaded the official 30 October NSE archive and recovered all **15/15** completed
+session bars. All have matching source provenance, 30 October dates, and no refresh
+errors. No local quote corpus was seeded to make this cloud test pass.
+
+The strengthened verifier passes access, intended schedules, actual dispatch/HTTP
+acceptance, completion, freshness and price-session integrity. The dated fallback
+was then exported from anonymous-readable outputs. Phone/desktop browser checks cover
+both the genuine failed-refresh labels and the recovered session/source display.

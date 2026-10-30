@@ -11,6 +11,7 @@
     "build": "tsc -b && vite build",
     "test:browser": "node scripts/verify-foundation.mjs",
     "test:product": "node scripts/verify-product.mjs",
+    "test:prices": "node scripts/verify-price-sources.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "record:demo": "node scripts/record-demo.mjs"
   },
