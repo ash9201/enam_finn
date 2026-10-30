@@ -7,6 +7,7 @@ from email.utils import parsedate_to_datetime
 import csv
 import io
 import ipaddress
+import math
 import re
 import socket
 import time
@@ -16,6 +17,7 @@ import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
 import httpx
+from finn.price_primary import exchange_session_bar
 
 USER_AGENT = "Mozilla/5.0 (compatible; FINN/0.1; public financial document research)"
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -347,7 +349,25 @@ def price_probe(company: dict) -> dict:
             )
             for index in frame.index
         ]
-    ]
+    ].copy()
+    if complete.empty:
+        raise ValueError("Yahoo returned no completed-session rows.")
+    primary = None
+    latest = complete.iloc[-1]
+    if any(not math.isfinite(float(latest[field])) for field in ["Close", "Volume"]):
+        session = complete.index[-1].date().isoformat()
+        with public_client() as client:
+            primary = exchange_session_bar(client, session, company)
+        complete.loc[complete.index[-1], "Close"] = primary["close"]
+        complete.loc[complete.index[-1], "Volume"] = primary["volume"]
+    if any(
+        not math.isfinite(float(value))
+        for row in complete.iloc[-21:][["Close", "Volume"]].itertuples(index=False)
+        for value in row
+    ):
+        raise ValueError(
+            "Incomplete daily bars affect the 20-session baseline; no comparison was generated."
+        )
     complete = complete.dropna(subset=["Close", "Volume"])
     if len(complete) < 21:
         raise ValueError("Fewer than 21 complete daily bars; no volume ratio can be validated.")
@@ -364,7 +384,14 @@ def price_probe(company: dict) -> dict:
         else False
     )
     return {
-        "provider": "Yahoo Finance via yfinance",
+        "provider": "NSE official daily file; prior history Yahoo Finance"
+        if primary
+        else "Yahoo Finance via yfinance",
+        "source_url": primary["source_url"] if primary else None,
+        "source_note": "Latest close/volume: NSE daily file. Prior 20 sessions: Yahoo Finance."
+        if primary
+        else None,
+        "primary_bar": primary,
         "history_fetch_attempts": attempt + 1,
         "ticker": company["symbol"] + ".NS",
         "complete_sessions": len(complete),
@@ -377,7 +404,10 @@ def price_probe(company: dict) -> dict:
         else None,
         "price_change_pct": None
         if corporate_actions
-        else float((current["Close"] / previous["Close"] - 1) * 100),
+        else float(
+            (current["Close"] / (primary["previous_close"] if primary else previous["Close"]) - 1)
+            * 100
+        ),
         "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
         "volume_note": "Volume ratio suppressed because a split affects the comparison window."
         if split_in_baseline

@@ -206,8 +206,14 @@ def sync_prices(store, companies: list[dict], *, origin: str = "local_manual") -
     failed = []
     for company in companies:
         attempted = now()
+        old = store.rows("finn_price_snapshots", symbol="eq." + company["symbol"], limit=1)
         try:
             data = price_probe(company)
+            previous_data = old[0].get("data") if old else None
+            if previous_data and data["last_session"] < previous_data["last_session"]:
+                raise ValueError(
+                    "The provider returned an older trading session. The newer saved session was retained."
+                )
             store.upsert(
                 "finn_price_snapshots",
                 [
@@ -224,7 +230,6 @@ def sync_prices(store, companies: list[dict], *, origin: str = "local_manual") -
             print(f"EOD fetched: {company['symbol']}", flush=True)
         except Exception as exc:
             failed.append(company["symbol"])
-            old = store.rows("finn_price_snapshots", symbol="eq." + company["symbol"], limit=1)
             # A prior price may remain visible, but always with a failed-refresh marker
             # and the original last_success/session dates. No silent substitution.
             values = {

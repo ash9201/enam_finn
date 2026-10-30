@@ -23,6 +23,8 @@ type Price = {
     price_change_pct: number | null
     volume_ratio: number | null
     volume_note?: string
+    source_note?: string | null
+    source_url?: string | null
   } | null
   error: string | null
   last_success_at: string | null
@@ -391,6 +393,14 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
                       {price?.data ? `EOD · ${price.data.last_session}` : 'Price unavailable'}
                       {price?.error ? ' · Refresh failed; last saved value shown' : ''}
                     </p>
+                    {price?.data?.source_note && (
+                      <p className="fine-print">
+                        {price.data.source_note}{' '}
+                        {price.data.source_url?.startsWith('https://nsearchives.nseindia.com/') && (
+                          <a href={price.data.source_url} target="_blank" rel="noopener noreferrer">NSE source ↗</a>
+                        )}
+                      </p>
+                    )}
                     <a className="investigate-link" href={researchLink(company.symbol)}>
                       Research company ↗
                     </a>

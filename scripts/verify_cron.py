@@ -26,6 +26,7 @@ with httpx.Client(timeout=120) as client:
 with open_store() as store:
     schedules = store.rpc("finn_source_schedule_status", {})
     sources = store.rows("finn_sync_status")
+    prices = store.rows("finn_price_snapshots", select="symbol,data,error,last_success_at")
     eod_current = scheduled_mode(store, "filings", "cron") == "filings"
 
 with supabase_client(public) as anon:
@@ -70,6 +71,17 @@ filings_current = any(
     for row in sources
 )
 freshness_ok = eod_current and filings_current
+snapshot_path = ROOT / "frontend" / "public" / "recorded-snapshot.json"
+baseline = json.loads(snapshot_path.read_text(encoding="utf-8"))["tables"]["finn_price_snapshots"]
+baseline_sessions = {
+    row["symbol"]: row["data"]["last_session"] for row in baseline if row.get("data")
+}
+price_integrity_ok = len(prices) == 15 and all(
+    row.get("data")
+    and not row.get("error")
+    and row["data"]["last_session"] >= baseline_sessions.get(row["symbol"], "")
+    for row in prices
+)
 # Cron SQL success alone proves dispatch, not completion. Both are required.
 dispatch_ok = any(row["status"] == "succeeded" for row in schedules["recent_runs"])
 http_ok = any(row["status_code"] == 202 for row in schedules["http_responses"])
@@ -81,6 +93,7 @@ passed = (
     and dispatch_ok
     and http_ok
     and freshness_ok
+    and price_integrity_ok
 )
 report = {
     "checked_at": now(),
@@ -92,6 +105,8 @@ report = {
     "http_acceptance_ok": http_ok,
     "completion_ok": job_ok and sources_ok,
     "freshness_ok": freshness_ok,
+    "price_integrity_ok": price_integrity_ok,
+    "price_sessions": sorted({row["data"]["last_session"] for row in prices if row.get("data")}),
     "schedule_status": schedules,
     "jobs": jobs,
     "sources": sources,

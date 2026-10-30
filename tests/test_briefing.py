@@ -39,7 +39,9 @@ def test_exchange_timestamps_support_both_observed_formats():
         parse_announcement_date("not a timestamp")
 
 
-def price_fixture(monkeypatch, split_index=None, failures=0):
+def price_fixture(
+    monkeypatch, split_index=None, failures=0, missing_latest=False, missing_history=False
+):
     import yfinance
     from yfinance.exceptions import YFRateLimitError
 
@@ -53,6 +55,10 @@ def price_fixture(monkeypatch, split_index=None, failures=0):
     )
     if split_index is not None:
         frame.iloc[split_index, frame.columns.get_loc("Stock Splits")] = 2
+    if missing_latest:
+        frame.iloc[-1, frame.columns.get_loc("Close")] = float("nan")
+    if missing_history:
+        frame.iloc[-5, frame.columns.get_loc("Close")] = float("nan")
 
     class Ticker:
         attempts = 0
@@ -65,6 +71,43 @@ def price_fixture(monkeypatch, split_index=None, failures=0):
 
     monkeypatch.setattr(yfinance, "Ticker", lambda symbol: Ticker())
     return price_probe({"symbol": "TEST"})
+
+
+def test_incomplete_latest_bar_uses_exact_dated_primary_close_and_volume(monkeypatch):
+    calls = []
+
+    def primary(client, session, company):
+        calls.append((session, company["symbol"]))
+        return {
+            "close": 106,
+            "volume": 400,
+            "previous_close": 100,
+            "source_url": "https://nsearchives.nseindia.com/test.zip",
+        }
+
+    monkeypatch.setattr("finn.sources.exchange_session_bar", primary)
+    result = price_fixture(monkeypatch, missing_latest=True)
+    assert calls == [("2026-02-04", "TEST")]
+    assert result["last_session"] == "2026-02-04"
+    assert result["close"] == 106
+    assert result["volume_ratio"] == 4
+    assert result["price_change_pct"] == pytest.approx(6)
+    assert "NSE" in result["provider"]
+    assert result["source_url"].endswith("test.zip")
+
+
+def test_incomplete_latest_bar_cannot_silently_drop_to_an_older_session(monkeypatch):
+    def unavailable(*args):
+        raise ValueError("NSE archive unavailable")
+
+    monkeypatch.setattr("finn.sources.exchange_session_bar", unavailable)
+    with pytest.raises(ValueError, match="NSE archive unavailable"):
+        price_fixture(monkeypatch, missing_latest=True)
+
+
+def test_missing_baseline_session_is_not_silently_skipped(monkeypatch):
+    with pytest.raises(ValueError, match="20-session baseline"):
+        price_fixture(monkeypatch, missing_history=True)
 
 
 def test_one_rate_limit_recovers_with_a_bounded_retry(monkeypatch):
