@@ -125,7 +125,7 @@ def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) 
     if reader.is_encrypted and not reader.decrypt(""):
         raise ValueError("Password-protected PDF is unsupported.")
     if len(reader.pages) > 700:
-        raise ValueError("Document exceeds the 700-page feasibility limit.")
+        raise ValueError("This PDF exceeds the prototype's 700-page processing limit.")
     pages = []
     scored = []
     for number, page in enumerate(reader.pages, 1):
@@ -162,7 +162,7 @@ def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) 
             scored.append((1000 * statement_start + headings * 5 + min(digits, 100) / 20, number))
     if sum(len(page["text"].strip()) for page in pages) < 100:
         raise ValueError(
-            "PDF has no usable text; scanned/OCR-only documents are unsupported in Milestone 0."
+            "This PDF has no readable text. Image-only documents are not supported by this prototype."
         )
     selected = sorted({number for _, number in sorted(scored, reverse=True)[:table_page_limit]})
     if not selected:

@@ -63,13 +63,23 @@ const stamp = (date: string) =>
 
 async function api(path: string, body?: unknown) {
   let response: Response
-  try {
-    response = await fetch(`${apiBase}${path}`, {
+  const request = () =>
+    fetch(`${apiBase}${path}`, {
       method: body === undefined ? 'GET' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(100000),
     })
+  try {
+    try {
+      response = await request()
+    } catch (error) {
+      if (body !== undefined) throw error
+      // A sleeping/redeploying free service can close a status connection. GET is
+      // safe to retry; never automatically resubmit an ambiguous model request.
+      await new Promise((resolve) => setTimeout(resolve, 700))
+      response = await request()
+    }
   } catch {
     throw new Error(
       'FINN could not connect. Check your connection or site-specific content-blocking settings, then retry.',

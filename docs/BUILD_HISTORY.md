@@ -49,3 +49,18 @@ exports/share links. Export those separately, redact credentials, and never bund
 - Added a public-only recorded snapshot with a visible historical-data notice, automated
   source workflow gated by repository configuration, browser acceptance and submission
   notes. Conversation exports/share links are still a separate submission artifact.
+
+### Deployment verification findings
+
+- Pushed the working prototype and verified actual Render phone/desktop flows. A fresh
+  deployed question returned five exact-quote-backed claims; the model path works.
+- An unprepared TCS request failed during source discovery on Render. Fixed-host,
+  operator-only diagnostics isolated source connectivity failures; IPv4 did not fix
+  them. Kept the failed job and did not replace it with a local seeded answer.
+- Added bounded source GET retries, source-specific failures and safe status-poll
+  recovery after a real disconnected response. Browser testing deliberately interrupts
+  one status read to verify recovery.
+- GitHub configuration is present, but both CI and dispatched sync stop before any
+  jobs start. Requested the error banner; no paid spending or account settings changed.
+- Recorded a phone walkthrough. Updated acceptance and README to expose the remaining
+  deployment issues instead of declaring full completion.

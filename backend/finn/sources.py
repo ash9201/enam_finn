@@ -27,13 +27,40 @@ def public_client() -> httpx.Client:
     return httpx.Client(headers={"User-Agent": USER_AGENT}, timeout=45, follow_redirects=True)
 
 
+def source_get(client: httpx.Client, url: str, service: str, *, allow_not_found=False):
+    """Retry transient reads once; keep access rejections and unavailable sources honest."""
+    for attempt in range(2):
+        try:
+            response = client.get(url)
+        except httpx.TransportError:
+            if attempt == 0:
+                time.sleep(1)
+                continue
+            raise ValueError(
+                f"{service} could not be reached from this server. Please retry later; no substitute source or company facts were used."
+            ) from None
+        if response.status_code in [429, 500, 502, 503, 504] and attempt == 0:
+            delay = response.headers.get("Retry-After", "1")
+            time.sleep(min(20, max(1, int(delay))) if delay.isdigit() else 1)
+            continue
+        if response.is_error and not (allow_not_found and response.status_code == 404):
+            raise ValueError(
+                f"{service} returned HTTP {response.status_code}. No alternative content was substituted."
+            )
+        return response
+    raise ValueError(f"{service} is unavailable.")
+
+
 def company_directory(client: httpx.Client) -> list[dict]:
     global _directory_cache
     with _directory_lock:
         if _directory_cache[1] and time.monotonic() - _directory_cache[0] < 900:
             return _directory_cache[1]
-        response = client.get("https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv")
-        response.raise_for_status()
+        response = source_get(
+            client,
+            "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
+            "The NSE company directory",
+        )
         rows = []
         for original in csv.DictReader(io.StringIO(response.text.lstrip("\ufeff"))):
             row = {key.strip(): value.strip() for key, value in original.items() if key}
@@ -65,10 +92,18 @@ def resolve_company(client: httpx.Client, symbol: str) -> dict:
 def discover_documents(client: httpx.Client, company: dict) -> dict:
     """Read link sections only; do not ingest Screener commentary or financial tables."""
     symbol = quote(company["symbol"], safe="")
-    response = client.get(f"https://www.screener.in/company/{symbol}/consolidated/")
+    response = source_get(
+        client,
+        f"https://www.screener.in/company/{symbol}/consolidated/",
+        "The primary-document discovery index (Screener)",
+        allow_not_found=True,
+    )
     if response.status_code == 404:
-        response = client.get(f"https://www.screener.in/company/{symbol}/")
-    response.raise_for_status()
+        response = source_get(
+            client,
+            f"https://www.screener.in/company/{symbol}/",
+            "The primary-document discovery index (Screener)",
+        )
     soup = BeautifulSoup(response.text, "html.parser")
     documents: dict[str, list] = {"annual_report": [], "transcript": []}
     for heading in soup.find_all(["h2", "h3"]):
@@ -138,7 +173,7 @@ def fetch_pdf(
             for piece in streamed.iter_bytes():
                 buffer.extend(piece)
                 if len(buffer) > max_bytes:
-                    raise ValueError("Document exceeds the 50 MB feasibility download limit.")
+                    raise ValueError("The source PDF exceeds the prototype's 50 MB download limit.")
             data, final_url = bytes(buffer), str(streamed.url)
             response = httpx.Response(
                 streamed.status_code,

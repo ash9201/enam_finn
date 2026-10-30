@@ -43,3 +43,8 @@ Best,
 Before sending: verify the prototype on a phone/incognito session; ensure reviewers can
 access the repository; include the actual build-history export and recording; remove
 placeholders above. This file is a draft, not a sent email.
+
+Current gate: resolve the source-discovery network failure on Render and GitHub Actions
+startup failure documented in [ACCEPTANCE.md](ACCEPTANCE.md) before treating this as a
+final submission. If either remains, disclose it in the covering text rather than
+presenting scheduled updates or arbitrary deployed-ticker discovery as verified.

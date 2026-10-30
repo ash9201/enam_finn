@@ -68,6 +68,14 @@ try {
     await page.screenshot({ path: `${output}/${name}-research.png`, fullPage: true })
     if (name === 'mobile') {
       // Identical question exercises a real persisted job but should reuse the model cache.
+      let interruptedStatus = false
+      await page.route('**/jobs/*', (route) => {
+        if (!interruptedStatus) {
+          interruptedStatus = true
+          return route.abort('failed')
+        }
+        return route.continue()
+      })
       await page.getByRole('button', { name: 'Investigate', exact: true }).click()
       await page
         .getByRole('button', { name: 'Investigating…', exact: true })

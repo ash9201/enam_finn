@@ -62,6 +62,29 @@ Semantic retrieval remains a measured follow-up, not a claimed feature. pgvector
 model/dimension metadata are reserved in Supabase. Comprehensive OCR, full historical
 exchange coverage, financial-table comparisons, and a four-quarter tracker remain out.
 
-Local release checks: **57 tests passed**, production build and emitted-secret scan
+Local release checks: **61 tests passed**, production build and emitted-secret scan
 passed; phone/desktop product and connection-browser checks passed. Empty windows
 recover through an explicit seven-day action. Live DB boundaries were verified.
+
+## Current external deployment issues — not a final submission gate pass
+
+The updated frontend/API deployed successfully. Product browser checks passed against
+the actual Render frontend. A new, uncached question completed on Render with five
+cited claims, verifying the deployed model and retrieval path over existing documents.
+
+An unfamiliar TCS request failed during document discovery. Operator-only fixed-host
+probes confirmed Screener connection failures from Render, with and without IPv4;
+the NSE directory also timed out under the shorter diagnostic timeout. Google model
+and Supabase connections worked. The same generic source pipeline worked locally for
+previously unprepared POLYCAB/CCL. This is **not** a successful deployed unfamiliar-ticker
+test. Source failures now name the dependency; no saved answer is substituted.
+
+GitHub accepted the source workflow and the required secrets/variable were verified,
+but push CI and workflow dispatch both ended in `startup_failure` with zero jobs. Actions
+is enabled, all three workflow files register as active, and no runner/code executed.
+Consequently automated updates and hosted CI are **not verified as working**. The exact
+account/run banner and Render region have been requested from the user.
+
+A 1.8 MB phone walkthrough is recorded at
+`artifacts/demo/finn-phone-demo.webm`. Keep the above issues visible in the submission
+writeup until fixed; a recording does not demonstrate live discovery or automation.

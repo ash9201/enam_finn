@@ -4,6 +4,11 @@ A mobile-first investor attention inbox and primary-source company research prot
 for the ENAM AI Engineer challenge. The first working release includes **Push and Pull**
 with real sources. The original [plan](docs/PLAN.md) records scope and trade-offs.
 
+**Current deployment gates:** new questions over saved primary documents work on Render,
+but unfamiliar-ticker discovery encountered source-network failures there. GitHub
+Actions accepted the configuration but stops before starting jobs. Automation and
+deployed unfamiliar-ticker research remain unresolved; see [acceptance](docs/ACCEPTANCE.md).
+
 ## What works
 
 - **Briefing:** real NSE portfolio filings, explainable priority, routine disclosures

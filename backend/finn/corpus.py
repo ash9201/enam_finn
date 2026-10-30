@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import uuid
+import httpx
 
 from finn.documents import extract_document
 from finn.retrieval import CHUNK_VERSION, chunk_pages
@@ -18,7 +19,12 @@ def now() -> str:
 
 
 def ingest_document(store, client, company: dict, document: dict) -> dict:
-    data, final_url = fetch_pdf(client, document["source_url"])
+    try:
+        data, final_url = fetch_pdf(client, document["source_url"])
+    except (httpx.TransportError, OSError):
+        raise ValueError(
+            f"The original {document['kind'].replace('_', ' ')} PDF could not be reached from this server. No other content was substituted."
+        ) from None
     digest = hashlib.sha256(data).hexdigest()
     document_id = str(
         uuid.uuid5(uuid.NAMESPACE_URL, f"finn:{company['symbol']}:{document['kind']}:{digest}")
