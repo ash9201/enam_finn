@@ -31,7 +31,13 @@ app.include_router(router)
 @app.get("/health/live")
 def live() -> dict:
     # Liveness must not depend on a third-party service or wake-up-time model call.
-    return {"status": "ok", "service": "finn-api", "version": __version__, "milestone": 2}
+    return {
+        "status": "ok",
+        "service": "finn-api",
+        "version": __version__,
+        "milestone": 2,
+        "revision": os.getenv("RENDER_GIT_COMMIT"),
+    }
 
 
 @app.get("/health/ready")

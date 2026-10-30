@@ -267,9 +267,20 @@ export default function ResearchApp() {
           retrieval: 'Finding relevant passages in the company’s documents…',
           analysis: 'Reading the evidence and checking citations…',
         }
+        const [, document, phase, page] = job.stage.split(':')
+        const extractionStage =
+          phase === 'pages'
+            ? `Reading document ${document} · page ${page}`
+            : phase === 'download'
+              ? `Downloading original document ${document}…`
+              : phase === 'tables'
+                ? `Preserving table context in document ${document}…`
+                : phase === 'saving'
+                  ? `Saving evidence for document ${document}…`
+                  : `Collecting and reading document ${document}…`
         setStage(
           job.stage.startsWith('extraction:')
-            ? `Collecting and reading document ${job.stage.split(':')[1]}…`
+            ? extractionStage
             : stages[job.stage] || 'Preparing your research…',
         )
       }

@@ -4,10 +4,11 @@ A mobile-first investor attention inbox and primary-source company research prot
 for the ENAM AI Engineer challenge. The first working release includes **Push and Pull**
 with real sources. The original [plan](docs/PLAN.md) records scope and trade-offs.
 
-**Current deployment gates:** new questions over saved primary documents work on Render,
-but unfamiliar-ticker discovery encountered source-network failures there. GitHub
-Actions accepted the configuration but stops before starting jobs. Automation and
-deployed unfamiliar-ticker research remain unresolved; see [acceptance](docs/ACCEPTANCE.md).
+**Current deployment gates:** a separate Singapore API completed live, unprepared TCS
+research end to end. The frontend still points to Virginia pending verification/switch.
+The repository is now public, but GitHub still refuses standard Ubuntu jobs because
+of an account billing lock. Automatic source updates remain unresolved; see
+[acceptance](docs/ACCEPTANCE.md).
 
 ## What works
 
@@ -49,6 +50,11 @@ in Postgres cap normal use below the user's stated free-tier limits; provider qu
 can still reject requests. Caches avoid repeating model calls for identical evidence.
 
 PDF processing keeps layout text for tables and reading-order text for narrative.
+New documents over 200 pages use the already-installed PDFium native text engine,
+while pypdf preserves aligned financial-page text and pdfplumber preserves sampled
+table cells/context. Native calls are serialised and handles closed promptly. Existing
+verified corpora remain intact. A native decoding failure falls back to pypdf over
+the same original PDF and records the warning.
 Every document retains original/final URLs, hash, fetch time and page numbers. Unknown
 publication/reporting dates stay unknown. Table cells are **candidates**, not approved
 facts. Financial table comparisons remain disabled. A quote repaired for PDF whitespace

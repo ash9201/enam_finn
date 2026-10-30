@@ -64,3 +64,18 @@ exports/share links. Export those separately, redact credentials, and never bund
   jobs start. Requested the error banner; no paid spending or account settings changed.
 - Recorded a phone walkthrough. Updated acceptance and README to expose the remaining
   deployment issues instead of declaring full completion.
+
+### Public-runner retry and first live Singapore corpus
+
+- Verified that the user made the repository public and restored the paid budget to $0.
+  Retried CI/source jobs on standard Ubuntu only. Both remain blocked before runner
+  assignment by an explicit account billing lock; no code ran and no larger runner
+  was requested. Prepared a support draft without contacting anyone.
+- The Singapore API reached the document index and completed uncached TCS research
+  with one annual report/two calls and three page-backed claims. No local TCS corpus
+  was seeded to conceal the earlier deployment failure.
+- Profiled a slow 361-page first load. Reused the existing PDFium dependency for the
+  large-document text pass, preserving pypdf financial-page layout and pdfplumber
+  cells/geometry. Added native-handle cleanup, serialisation, source-preserving decode
+  fallback, and real page/table/saving progress. Local full extraction fell from
+  about 60 seconds to 7 seconds; deployed cold performance still needs checking.

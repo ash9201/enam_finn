@@ -62,7 +62,7 @@ Semantic retrieval remains a measured follow-up, not a claimed feature. pgvector
 model/dimension metadata are reserved in Supabase. Comprehensive OCR, full historical
 exchange coverage, financial-table comparisons, and a four-quarter tracker remain out.
 
-Local release checks: **61 tests passed**, production build and emitted-secret scan
+Local release checks: **64 tests passed**, production build and emitted-secret scan
 passed; phone/desktop product and connection-browser checks passed. Empty windows
 recover through an explicit seven-day action. Live DB boundaries were verified.
 
@@ -93,3 +93,25 @@ is also temporarily disabled to avoid a potentially billable private runner. See
 A 1.8 MB phone walkthrough is recorded at
 `artifacts/demo/finn-phone-demo.webm`. Keep the above issues visible in the submission
 writeup until fixed; a recording does not demonstrate live discovery or automation.
+
+### Follow-up: public GitHub and Singapore
+
+The user made the repository public and restored the paid Actions budget to $0. Both
+workflows were retried using only `ubuntu-latest`. Jobs now register, but GitHub assigns
+no runner and reports: "The job was not started because your account is locked due to
+a billing issue." This remains an account-level gate. CI is re-enabled, while the
+scheduled-source variable remains off until a real source job succeeds. A support
+draft is in [GITHUB_ACTIONS_SUPPORT.md](GITHUB_ACTIONS_SUPPORT.md); it has not been sent.
+
+Singapore can reach Screener. A completely unprepared TCS request completed live:
+one 361-page annual report, two transcripts, retrieval, and three verified claims.
+No local TCS corpus was seeded. The first run was interrupted by a deployment; a
+stable-deployment retry succeeded. The existing frontend/Virginia API is retained
+until the verified endpoint can be switched and browser-tested.
+
+The first TCS load exposed slow large-PDF extraction on free CPU. A local full-parser
+benchmark improved from 59.95 seconds / 260 MB peak working set to 7.09 seconds / 164 MB
+using native text extraction plus aligned financial-page/table processing. Both read
+all 361 pages from the same original PDF, and all table candidates remain unvalidated.
+These are local measurements, not a claimed cloud latency. Cold research on another
+unprepared ticker is the next deployment check.

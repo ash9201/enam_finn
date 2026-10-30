@@ -56,7 +56,7 @@ def expire_stale_jobs(store):
                 {
                     "state": "failed",
                     "stage": "failed",
-                    "error": "The research service restarted. Your source documents are saved; please retry.",
+                    "error": "The research service restarted. Any saved source documents will be reused; please retry.",
                     "updated_at": now(),
                 },
                 id="eq." + job["id"],

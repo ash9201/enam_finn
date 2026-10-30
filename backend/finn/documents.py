@@ -7,10 +7,39 @@ from decimal import Decimal
 import hashlib
 import io
 import re
+from threading import Lock
 
 import pdfplumber
+import pypdfium2 as pdfium
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
+
+_PDFIUM_LOCK = Lock()  # PDFium calls must not run concurrently across threads.
+
+
+def native_page_texts(data: bytes, progress) -> list[str]:
+    """Read every page without rendering; close native handles promptly."""
+    with _PDFIUM_LOCK:
+        pdf = pdfium.PdfDocument(data)
+        texts = []
+        try:
+            for index in range(len(pdf)):
+                page = pdf[index]
+                try:
+                    textpage = page.get_textpage()
+                    try:
+                        texts.append(
+                            textpage.get_text_bounded(errors="strict").replace("\r\n", "\n")
+                        )
+                    finally:
+                        textpage.close()
+                finally:
+                    page.close()
+                if index == 0 or (index + 1) % 25 == 0 or index + 1 == len(pdf):
+                    progress(f"pages:{index + 1}/{len(pdf)}")
+        finally:
+            pdf.close()
+        return texts
 
 
 class FinancialFact(BaseModel):
@@ -120,25 +149,61 @@ def financial_header_settings(page) -> dict | None:
     return None
 
 
-def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) -> dict:
+def extract_document(
+    data: bytes,
+    metadata: dict,
+    *,
+    table_page_limit: int = 8,
+    native_text: bool | None = None,
+    progress=lambda stage: None,
+) -> dict:
     reader = PdfReader(io.BytesIO(data))
     if reader.is_encrypted and not reader.decrypt(""):
         raise ValueError("Password-protected PDF is unsupported.")
     if len(reader.pages) > 700:
         raise ValueError("This PDF exceeds the prototype's 700-page processing limit.")
+    use_native = len(reader.pages) > 200 if native_text is None else native_text
+    native = None
+    extraction_warnings = []
+    if use_native:
+        try:
+            native = native_page_texts(data, progress)
+            if len(native) != len(reader.pages):
+                raise ValueError("Page counts differ between PDF readers.")
+        except (pdfium.PdfiumError, UnicodeError, ValueError) as exc:
+            extraction_warnings.append(
+                {
+                    "stage": "native_text",
+                    "error_type": type(exc).__name__,
+                    "fallback": "pypdf_same_original_pdf",
+                }
+            )
+            native = None
     pages = []
     scored = []
     for number, page in enumerate(reader.pages, 1):
-        text = page.extract_text(extraction_mode="layout") or ""
+        text = (
+            native[number - 1]
+            if native is not None
+            else (page.extract_text(extraction_mode="layout") or "")
+        )
         # Plain extraction follows PDF content-stream order, which usually preserves
         # narrative columns. Keep layout text separately for tables and source review.
-        reading_text = page.extract_text(extraction_mode="plain") or text
+        reading_text = (
+            native[number - 1]
+            if native is not None
+            else (page.extract_text(extraction_mode="plain") or text)
+        )
         pages.append(
             {
                 "pdf_page": number,
                 "text": text,
                 "reading_text": reading_text,
-                "metadata_candidates": metadata_candidates(text),
+                "metadata_candidates": {
+                    **metadata_candidates(text),
+                    "text_mode": "reading_order" if native is not None else "layout",
+                    "reading_extractor": "pdfium" if native is not None else "pypdf",
+                },
             }
         )
         # Prefer numeric financial-statement pages over a contents-page mention.
@@ -160,6 +225,8 @@ def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) 
         )
         if headings and digits >= 25:
             scored.append((1000 * statement_start + headings * 5 + min(digits, 100) / 20, number))
+        if native is None and (number == 1 or number % 25 == 0 or number == len(reader.pages)):
+            progress(f"pages:{number}/{len(reader.pages)}")
     if sum(len(page["text"].strip()) for page in pages) < 100:
         raise ValueError(
             "This PDF has no readable text. Image-only documents are not supported by this prototype."
@@ -168,10 +235,21 @@ def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) 
     if not selected:
         selected = list(range(1, min(len(pages), 3) + 1))
     tables = []
-    extraction_warnings = []
     with pdfplumber.open(io.BytesIO(data)) as pdf:
-        for number in selected:
+        for table_index, number in enumerate(selected, 1):
+            progress(f"tables:{table_index}/{len(selected)}")
             try:
+                if native is not None:
+                    # Keep aligned financial-page text and original cell geometry;
+                    # native prose extraction never establishes numerical meaning.
+                    layout = (
+                        reader.pages[number - 1].extract_text(extraction_mode="layout")
+                        or pages[number - 1]["text"]
+                    )
+                    pages[number - 1]["text"] = layout
+                    pages[number - 1]["metadata_candidates"].update(
+                        metadata_candidates(layout), text_mode="layout"
+                    )
                 page = pdf.pages[number - 1]
                 found = page.find_tables()
                 method = "ruled_lines"
@@ -219,6 +297,7 @@ def extract_document(data: bytes, metadata: dict, *, table_page_limit: int = 8) 
         "extracted_at": datetime.now(timezone.utc).isoformat(),
         "page_numbering": "1-based PDF page, not printed report pagination",
         "page_count": len(pages),
+        "text_extractor": "pdfium_with_financial_page_layout" if native is not None else "pypdf",
         "pages": pages,
         "tables": tables,
         "table_pages_checked": selected,

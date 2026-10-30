@@ -18,7 +18,10 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def ingest_document(store, client, company: dict, document: dict) -> dict:
+def ingest_document(
+    store, client, company: dict, document: dict, *, progress=lambda stage: None
+) -> dict:
+    progress("download")
     try:
         data, final_url = fetch_pdf(client, document["source_url"])
     except (httpx.TransportError, OSError):
@@ -40,8 +43,9 @@ def ingest_document(store, client, company: dict, document: dict) -> dict:
     fetched_at = now()
     logging.getLogger("pypdf").setLevel(logging.ERROR)
     extracted = extract_document(
-        data, {**document, "final_url": final_url, "fetched_at": fetched_at}
+        data, {**document, "final_url": final_url, "fetched_at": fetched_at}, progress=progress
     )
+    progress("saving")
     storage_path = f"sources/{company['symbol']}/{digest}.pdf"
     store.put_pdf(storage_path, data)
     record = {
@@ -67,6 +71,7 @@ def ingest_document(store, client, company: dict, document: dict) -> dict:
             "warnings": extracted["table_extraction_warnings"],
             "financial_comparisons_enabled": False,
             "chunk_version": CHUNK_VERSION,
+            "text_extractor": extracted.get("text_extractor", "pypdf"),
         },
     }
     store.upsert("finn_documents", [record])
@@ -137,7 +142,16 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
         documents = []
         for index, document in enumerate(selected):
             progress(f"extraction:{index + 1}/{len(selected)}")
-            documents.append(ingest_document(store, client, company, document))
+            prefix = f"extraction:{index + 1}/{len(selected)}"
+            documents.append(
+                ingest_document(
+                    store,
+                    client,
+                    company,
+                    document,
+                    progress=lambda phase, prefix=prefix: progress(f"{prefix}:{phase}"),
+                )
+            )
     # Activate the manifest only after every selected document is fully stored. A failed
     # refresh cannot replace the last complete corpus with partially ingested evidence.
     manifest = sorted({doc["id"] for doc in documents})

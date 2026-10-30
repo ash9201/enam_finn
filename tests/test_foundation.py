@@ -105,7 +105,8 @@ def test_unknown_ticker_does_not_resolve_to_demo_company():
         resolve_company(client, "UNKNOWN")
 
 
-def test_pdf_preserves_page_table_cells_and_ambiguity():
+@pytest.mark.parametrize("native_text", [False, True])
+def test_pdf_preserves_page_table_cells_and_ambiguity(native_text):
     out = io.BytesIO()
     document = SimpleDocTemplate(out)
     styles = getSampleStyleSheet()
@@ -136,6 +137,7 @@ def test_pdf_preserves_page_table_cells_and_ambiguity():
             "reporting_period": None,
             "published_at": None,
         },
+        native_text=native_text,
     )
     assert result["page_count"] == 1
     assert result["tables"][0]["pdf_page"] == 1
