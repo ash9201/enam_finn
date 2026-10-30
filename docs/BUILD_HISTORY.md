@@ -137,3 +137,17 @@ exports/share links. Export those separately, redact credentials, and never bund
   links, no errors. The strengthened read-only verification passes price integrity as
   well as dispatch, completion, freshness and access. No extra user SQL or local quote
   seeding was used. Exported the public fallback only after that result.
+
+### GitHub account recovery (31 October IST)
+
+- The user resolved the billing restriction and requested a return to GitHub scheduling.
+  Both workflows then ran successfully on standard `ubuntu-latest`: 87 hosted tests,
+  build/secret scan, and a full filing plus 15-company EOD sync. Actual stored sessions
+  are 30 October, with no errors and `github_actions` provenance.
+- Prepared a scoped, reversible SQL script to deactivate only FINN's fallback jobs.
+  Application API keys cannot administer Cron. GitHub automatic scheduling remains
+  off until owner SQL execution and inactive-schedule verification, avoiding duplicates.
+- The owner then ran the scoped deactivation script. Confirmed both fallback jobs
+  inactive and no in-flight source worker, enabled GitHub's repository source variable,
+  and read it back as true. The scheduler switch is complete; the fallback remains
+  installed but inactive. No paid runner or spending setting was changed.

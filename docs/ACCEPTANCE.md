@@ -10,6 +10,12 @@ configured and passed a real full-source scheduled refresh: **15/15 prices**, co
 filings, correct schedules, current source timestamps, and denied anonymous/private
 access. Earlier failures and the first transient rate limit below are retained as history.
 
+**GitHub recovery:** after the user resolved the account issue, hosted CI and a full
+source sync passed on standard Ubuntu runners. The source run refreshed 15/15 prices
+with correct sessions and `github_actions` provenance. Both Supabase fallback schedules
+are now verified inactive, with no in-flight fallback work. GitHub's source variable
+is verified `true`; both workflows are active. See [scheduler switch](GITHUB_AUTOMATION.md).
+
 ## Verified behaviour
 
 - One company (INFY) completed generic discovery → primary PDF extraction → Supabase

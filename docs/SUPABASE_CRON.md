@@ -1,5 +1,11 @@
 # Supabase Cron fallback
 
+**Current state (31 October 2026 IST): inactive.** GitHub's account restriction is
+resolved; CI and source sync passed, and GitHub scheduling is enabled. Both regular
+Supabase jobs are verified `active=false`. The setup and verification below document
+the tested recovery option. Do not rerun the activation/configuration scripts unless
+GitHub source scheduling has first been turned off. See [scheduler switch](GITHUB_AUTOMATION.md).
+
 GitHub's public standard-runner jobs remain blocked by an account billing lock.
 The user approved this fallback on 30 October 2026. It uses the existing Supabase
 database and Render API; no paid scheduler or extra backend is created.

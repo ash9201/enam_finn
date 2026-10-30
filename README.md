@@ -5,11 +5,13 @@ for the ENAM AI Engineer challenge. The first working release includes **Push an
 with real sources. The original [plan](docs/PLAN.md) records scope and trade-offs.
 
 **Current deployment:** the frontend now uses Singapore and passes deployed phone/desktop
-browser checks. Unprepared TCS and HINDUNILVR research completed live. GitHub refuses
-standard public Ubuntu jobs because of an account billing lock. A user-approved
-[Supabase Cron fallback](docs/SUPABASE_CRON.md) passed a real full-source scheduled run:
-announcements completed and all **15/15 prices** refreshed, with freshness and private
-access checks passing. Bounded rate-limit retries and overdue EOD recovery are implemented.
+browser checks. Unprepared TCS and HINDUNILVR research completed live. GitHub's account
+restriction is resolved: hosted CI and a full 15-company source sync passed on standard
+Ubuntu runners. [GitHub Actions scheduling](docs/GITHUB_AUTOMATION.md) is enabled; both
+Supabase fallback schedules are verified inactive. The retained
+[Supabase Cron fallback](docs/SUPABASE_CRON.md) was also tested successfully and can be
+reactivated if needed after turning GitHub scheduling off. Prices preserve actual
+session dates, with bounded rate-limit retries and explicit primary-source recovery.
 See [acceptance](docs/ACCEPTANCE.md).
 
 ## What works
@@ -38,8 +40,8 @@ only company metadata and explicitly published prepared answers are anonymous-re
 ## Architecture
 
 React/TypeScript/Vite/Tailwind on Render static hosting; Python 3.12/FastAPI on a free
-Render web service; Supabase Postgres/Storage; Supabase Cron source-sync fallback with
-the original GitHub Actions workflow retained for account recovery.
+Render web service; Supabase Postgres/Storage; GitHub Actions for scheduled source
+ingestion. Supabase Cron is retained as an inactive, tested recovery option.
 The frontend reads saved public results without waking Python. On-demand research
 uses persisted jobs and polls their progress. No external vector service or RAG framework.
 
@@ -139,20 +141,18 @@ API URLs remain valid. Backend CORS permits GET and POST from the configured fro
 origin; it does not permit arbitrary origins. `/health/live` is process liveness,
 while `/health/ready` reports configuration presence, not a blanket dependency guarantee.
 
-For the active fallback, follow [Supabase Cron setup](docs/SUPABASE_CRON.md). It calls
-the existing Python source modules through a server-authenticated API; completed
-source results remain distinct from Cron dispatch or HTTP acceptance.
-
-The retained GitHub workflow uses repository settings:
+Automatic updates use the verified [GitHub workflow](docs/GITHUB_AUTOMATION.md) with
+these repository settings:
 
 - Secrets: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`.
-- Repository variable: `FINN_ENABLE_SCHEDULED_SYNC=false` while Supabase Cron is active.
+- Repository variable: `FINN_ENABLE_SCHEDULED_SYNC=true`.
 
 `portfolio-sync.yml` checks announcements at minutes 17/47 and EOD prices at **18:15 IST**
 on weekdays. GitHub scheduling can be delayed; actual sync state and timestamps are
-shown. The job is disabled until explicitly enabled and needs no Gemini key. It runs
-independently of a sleeping Render API when enabled. Do not enable two automatic
-schedulers together. Current GitHub account restrictions prevent workflow dispatch too.
+shown. It needs no Gemini key and runs independently of a sleeping Render API.
+Both [Supabase fallback schedules](docs/SUPABASE_CRON.md) are inactive. If switching
+back to the fallback, turn the GitHub source variable off first. Do not run two
+automatic schedulers together.
 
 If an API request is blocked in the browser, check site-specific content-blocking rules
 and the configured CORS origin. Do not put server secrets in frontend settings or

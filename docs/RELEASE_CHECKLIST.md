@@ -14,12 +14,13 @@ claim complete financial-document coverage or an assessment submission already s
 - [x] INFY narrative/evidence example with citations and a defensible abstention.
 - [x] Private PDFs/source text/jobs remain protected; anonymous writes are denied.
 - [x] Real Supabase Cron dispatch completed filings plus 15/15 EOD refreshes.
-- [x] Temporary acceptance schedule removed; two intended schedules active.
-- [x] GitHub automatic source workflow disabled to avoid duplicate schedulers.
+- [x] Temporary acceptance schedule removed; both Supabase fallback schedules inactive.
+- [x] GitHub automatic source workflow enabled after fallback deactivation was verified.
 - [x] Eighty-seven local tests pass; deployed browser connection/product checks passed.
 - [x] Missing latest daily bars recover from exact-date NSE records, with visible provenance.
 - [x] Older session responses cannot overwrite newer saved records; failed refreshes stay visible.
-- [ ] GitHub-hosted CI: account restriction remains. Local/deployed checks are the evidence.
+- [x] GitHub-hosted CI: 87 tests, frontend production build and secret scan passed.
+- [x] GitHub source workflow: actual filing sync and 15/15 prices passed with correct dates.
 
 ## Final manual items
 

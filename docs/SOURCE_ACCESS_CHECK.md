@@ -3,7 +3,8 @@
 **Update:** the Singapore test succeeded for unprepared TCS and HINDUNILVR, including
 live documents and cited answers. The frontend now uses Singapore and passed deployed
 browser checks. Supabase Cron subsequently passed a full scheduled filing/15-price
-refresh; GitHub source scheduling remains off while the account is restricted. The
+refresh. The GitHub account restriction was later resolved: CI/source runs pass,
+GitHub scheduling is enabled and both Supabase fallback schedules are inactive. The
 setup recipe below is historical and records the single regional test already
 performed; do not create another copy or switch back to Virginia.
 

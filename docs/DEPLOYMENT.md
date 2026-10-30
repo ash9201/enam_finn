@@ -115,7 +115,7 @@ the current release with the product browser checks and [acceptance notes](ACCEP
 
 The production frontend now points to the verified Singapore API at
 `https://finn-api-source-test.onrender.com`. Virginia remains available for rollback.
-GitHub jobs are blocked by an account-level billing lock even on free public runners.
-The user-approved [Supabase Cron fallback](SUPABASE_CRON.md) reuses the existing API
-and database. Apply its migration and local-only Vault configuration, then verify an
-actual scheduled fetch. No new Render service or paid cron job is needed.
+GitHub's account restriction has been resolved. Hosted CI and a full source workflow
+passed on standard Ubuntu runners; [GitHub scheduling](GITHUB_AUTOMATION.md) is enabled.
+Both [Supabase fallback schedules](SUPABASE_CRON.md) are verified inactive. Retain their
+configuration for recovery, but do not reactivate them alongside GitHub scheduling.
