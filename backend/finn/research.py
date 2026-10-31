@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from finn.config import first_env
 from finn.corpus import ensure_corpus, now
 from finn.documents import citation_is_supported, resolve_source_quote
-from finn.retrieval import retrieve
+from finn.retrieval import retrieval_profile, profile_identity, retrieve_with_diagnostics
 from finn.services import DependencyError, MissingConfiguration, require_ok
 
 PROMPT_VERSION = "grounded-claims-v3-reading-order"
@@ -44,6 +44,13 @@ def supported_numbers(statement: str, quote_text: str) -> bool:
     return numbers(statement) <= numbers(quote_text)
 
 
+def supported_metrics(statement: str, quote_text: str) -> bool:
+    # A quote about margin cannot establish a different named financial measure.
+    # Conservative acronym matching supplements source-support review.
+    metrics = lambda text: set(re.findall(r"\b(?:EBITDA|EBIT|EPS|PAT|PBT)\b", text.upper()))
+    return metrics(statement) <= metrics(quote_text)
+
+
 def validate_answer(draft: DraftAnswer, evidence: list[dict]) -> tuple[list[dict], int]:
     by_id = {item["chunk_id"]: item for item in evidence}
     valid, withheld = [], 0
@@ -59,6 +66,7 @@ def validate_answer(draft: DraftAnswer, evidence: list[dict]) -> tuple[list[dict
             source is None
             or not citation_is_supported(claim.quote, source["body"])
             or not supported_numbers(claim.statement, claim.quote)
+            or not supported_metrics(claim.statement, claim.quote)
             or (
                 has_numbers
                 and (
@@ -187,6 +195,10 @@ def research_company(
     refresh=False,
     kinds=None,
     published_before=None,
+    document_ids=None,
+    published_after=None,
+    reporting_period=None,
+    metadata_filter=None,
     publish=False,
     progress=lambda stage: None,
 ) -> dict:
@@ -199,24 +211,39 @@ def research_company(
             store, corpus, refresh=refresh, publish=publish, progress=progress
         )
     model = os.getenv("GEMINI_LITE_MODEL", "gemini-3.5-flash-lite")
-    cache_key = hashlib.sha256(
-        json.dumps(
-            [
-                symbol,
-                " ".join(question.split()).casefold(),
-                corpus["corpus_fingerprint"],
-                model,
-                PROMPT_VERSION,
-                kinds,
-                published_before,
-            ],
-            sort_keys=True,
-        ).encode()
-    ).hexdigest()
+    profile = retrieval_profile(store, symbol)
+    identity = profile_identity(profile)
+    cache_parts = [
+        symbol,
+        " ".join(question.split()).casefold(),
+        corpus["corpus_fingerprint"],
+        model,
+        PROMPT_VERSION,
+        kinds,
+        published_before,
+    ]
+    if identity is not None:
+        cache_parts.append(identity)
+    if any(
+        value is not None
+        for value in [document_ids, published_after, reporting_period, metadata_filter]
+    ):
+        cache_parts.append(
+            {
+                "document_ids": document_ids,
+                "published_after": published_after,
+                "reporting_period": reporting_period,
+                "metadata_filter": metadata_filter,
+            }
+        )
+    cache_key = hashlib.sha256(json.dumps(cache_parts, sort_keys=True).encode()).hexdigest()
     cached = store.rows("finn_research_cache", cache_key="eq." + cache_key, limit=1)
     # Source refresh has already succeeded above. The fingerprint changes whenever
     # evidence changes; identical documents do not warrant another model call.
-    if cached:
+    if cached and all(
+        supported_metrics(claim["statement"], claim["citation"]["quote"])
+        for claim in cached[0]["result"].get("claims", [])
+    ):
         if publish and not cached[0]["is_public"]:
             store.patch("finn_research_cache", {"is_public": True}, id="eq." + cached[0]["id"])
         return {
@@ -226,13 +253,35 @@ def research_company(
             "source_checked_at": corpus["source_checked_at"],
         }
     progress("retrieval")
-    evidence = retrieve(store, symbol, question, kinds=kinds, published_before=published_before)
+    retrieval = retrieve_with_diagnostics(
+        store,
+        symbol,
+        question,
+        kinds=kinds,
+        published_before=published_before,
+        document_ids=document_ids,
+        published_after=published_after,
+        reporting_period=reporting_period,
+        metadata_filter=metadata_filter,
+        profile=profile,
+    )
+    evidence = retrieval["evidence"]
     withheld, usage, claims = 0, {}, []
     if evidence:
         progress("analysis")
         draft, usage = generate(store, question, evidence, model)
         claims, withheld = validate_answer(draft, evidence)
     notes = list(corpus["coverage"]["notes"])
+    if retrieval["fallback_reason"] == "index_incomplete":
+        notes.append(
+            "Additional document search is still being prepared. This answer uses keyword search."
+        )
+    elif retrieval.get("semantic_error") in ["daily_budget", "provider_daily_budget"]:
+        notes.append(
+            "Semantic search's daily free-tier allowance is unavailable. This answer uses keyword search."
+        )
+    elif retrieval["fallback_reason"]:
+        notes.append("Semantic search is temporarily unavailable. This answer uses keyword search.")
     if corpus["coverage"]["transcripts"] < 2:
         notes.append("Fewer than two raw transcripts were available; coverage is partial.")
     if withheld:
@@ -255,13 +304,22 @@ def research_company(
         "source_checked_at": corpus["source_checked_at"],
         "generated_at": now(),
         "cached": False,
-        "retrieval_mode": "keyword",
+        "retrieval_mode": retrieval["mode"],
+        "retrieval": {
+            "version": profile.get("version"),
+            "latency_ms": retrieval["latency_ms"],
+            "fallback_reason": retrieval["fallback_reason"],
+            "semantic_error": retrieval.get("semantic_error"),
+            "index": profile.get("index"),
+            "embedding_model": profile.get("model"),
+            "settings": profile.get("settings"),
+        },
         "model": model,
         "usage": usage,
         "financial_comparisons_enabled": False,
     }
     # Abstentions are valid outputs, but are not cached as permanently unavailable.
-    if claims:
+    if claims and retrieval["fallback_reason"] != "semantic_unavailable":
         store.upsert(
             "finn_research_cache",
             [

@@ -23,8 +23,10 @@ target period is not established. This shows the distinction between reading man
 and evaluating what the evidence can support.
 
 I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL keyword
-retrieval ships first; pgvector fields and metadata are ready for a measured hybrid/RRF
-extension. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
+retrieval is complemented by a feature-flagged Gemini/pgvector/RRF implementation with
+incremental indexing and keyword fallback. A small CCL evaluation improves early
+reference-page recall, with equal reviewed answer quality and higher latency; production
+remains keyword-only pending broader evaluation and free-tier allowance. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
 cached, with an explicitly recorded fallback when its free-tier service is unavailable.
 GitHub Actions drives automatic source updates; its full filing scan and 15-company
 price refresh were verified. A tested Supabase Cron fallback is retained but inactive.
@@ -37,7 +39,7 @@ do not become financial comparisons.
 I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
 Next I would expand independently verified financial extraction and four-quarter
 statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
-GitHub-hosted CI passes 87 tests, the production build and secret scan; deployed
+Frontend build and secret checks pass; the expanded local suite passes 112 tests. Deployed
 phone/desktop browser checks also pass. Free-hosting cold starts and upstream failures
 remain visible.
 When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date

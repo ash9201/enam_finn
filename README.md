@@ -45,10 +45,15 @@ ingestion. Supabase Cron is retained as an inactive, tested recovery option.
 The frontend reads saved public results without waking Python. On-demand research
 uses persisted jobs and polls their progress. No external vector service or RAG framework.
 
-Postgres full-text search is implemented with company, document-kind, and date filters.
-The schema reserves model-tagged 768-dimensional pgvector fields for later semantic
-retrieval/RRF. **Semantic search is not enabled**: fix extraction and measure retrieval
-quality before spending time/quota embedding the corpus.
+Postgres full-text search is complemented by Gemini embeddings, Supabase pgvector and
+Reciprocal Rank Fusion, with company/document/date/metadata filters in both branches.
+[Hybrid retrieval](docs/HYBRID_RETRIEVAL.md) is behind the existing feature flag;
+production remains keyword-only during controlled rollout. The completed CCL
+[evaluation](docs/HYBRID_EVALUATION.md) improves early reference-page recall, with equal
+reviewed answer quality and additional latency. Other backfills await the free-tier
+input allowance. Partial
+indexes and semantic failures use the working keyword path with explicit limitations.
+Citation and financial-data validation remain unchanged.
 
 Gemini 3.5 Flash-Lite handles ordinary answers. Gemini 3.8 Flash is preferred for deeper
 analysis but was intermittently slow in live testing; a bounded Flash-Lite fallback

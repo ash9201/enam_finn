@@ -450,7 +450,7 @@ export default function ResearchApp() {
           <div className="coverage-line">
             <span>{current.coverage.annual_reports} annual report</span>
             <span>{current.coverage.transcripts} call transcripts</span>
-            <span>Keyword search</span>
+            <span>{current.retrieval_mode === 'hybrid' ? 'Hybrid search' : 'Keyword search'}</span>
           </div>
           {current.claims.length ? (
             <ol className="claim-list">

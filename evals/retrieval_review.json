@@ -1,0 +1,41 @@
+{
+  "version": "ccl-source-review-v1",
+  "reviewer": "Coding assistant inspected generated claims and original retrieved source excerpts during implementation. Independent human review remains pending; no automated LLM judge supplied these ratings.",
+  "rubric": {
+    "0": "Unsupported/wrong, or abstention despite an available answer.",
+    "1": "Useful supported content with material redundancy, incomplete coverage, or imprecise attribution.",
+    "2": "Adequate, useful, supported answer; or correct abstention for an unsupported question."
+  },
+  "cases": [
+    {
+      "id": "ccl-private",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "Both correctly describe private-label instant coffee manufacturing. Updated keyword answers cite valid alternative annual-report page 60; hybrid cites page 11. Curated reference-page recall is not answer correctness. One keyword draft claim was withheld by the existing validation."
+    },
+    {
+      "id": "ccl-cost",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "Both final answers correctly explain management's cost-plus/margin account. The hybrid draft incorrectly added unchanged EBITDA to a quote about margin; a new conservative metric-name guard withholds that entire claim. Remaining hybrid claims cover margins and calmer customer contracting. Ratings apply to validated output, not the rejected draft."
+    },
+    {
+      "id": "ccl-location",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "After fixing the single-document cap, both correctly report the October call's not-yet-decided India/Vietnam choice on PDF page 13. The original four-passage keyword baseline abstained. Neither final answer turns possible expansion into a commitment."
+    },
+    {
+      "id": "ccl-demand",
+      "keyword": 1,
+      "hybrid": 1,
+      "notes": "Both find July PDF page 7 after the cap fix and supply consumption/mix commentary. Both should explicitly attribute management's observations instead of sounding like universal demand facts. Exact-quote validation alone does not catch that distinction. The original keyword baseline abstained."
+    },
+    {
+      "id": "ccl-unavailable",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "Both correctly abstain on audited FY2030 revenue; neither fabricates future financial figures. This negative case is excluded from positive-case quality and recall averages."
+    }
+  ]
+}

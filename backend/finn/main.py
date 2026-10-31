@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from contextlib import asynccontextmanager
 import os
 
 from fastapi import FastAPI
@@ -7,10 +8,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from finn import __version__
 from finn.config import configuration_status, load_local_env
 from finn.api import router
+from finn import embeddings
 
 
 load_local_env()
-app = FastAPI(title="FINN API", version=__version__)
+
+
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    if embeddings.enabled():
+        embeddings.stop_background()
+
+
+app = FastAPI(title="FINN API", version=__version__, lifespan=lifespan)
 origins = [
     origin.strip()
     for origin in os.getenv("FINN_ALLOWED_ORIGINS", "http://localhost:5173").split(",")

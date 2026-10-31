@@ -22,5 +22,6 @@ act on a claim. Keep manually reviewing important interpretations and financial 
 
 The prepared examples use a small number of concise qualitative claims. Detailed
 financial-table comparisons remain disabled where periods, units or accounting basis
-are unresolved. Semantic retrieval is deferred until a question-level evaluation
-shows a meaningful improvement over the working keyword baseline.
+are unresolved. The subsequent [hybrid retrieval evaluation](HYBRID_EVALUATION.md)
+compares keyword and semantic/RRF retrieval, reports the corrected baseline and actual
+quota constraint, and keeps answer-quality findings separate from reference-page recall.

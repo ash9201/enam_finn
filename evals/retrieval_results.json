@@ -1,0 +1,540 @@
+{
+  "cases_version": "primary-pages-v1",
+  "executed_case_ids": [
+    "ccl-private",
+    "ccl-cost",
+    "ccl-location",
+    "ccl-demand",
+    "ccl-unavailable"
+  ],
+  "selected_settings": {
+    "candidates": 30,
+    "limit": 10,
+    "rrf_k": 10,
+    "semantic_weight": 2.0,
+    "page_cap": 2,
+    "document_cap": 4,
+    "adaptive_document_cap": true
+  },
+  "grid_dev_only": [
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 2.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 2.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 1.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 1.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 1.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 0.5,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 0.5,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 30,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 2.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 1.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 0.5,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 10,
+        "semantic_weight": 0.5,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    },
+    {
+      "settings": {
+        "candidates": 60,
+        "limit": 10,
+        "rrf_k": 60,
+        "semantic_weight": 2.0,
+        "page_cap": 2,
+        "document_cap": 4,
+        "adaptive_document_cap": true
+      },
+      "dev": {
+        "recall_at_5": 0.75,
+        "recall_at_10": 0.75,
+        "cases": 2
+      }
+    }
+  ],
+  "results": {
+    "keyword_original": {
+      "dev": {
+        "recall_at_5": 0.5,
+        "recall_at_10": 0.5,
+        "cases": 2
+      },
+      "heldout": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "cases": 2
+      }
+    },
+    "keyword_matched": {
+      "dev": {
+        "recall_at_5": 0.5,
+        "recall_at_10": 0.75,
+        "cases": 2
+      },
+      "heldout": {
+        "recall_at_5": 0.5,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    },
+    "hybrid": {
+      "dev": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "cases": 2
+      },
+      "heldout": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "cases": 2
+      }
+    }
+  },
+  "case_scores": {
+    "ccl-private": {
+      "keyword": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0
+      },
+      "keyword_matched": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.5
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      }
+    },
+    "ccl-cost": {
+      "keyword": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      },
+      "keyword_matched": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      }
+    },
+    "ccl-location": {
+      "keyword": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0
+      },
+      "keyword_matched": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      }
+    },
+    "ccl-demand": {
+      "keyword": {
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0
+      },
+      "keyword_matched": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0
+      }
+    }
+  },
+  "latency_ms_median_candidates_60": {
+    "keyword_latency_ms": 645.48,
+    "hybrid_first_latency_ms": 3752.27,
+    "hybrid_warm_latency_ms": 1843.14
+  },
+  "evaluated_at": "2026-10-31T04:30:15.348685+00:00",
+  "scope": "One fully indexed company, CCL; four positive questions across annual report and two transcripts, plus one negative. Seven other labelled cases remain unexecuted because of the live free-tier embedding-input quota. Source review is by the coding assistant, not independent human review.",
+  "positive_quality_mean_out_of_2": {
+    "keyword": 1.75,
+    "hybrid": 1.75
+  },
+  "negative_abstentions": {
+    "keyword": true,
+    "hybrid": true
+  },
+  "withheld_claims": {
+    "keyword": 1,
+    "hybrid": 1
+  },
+  "warm_latency_selected": {
+    "settings": {
+      "candidates": 30,
+      "limit": 10,
+      "rrf_k": 10,
+      "semantic_weight": 2.0,
+      "page_cap": 2,
+      "document_cap": 4,
+      "adaptive_document_cap": true
+    },
+    "measurements": [
+      {
+        "case": "ccl-private",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 2206.6
+      },
+      {
+        "case": "ccl-private",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1973.28
+      },
+      {
+        "case": "ccl-cost",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 455.76
+      },
+      {
+        "case": "ccl-cost",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1426.9
+      },
+      {
+        "case": "ccl-location",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 460.6
+      },
+      {
+        "case": "ccl-location",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1424.68
+      },
+      {
+        "case": "ccl-demand",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 468.3
+      },
+      {
+        "case": "ccl-demand",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1394.55
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 467.67
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1435.69
+      },
+      {
+        "case": "ccl-private",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1394.4
+      },
+      {
+        "case": "ccl-private",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 464.2
+      },
+      {
+        "case": "ccl-cost",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1370.89
+      },
+      {
+        "case": "ccl-cost",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 574.41
+      },
+      {
+        "case": "ccl-location",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1625.18
+      },
+      {
+        "case": "ccl-location",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 461.21
+      },
+      {
+        "case": "ccl-demand",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1396.55
+      },
+      {
+        "case": "ccl-demand",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 455.48
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1412.5
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 453.99
+      },
+      {
+        "case": "ccl-private",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 465.04
+      },
+      {
+        "case": "ccl-private",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1410.0
+      },
+      {
+        "case": "ccl-cost",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 440.94
+      },
+      {
+        "case": "ccl-cost",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1384.32
+      },
+      {
+        "case": "ccl-location",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 454.35
+      },
+      {
+        "case": "ccl-location",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1369.73
+      },
+      {
+        "case": "ccl-demand",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 460.58
+      },
+      {
+        "case": "ccl-demand",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1369.52
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 474.84
+      },
+      {
+        "case": "ccl-unavailable",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1402.55
+      }
+    ],
+    "median_ms": {
+      "keyword": 461.21,
+      "hybrid": 1402.55
+    }
+  },
+  "manual_review_file": "evals/retrieval_review.json",
+  "index_coverage": {
+    "CCL": {
+      "ready": 694,
+      "total": 694
+    },
+    "INFY": {
+      "ready": 264,
+      "total": 1125
+    },
+    "POLYCAB": {
+      "ready": 0,
+      "total": 1378
+    }
+  }
+}

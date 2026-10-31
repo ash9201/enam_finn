@@ -151,3 +151,33 @@ exports/share links. Export those separately, redact credentials, and never bund
   inactive and no in-flight source worker, enabled GitHub's repository source variable,
   and read it back as true. The scheduler switch is complete; the fallback remains
   installed but inactive. No paid runner or spending setting was changed.
+
+
+### Hybrid retrieval implementation and measured limits (31 October IST)
+
+- Added private pgvector embedding/cache/quota RPCs in migration 0006; the owner
+  applied it successfully. Live tests confirmed anonymous denials, identical company/
+  document/date/metadata filtering, and rejection of stale-content embedding writes.
+- Implemented direct Gemini embedding REST calls, 768-dimensional normalisation,
+  content/task/model-version caches, resumable batch indexing, RRF and explicit keyword
+  fallback. Generic corpus activation/reuse schedules the same indexing path for any
+  company. No dependencies or separate vector service were added.
+- CCL reached 694/694 chunks. A real database disconnect preserved its checkpoint;
+  the resumed run completed. INFY reached 264/1,125 before Google rejected a batch
+  on the 1,000-individual-text daily quota. Stopped bulk work. Migration 0007 corrects
+  shared accounting from HTTP batch envelopes to input units and reserves foreground
+  headroom; it is an owner SQL step. Daily QuotaFailure/RetryInfo now stops retries.
+- Froze primary-page labels, compared actual rankings and generated answers, and
+  inspected citations. Found and fixed the old single-document four-passage cap,
+  then compared hybrid against the corrected keyword baseline. Twelve bounded RRF
+  settings were evaluated on development questions only. The completed five-case
+  CCL run and seven unexecuted cases are distinguished in the committed report.
+- Recall@5/@10 improves from 0.500/0.875 to 1.000/1.000 on four positive CCL questions.
+  Reviewed validated-answer quality is equal at 1.75/2; warmed retrieval adds about
+  0.94 seconds. A hybrid draft's unsupported EBITDA addition was caught in review
+  and is now withheld by a conservative named-metric guard, including cached answers.
+  Management-observation attribution remains a documented limitation.
+- Tested local persisted API jobs with real primary evidence and hybrid retrieval.
+  Production rollout stays off pending broader evaluation/allowance; private vectors
+  remain useful cached state. No paid resources, scheduler changes or fabricated
+  coverage were introduced. See HYBRID_RETRIEVAL.md and HYBRID_EVALUATION.md.

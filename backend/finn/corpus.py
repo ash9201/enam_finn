@@ -8,6 +8,7 @@ import json
 import logging
 import uuid
 import httpx
+from finn import embeddings
 
 from finn.documents import extract_document
 from finn.retrieval import CHUNK_VERSION, chunk_pages
@@ -113,6 +114,7 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
             for doc in documents
         )
         if current_index and (datetime.now(timezone.utc) - checked).total_seconds() < 86400:
+            embeddings.schedule_backfill(symbol)
             return {**existing[0], "reused_corpus": True}
     progress("discovery")
     with public_client() as client:
@@ -175,4 +177,5 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
         "coverage": coverage,
     }
     store.patch("finn_companies", updated, symbol="eq." + symbol)
+    embeddings.schedule_backfill(symbol)
     return {**company, **updated, "reused_corpus": False}

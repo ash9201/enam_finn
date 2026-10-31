@@ -70,8 +70,10 @@ Run `python -m pytest`, the frontend production build, the emitted-secret scan, 
 screenshots, and primary-source evidence live in ignored `artifacts/`; the covering
 note draft is [SUBMISSION.md](SUBMISSION.md).
 
-Semantic retrieval remains a measured follow-up, not a claimed feature. pgvector and
-model/dimension metadata are reserved in Supabase. Comprehensive OCR, full historical
+Semantic retrieval is implemented behind its rollout flag, with pgvector/RRF, private
+embedding caches, resumable indexing and keyword fallback. The [CCL evaluation](HYBRID_EVALUATION.md)
+records actual results and the input-quota limit; production remains keyword-only.
+Comprehensive OCR, full historical
 exchange coverage, financial-table comparisons, and a four-quarter tracker remain out.
 
 Earlier foundation release checks: **64 tests passed**, production build and emitted-secret scan
