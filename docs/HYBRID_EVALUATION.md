@@ -101,6 +101,14 @@ records this limitation rather than treating a valid quotation as complete entai
 
 Without `--symbols CCL`, collection attempts the wider set and skips incomplete indexes;
 tuning refuses a missing positive case. This avoids publishing a partial run as a full
-cross-company benchmark. Answer replay reuses a draft only with the same evidence IDs
-and model and reruns validation. Raw passages, drafts, timings and API job results stay
+cross-company benchmark. Answer replay reuses a draft only with the same evidence IDs, model
+and prompt version and reruns validation. Raw passages, drafts, timings and API job results stay
 in ignored local `artifacts/`; committed results contain source links, metrics and notes.
+
+
+The live local persisted-job workflow also passed: a fresh, validated CCL answer used
+hybrid retrieval and the next identical request returned the same cached answer. Source
+PDF page 11 and its original link were preserved; financial comparisons remained off.
+The 112-test suite, production build/secret scan and 44 Light/Dark/System browser
+regression scenes passed. The live quota-accounting gate remains the owner-applied
+0007 migration; it must pass before further backfill or production opt-in.

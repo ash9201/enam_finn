@@ -53,7 +53,8 @@ production remains keyword-only during controlled rollout. The completed CCL
 reviewed answer quality and additional latency. Other backfills await the free-tier
 input allowance. Partial
 indexes and semantic failures use the working keyword path with explicit limitations.
-Citation and financial-data validation remain unchanged.
+Existing citation/table guards remain in force; an added metric-name check withholds
+unsupported financial acronyms.
 
 Gemini 3.5 Flash-Lite handles ordinary answers. Gemini 3.8 Flash is preferred for deeper
 analysis but was intermittently slow in live testing; a bounded Flash-Lite fallback
