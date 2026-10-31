@@ -48,9 +48,10 @@ uses persisted jobs and polls their progress. No external vector service or RAG 
 Postgres full-text search is complemented by Gemini embeddings, Supabase pgvector and
 Reciprocal Rank Fusion, with company/document/date/metadata filters in both branches.
 [Hybrid retrieval](docs/HYBRID_RETRIEVAL.md) is behind the existing feature flag;
-production remains keyword-only during controlled rollout. The completed CCL
-[evaluation](docs/HYBRID_EVALUATION.md) improves early reference-page recall, with equal
-reviewed answer quality and additional latency. Other corpora require additional
+production remains keyword-only during controlled rollout. CCL and previously unprepared
+GOKEX have complete indexes. The [evaluation](docs/HYBRID_EVALUATION.md) records better
+early reference-page recall, a small observed answer-quality difference and added latency;
+the GOKEX check used frozen settings. Other corpora require additional
 quota-bounded backfill. Partial
 indexes and semantic failures use the working keyword path with explicit limitations.
 Existing citation/table guards remain in force; an added metric-name check withholds

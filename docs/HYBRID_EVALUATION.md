@@ -6,7 +6,7 @@ a representative accuracy benchmark. Reviewable questions, source-page links, ra
 and measurements are in [cases](../evals/retrieval_cases.json),
 [review notes](../evals/retrieval_review.json) and [results](../evals/retrieval_results.json).
 
-## What actually ran
+## Initial CCL study
 
 CCL's complete active corpus: one annual report and two transcripts, 694 chunks.
 Four answerable questions cover private-label manufacturing, cost-plus economics,
@@ -121,3 +121,70 @@ CCL hybrid retrieval worked with zero provider calls; the deployed keyword job a
 completed successfully. After the daily reset, one bounded 24-chunk resume test
 advanced INFY from 264 to 288 of 1,125 chunks. This updates indexing progress, not the
 frozen evaluation scores above. Production's semantic flag remains off.
+
+
+## New-company validation after the quota reset
+
+The subsequent GOKEX test began with **no existing corpus**. The generic NSE resolution
+and link-discovery flow acquired a 254-page annual report and two original transcripts
+(19 and 26 pages), stored the private source documents, activated the manifest and
+scheduled embeddings automatically. No manual document links, prepared-company branch,
+new model or production flag change was used.
+
+The first business answer used keyword search with an indexing limitation. Once all
+**711/711** chunks were embedded, the identical question produced a new hybrid answer
+instead of reusing the preparing-state keyword result. Company filtering, original PDF
+pages/links and private-result policies remained intact. CCL is still 694/694; INFY is
+288/1,125. The verification/indexing processes have finished; this is not a continuously
+running backfill service.
+
+Three new positive questions and one negative were source-labelled, then evaluated
+with the **already frozen CCL settings**. No tuning used GOKEX. The separate default
+business smoke test was observed beforehand, so this is not a blinded study. Results
+and reviewed output notes are in [new-company measurements](../evals/generic_retrieval_results.json)
+and [source review](../evals/generic_retrieval_review.json).
+
+| GOKEX measure, three positives | Matched keyword | Hybrid |
+| --- | ---: | ---: |
+| Reference-page Recall@5 | 0.667 | 0.833 |
+| Reference-page Recall@10 | 0.833 | 0.833 |
+| Reviewed validated-answer quality / 2 | 1.33 | 1.67 |
+| Unsupported FY2030 question | Correct abstention | Correct abstention |
+| Warmed retrieval median, 12 measurements/method | 647 ms | 1,771 ms |
+
+Both methods correctly describe the apparel platform and overseas manufacturing
+footprint, although the platform answers repeat themselves. Keyword's footprint
+citation on PDF page 8 is a valid alternative outside the reference labels. The
+hybrid tariff answer explains customer discounts net of supply-chain discounts;
+keyword focuses on buyer pricing and omits supplier participation. Relevant material
+exists in both contexts. This one-run quality difference includes generation choices
+and conservative claim withholding; it is not causal proof that embeddings improve
+answer accuracy.
+
+The wider labelled set now has sixteen cases: nine executed across two companies
+(seven positives, two negatives), with seven original INFY/POLYCAB cases still pending.
+Across the seven executed positives, macro reference-page Recall@5 is **0.571 to 0.929**
+and Recall@10 **0.857 to 0.929**; reviewed quality is **1.57 to 1.71 / 2**. Both negatives
+abstain correctly. The pooled warmed medians are **495 ms versus 1,471 ms**, with 27
+measurements per method from different times on the operator's connection. This remains
+a small, assistant-reviewed check with curated references, not a market-wide benchmark.
+
+Additional source-quality observations remain visible: one transcript index label is
+Jun 2026 but its primary header says May 25; publication/reporting fields stay unknown.
+A font control character caused both methods to lose one paraphrased quotation under
+strict source-slice validation. A separate default-business answer included an excerpt
+starting inside a word at an overlap boundary; its fact was checked against the full
+primary page. Whole-word excerpts, cleaner attribution and less redundant generation
+remain worthwhile improvements. Financial table comparisons remain disabled.
+
+The production flag remains off. These results support a controlled trial on complete
+indexes, while broader coverage and independent human review remain unfinished.
+
+Reproduce the added check after the CCL collection/tuning commands above:
+
+```powershell
+.venv\Scripts\python scripts/evaluate_retrieval.py collect --symbols GOKEX
+.venv\Scripts\python scripts/evaluate_retrieval.py score --symbols GOKEX
+.venv\Scripts\python scripts/evaluate_retrieval.py answers --symbols GOKEX
+.venv\Scripts\python scripts/evaluate_retrieval.py latency --symbols GOKEX
+```

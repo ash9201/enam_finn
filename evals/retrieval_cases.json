@@ -1,5 +1,5 @@
 {
-  "version": "primary-pages-v1",
+  "version": "primary-pages-v2-generic-company",
   "label_scope": "Curated reference-page recall, not exhaustive relevance annotation. Source pages inspected before ranking/tuning. Retrieved chunks count toward k; reference pages are deduplicated.",
   "cases": [
     {
@@ -246,6 +246,87 @@
       "filters": {},
       "reference_pages": [],
       "support_notes": "Private contact detail absent. Must abstain rather than invent or infer."
+    },
+    {
+      "id": "gokex-platform",
+      "split": "heldout",
+      "symbol": "GOKEX",
+      "question": "Which activities does Gokaldas bring together on its integrated apparel platform?",
+      "filters": {
+        "kinds": [
+          "annual_report"
+        ],
+        "document_ids": [
+          "9385885a-db81-5a41-945d-2756cf6f4b6d"
+        ]
+      },
+      "reference_pages": [
+        {
+          "document_id": "9385885a-db81-5a41-945d-2756cf6f4b6d",
+          "pdf_page": 5,
+          "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/eb7abea2-0f79-46c4-a65d-485d9d230896.pdf"
+        }
+      ],
+      "support_notes": "Design, product development, sourcing, manufacturing, finishing and logistics. No founding-year claim is needed."
+    },
+    {
+      "id": "gokex-geography",
+      "split": "heldout",
+      "symbol": "GOKEX",
+      "question": "Where outside India does it make garments?",
+      "filters": {
+        "kinds": [
+          "annual_report"
+        ],
+        "document_ids": [
+          "9385885a-db81-5a41-945d-2756cf6f4b6d"
+        ]
+      },
+      "reference_pages": [
+        {
+          "document_id": "9385885a-db81-5a41-945d-2756cf6f4b6d",
+          "pdf_page": 4,
+          "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/eb7abea2-0f79-46c4-a65d-485d9d230896.pdf"
+        },
+        {
+          "document_id": "9385885a-db81-5a41-945d-2756cf6f4b6d",
+          "pdf_page": 5,
+          "source_url": "https://www.bseindia.com/xml-data/corpfiling/AttachHis/eb7abea2-0f79-46c4-a65d-485d9d230896.pdf"
+        }
+      ],
+      "support_notes": "Manufacturing platform includes Kenya and Ethiopia. Distinguish factories from overseas marketing offices."
+    },
+    {
+      "id": "gokex-tariffs",
+      "split": "heldout",
+      "symbol": "GOKEX",
+      "question": "In the May call, how did it share import-duty pressure with its buyers and suppliers?",
+      "filters": {
+        "kinds": [
+          "transcript"
+        ],
+        "document_ids": [
+          "38ddc89b-2372-5c86-93f5-cbe4477ed6c5"
+        ]
+      },
+      "reference_pages": [
+        {
+          "document_id": "38ddc89b-2372-5c86-93f5-cbe4477ed6c5",
+          "pdf_page": 3,
+          "source_url": "https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=6f7c5bdf-d6af-4d66-836e-1487c3115f31.pdf"
+        }
+      ],
+      "support_notes": "Management describes discounts passed to customers net of discounts imposed on its supply chain. Attribute the account to management; do not invent permanent contract terms. Discovery index label is Jun 2026; the primary PDF header identifies May 25, 2026. Publication/reporting metadata remains unverified rather than inferred from the label."
+    },
+    {
+      "id": "gokex-unavailable",
+      "split": "negative",
+      "symbol": "GOKEX",
+      "question": "What is the exact audited net profit of Gokaldas Exports for FY2030?",
+      "filters": {},
+      "reference_pages": [],
+      "support_notes": "Future audited period absent. Abstain rather than extrapolate."
     }
-  ]
+  ],
+  "generic_company_validation": "GOKEX cases added after freezing CCL-selected RRF settings. Source pages inspected before collecting these question rankings; no retuning on this company. Default business-overview smoke test was observed beforehand. Independent human review remains pending."
 }

@@ -1,0 +1,249 @@
+{
+  "cases_version": "primary-pages-v2-generic-company",
+  "executed_case_ids": [
+    "gokex-platform",
+    "gokex-geography",
+    "gokex-tariffs",
+    "gokex-unavailable"
+  ],
+  "selected_settings": {
+    "candidates": 30,
+    "limit": 10,
+    "rrf_k": 10,
+    "semantic_weight": 2.0,
+    "page_cap": 2,
+    "document_cap": 4,
+    "adaptive_document_cap": true
+  },
+  "settings_source_cases": [
+    "ccl-private",
+    "ccl-cost",
+    "ccl-location",
+    "ccl-demand",
+    "ccl-unavailable"
+  ],
+  "selection": "Previously frozen settings; no tuning on these cases.",
+  "results": {
+    "keyword_original": {
+      "heldout": {
+        "recall_at_5": 0.6667,
+        "recall_at_10": 0.6667,
+        "cases": 3
+      }
+    },
+    "keyword_matched": {
+      "heldout": {
+        "recall_at_5": 0.6667,
+        "recall_at_10": 0.8333,
+        "cases": 3
+      }
+    },
+    "hybrid": {
+      "heldout": {
+        "recall_at_5": 0.8333,
+        "recall_at_10": 0.8333,
+        "cases": 3
+      }
+    }
+  },
+  "evaluated_at": "2026-10-31T08:07:56.929024+00:00",
+  "review_file": "evals/generic_retrieval_review.json",
+  "positive_quality_mean_out_of_2": {
+    "keyword": 1.3333,
+    "hybrid": 1.6667
+  },
+  "negative_abstentions": {
+    "keyword": true,
+    "hybrid": true
+  },
+  "withheld_claims": {
+    "keyword": 2,
+    "hybrid": 1
+  },
+  "warm_latency_selected": {
+    "settings": {
+      "candidates": 30,
+      "limit": 10,
+      "rrf_k": 10,
+      "semantic_weight": 2.0,
+      "page_cap": 2,
+      "document_cap": 4,
+      "adaptive_document_cap": true
+    },
+    "measurements": [
+      {
+        "case": "gokex-platform",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 1866.48
+      },
+      {
+        "case": "gokex-platform",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 2667.48
+      },
+      {
+        "case": "gokex-geography",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 664.35
+      },
+      {
+        "case": "gokex-geography",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 2092.54
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 647.07
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1789.21
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "keyword",
+        "repeat": 0,
+        "latency_ms": 646.72
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "hybrid",
+        "repeat": 0,
+        "latency_ms": 1761.35
+      },
+      {
+        "case": "gokex-platform",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1779.13
+      },
+      {
+        "case": "gokex-platform",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 495.03
+      },
+      {
+        "case": "gokex-geography",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1470.77
+      },
+      {
+        "case": "gokex-geography",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 641.7
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1811.73
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 623.12
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "hybrid",
+        "repeat": 1,
+        "latency_ms": 1744.2
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "keyword",
+        "repeat": 1,
+        "latency_ms": 660.35
+      },
+      {
+        "case": "gokex-platform",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 659.98
+      },
+      {
+        "case": "gokex-platform",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1761.11
+      },
+      {
+        "case": "gokex-geography",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 647.5
+      },
+      {
+        "case": "gokex-geography",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1629.4
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 645.65
+      },
+      {
+        "case": "gokex-tariffs",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1773.32
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "keyword",
+        "repeat": 2,
+        "latency_ms": 665.74
+      },
+      {
+        "case": "gokex-unavailable",
+        "method": "hybrid",
+        "repeat": 2,
+        "latency_ms": 1769.25
+      }
+    ],
+    "median_ms": {
+      "keyword": 647.29,
+      "hybrid": 1771.28
+    }
+  },
+  "index_coverage": {
+    "GOKEX": {
+      "ready": 711,
+      "total": 711,
+      "annual_reports": 1,
+      "transcripts": 2
+    }
+  },
+  "scope": "Three positive source-reviewed questions and one negative on a genuinely new company, using frozen CCL settings. Curated reference-page recall, not exhaustive relevance or independent human accuracy.",
+  "combined_seven_positive_cases": {
+    "keyword": {
+      "recall_at_5": 0.5714,
+      "recall_at_10": 0.8571,
+      "quality_out_of_2": 1.5714
+    },
+    "hybrid": {
+      "recall_at_5": 0.9286,
+      "recall_at_10": 0.9286,
+      "quality_out_of_2": 1.7143
+    }
+  },
+  "combined_warm_median_ms": {
+    "keyword": 495.03,
+    "hybrid": 1470.77
+  }
+}

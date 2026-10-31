@@ -205,6 +205,33 @@ def tune(cases):
     print(json.dumps({k: v for k, v in report.items() if k != "grid_dev_only"}, indent=2))
 
 
+def score_frozen(cases):
+    """Evaluate a new company using the existing chosen settings, without tuning."""
+    frozen = read(ARTIFACTS / "metrics.json")
+    settings = retrieval.RetrievalSettings(**frozen["selected_settings"])
+    records = read(ARTIFACTS / "rankings.json")
+    if any(c["id"] not in records for c in cases):
+        raise RuntimeError("Collect every selected case before frozen-settings scoring.")
+    splits = sorted({c["split"] for c in cases if c["split"] != "negative"})
+    report = {
+        "cases_version": read(CASES)["version"],
+        "executed_case_ids": [c["id"] for c in cases],
+        "selected_settings": asdict(settings),
+        "settings_source_cases": frozen["executed_case_ids"],
+        "selection": "Previously frozen settings; no tuning on these cases.",
+        "results": {
+            method: {split: metrics(cases, records, current, strategy, split) for split in splits}
+            for method, current, strategy in [
+                ("keyword_original", ORIGINAL, "keyword"),
+                ("keyword_matched", settings, "keyword"),
+                ("hybrid", settings, "hybrid"),
+            ]
+        },
+    }
+    write(ARTIFACTS / "frozen-score.json", report)
+    print(json.dumps(report, indent=2))
+
+
 def answers(cases):
     records = read(ARTIFACTS / "rankings.json")
     settings = retrieval.RetrievalSettings(**read(ARTIFACTS / "metrics.json")["selected_settings"])
@@ -300,7 +327,7 @@ def main():
         "true"  # This process only; never changes deployment.
     )
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=["collect", "tune", "answers", "latency"])
+    parser.add_argument("stage", choices=["collect", "tune", "score", "answers", "latency"])
     parser.add_argument("--symbols", nargs="*")
     args = parser.parse_args()
     cases = read(CASES)["cases"]
@@ -310,6 +337,8 @@ def main():
         collect(cases, args.symbols)
     elif args.stage == "tune":
         tune(cases)
+    elif args.stage == "score":
+        score_frozen(cases)
     elif args.stage == "answers":
         answers(cases)
     else:

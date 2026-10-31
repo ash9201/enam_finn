@@ -1,0 +1,32 @@
+{
+  "version": "gokex-source-review-v1",
+  "reviewer": "Coding assistant inspected primary passages and validated generated answers. Independent human assessment remains pending; ratings were not supplied by an automated judge.",
+  "settings": "Frozen CCL-selected settings. No parameter tuning on GOKEX.",
+  "cases": [
+    {
+      "id": "gokex-platform",
+      "keyword": 1,
+      "hybrid": 1,
+      "notes": "Both correctly describe the integrated apparel chain on annual-report PDF page 5, but repeat most activities in two overlapping claims. Both withhold a third draft quotation whose invented hyphen does not match a control character in the extracted source. This is conservative quote rejection, not a missing business fact."
+    },
+    {
+      "id": "gokex-geography",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "Both correctly identify Kenya and Ethiopia and distinguish manufacturing from marketing offices. Keyword cites the valid footprint legend on PDF page 8, outside the curated reference pages. Hybrid cites pages 5 and 61; its operational factory counts are directly supported by the cited note and are not derived financial comparisons."
+    },
+    {
+      "id": "gokex-tariffs",
+      "keyword": 1,
+      "hybrid": 2,
+      "notes": "Keyword explains customer rebates/pricing but misses the supplier contribution. A monetary claim on a table-candidate page is withheld. Hybrid answers the net customer/supply-chain discount relationship and adds the separately supported Africa/AGOA refusal. Relevant material exists in both contexts: this one-run validated-answer difference is not causal proof of a retrieval-driven quality gain. The discovery label is Jun 2026, while the original PDF header identifies May 25; publication/reporting metadata correctly stays unverified."
+    },
+    {
+      "id": "gokex-unavailable",
+      "keyword": 2,
+      "hybrid": 2,
+      "notes": "Both abstain on unavailable audited FY2030 net profit. Excluded from positive-case quality and recall averages."
+    }
+  ],
+  "generic_workflow_notes": "The separate default-business question first used keyword search during indexing and subsequently produced a hybrid answer after all 711 chunks were ready. One later citation excerpt starts inside the word garments because of the existing overlap boundary; its business fact was checked against the full primary page. Excerpt boundaries remain a polish limitation."
+}

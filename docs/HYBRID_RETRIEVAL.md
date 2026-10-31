@@ -102,9 +102,10 @@ keyword answer. Flag-off requests retain compatibility with the original keyword
 
 ## Reproducible evaluation
 
-`evals/retrieval_cases.json` contains ten answerable questions (five development, five
-parameter hold-out) and two unsupported questions, with primary-source PDF page links
-and support notes. Source pages were inspected before selecting retrieval settings.
+`evals/retrieval_cases.json` now contains thirteen answerable questions (five development,
+eight hold-out) and three unsupported questions, with primary-source PDF page links and
+support notes. The original CCL study selected settings; the later GOKEX study used
+those frozen settings without retuning. Source-review timing is recorded in the labels.
 
 Recall@5/@10 uses **curated reference pages**, not exhaustive relevance annotation of
 thousands of pages: retrieved chunks occupy ranking slots; duplicate reference pages
@@ -118,8 +119,11 @@ check, not an independently human-rated or statistically representative benchmar
 .venv\Scripts\python scripts/evaluate_retrieval.py answers
 ```
 
-Use `--symbols CCL` for the completed evaluation; the full-set run remains pending
-available free-tier quota. These commands opt into semantic search **only in their process**, never change Render
+Use `--symbols CCL` for the original evaluation. To reproduce the new-company check,
+run `collect --symbols GOKEX`, `score --symbols GOKEX`, `answers --symbols GOKEX`, and
+`latency --symbols GOKEX` after the CCL tuning run. `score` reads the previously selected
+settings and never tunes on its selected cases. The full-set run remains pending
+additional indexing. These commands opt into semantic search **only in their process**, never change Render
 or `.env.local`, and require live credentials/complete indexes. Raw candidates, generated
 drafts and timings stay under ignored `artifacts/retrieval/`. Collection refuses a keyword
 substitution when hybrid is unavailable, and resumes completed cases. The original

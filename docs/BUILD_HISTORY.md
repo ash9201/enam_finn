@@ -193,3 +193,20 @@ exports/share links. Export those separately, redact credentials, and never bund
 - A bounded resume after the allowance reset indexed 24 more INFY chunks, reaching
   288/1,125. The verification run has ended; it did not launch a continuous backfill.
   The earlier evaluation snapshot and its limitations remain unchanged.
+
+
+### Generic new-company hybrid validation
+
+- Used the remaining reset allowance for previously unprepared GOKEX. The same generic
+  pipeline discovered an annual report and two transcripts, produced a keyword answer
+  during indexing and automatically embedded all 711 chunks. Repeating the question
+  then produced a hybrid answer, proving completion invalidates the partial-index cache.
+  New research stays private; the watchlist and production flag are unchanged.
+- Added three held-out positive questions and a negative before collecting their
+  rankings. A frozen-settings scoring command reuses CCL's chosen parameters without
+  tuning on the new company; it reproduces the original CCL scores unchanged.
+- New-company Recall@5 improves from 0.667 to 0.833; @10 is equal at 0.833. Observed
+  validated-answer quality is 1.33 versus 1.67/2, with both negative answers abstaining.
+  Recorded generation/withholding effects and excerpt/date-label limitations explicitly.
+  The earlier CCL report is retained; aggregate results span seven positives and two
+  negatives across two complete indexes. Seven other labelled cases remain pending.
