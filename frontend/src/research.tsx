@@ -446,7 +446,7 @@ function Evidence({
             </button>
             {showImage && (
               <img
-                src={`${apiBase}/research/${selection.answer.id}/evidence/${citation.id}/image?symbol=${selection.answer.symbol}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`}
+                src={`${apiBase}/research/${selection.answer.id}/evidence/${citation.id}/image?symbol=${encodeURIComponent(selection.answer.symbol)}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`}
                 alt={`Original ${selection.answer.symbol} statement, PDF page ${citation.pdf_page}`}
                 onError={() =>
                   setVerification(

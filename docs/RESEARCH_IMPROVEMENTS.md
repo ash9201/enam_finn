@@ -195,3 +195,20 @@ browser path reads genuinely public snapshots and does not substitute failed res
 Remaining work includes broader independently reviewed accounting coverage, fiscal-label
 EBITDA tables, difficult M&M/Reliance/Titan layouts, and a larger answer-quality study.
 Free API cold starts, source restrictions and provider quotas remain observable limits.
+
+## Production verification
+
+Release `879a409` was deployed on the active Singapore API and Render frontend.
+[Hosted CI](https://github.com/ash9201/enam_finn/actions/runs/41219871884) and the manually
+dispatched [indexing workflow](https://github.com/ash9201/enam_finn/actions/runs/41219969548)
+both succeeded on standard runners. Index maintenance reached the real daily ceiling
+and preserved its pause; no extra provider calls or complete INFY index are claimed.
+
+A fresh production CCL hybrid question returned five supported points (125 words) in
+13.48 seconds including submission/polling. Server processing was 8.33 seconds, with
+3.02 seconds retrieval, 1.39 seconds nested embedding and 3.40 seconds generation.
+An INFY completed keyword cache response took 2.14 seconds. These are individual live
+observations, not latency guarantees. The three richer overviews, 15 partial-or-complete
+financial outputs and CCL/KPIT comparisons were explicitly published after deployment;
+the superseded INFY comparison remains privately preserved rather than presented as
+newly verified. Subsequent UI URL verification also covers ampersands in M&M symbols.

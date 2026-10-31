@@ -75,6 +75,8 @@ try {
     ['desktop', { width: 1440, height: 1000 }],
   ]) {
     for (const theme of ['light', 'dark']) {
+      if (process.env.FINN_BROWSER_SIZE && process.env.FINN_BROWSER_SIZE !== size) continue
+      if (process.env.FINN_BROWSER_THEME && process.env.FINN_BROWSER_THEME !== theme) continue
       const context = await browser.newContext({
         viewport,
         colorScheme: theme,
@@ -130,14 +132,20 @@ try {
       })
 
       await page.goto(base + '/?view=research&symbol=HDFCBANK&analysis=results')
-      await expect(
-        page.getByRole('table', { name: 'consolidated quarterly figures', exact: true }),
-      ).toBeVisible({ timeout: 30000 })
+      await page.waitForSelector('.financial-table')
+      await expect(page.locator('table[aria-label="consolidated quarterly figures"]')).toHaveCount(
+        1,
+        { timeout: 30000 },
+      )
+      await expect(page.locator('table[aria-label="consolidated quarterly figures"]')).toBeVisible({
+        timeout: 30000,
+      })
       await expect(page.locator('.financial-table').first()).toContainText('Bank: total income')
       await audit(page.locator('.answer-panel'))
-      await page
-        .getByRole('button', { name: 'Inspect consolidated Revenue for 2026-09-30', exact: true })
-        .click()
+      await expect(
+        page.locator('button[aria-label="Inspect consolidated Revenue for 2026-09-30"]'),
+      ).toHaveCount(1)
+      await page.locator('button[aria-label="Inspect consolidated Revenue for 2026-09-30"]').click()
       const dialog = page.getByRole('dialog')
       await expect(dialog).toContainText('129358.69')
       await expect(dialog).toContainText('Two separate image reads')
@@ -192,6 +200,15 @@ try {
         await page.goto(base + '/?view=research&symbol=M%26M&analysis=results')
         await expect(page.locator('.financial-partial')).toBeVisible({ timeout: 30000 })
         await audit(page.locator('.answer-panel'))
+        await page.locator('.financial-table-wrap .financial-number').first().click()
+        await page.getByRole('button', { name: 'View original statement page' }).click()
+        await expect(page.locator('.statement-preview img')).toHaveAttribute('src', /symbol=M%26M/)
+        await expect
+          .poll(() => page.locator('.statement-preview img').evaluate((img) => img.naturalWidth), {
+            timeout: 20000,
+          })
+          .toBeGreaterThan(500)
+        await page.getByRole('button', { name: 'Close evidence' }).click()
         await page.goto(base + '/?view=research&symbol=INFY')
         await expect(page.locator('.answer-panel')).toBeVisible({ timeout: 30000 })
         await page.getByText('Sources, coverage & search details', { exact: true }).click()
