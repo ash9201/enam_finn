@@ -34,7 +34,7 @@ def test_quarter_date_and_immediate_periods():
     assert shift_quarter("2024-02-29", -12) == "2023-02-28"
 
 
-def table_pdf():
+def table_pdf(first_expense_label="Expense item 0"):
     stream = io.BytesIO()
     c = Canvas(stream, pagesize=(730, 800))
     c.setFont("Helvetica", 9)
@@ -55,7 +55,7 @@ def table_pdf():
         c.drawRightString(x, 700, label)
     labels = (
         ["Revenue from operations"]
-        + ["Expense item " + str(i) for i in range(9)]
+        + [first_expense_label if i == 0 else "Expense item " + str(i) for i in range(9)]
         + ["Profit before tax", "Profit for the period"]
     )
     for index, label in enumerate(labels):
@@ -188,3 +188,35 @@ def test_damaged_decimal_cell_is_withheld_without_losing_valid_quarters():
         "2025-09-30",
     }
     assert rejected and all(f["value"] != "12901.75" for f in accepted)
+
+
+def test_explicit_reported_ebitda_cells_can_be_validated():
+    table = extract_results_pdf(table_pdf("EBITDA"), {})["tables"][0]
+    row = next(r for r in table["rows"] if r["cells"][0] == "EBITDA")
+    facts, rejected = validate_cells(
+        [table],
+        RowMap(
+            selections=[
+                RowSelection(table_id=table["table_id"], metric="EBITDA", row_index=row["index"])
+            ]
+        ),
+    )
+    assert len(facts) == 3 and not rejected
+    assert all(f["validated"] and f["definition"] == "reported_ebitda" for f in facts)
+
+
+def test_adjusted_ebitda_and_operating_profit_are_not_substituted():
+    for label in ["Adjusted EBITDA", "EBITDA margin %", "Operating profit"]:
+        table = extract_results_pdf(table_pdf(label), {})["tables"][0]
+        row = next(r for r in table["rows"] if r["cells"][0] == label)
+        facts, rejected = validate_cells(
+            [table],
+            RowMap(
+                selections=[
+                    RowSelection(
+                        table_id=table["table_id"], metric="EBITDA", row_index=row["index"]
+                    )
+                ]
+            ),
+        )
+        assert not facts and rejected

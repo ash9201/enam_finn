@@ -109,17 +109,26 @@ current-quarter cause. Quote existence and native-cell validation do not prove s
 entailment or every possible accounting comparability issue. The bounded two-company
 review is retained as acceptance evidence.
 
-- 25 targeted financial tests cover malformed/negative/Indian-format numbers, merged
+- 27 targeted financial tests cover malformed/negative/Indian-format numbers, merged
   and wrapped quarter/YTD headings, exact periods, source-row substitution, decimal
   damage, unit conversion, unvalidated figures, incompatible definitions/bases,
-  nonpositive denominators and avoiding unnecessary LLM calls.
-- Full backend regression: **154 passed**. No unrelated backend suite was repeated per theme.
+  nonpositive denominators, explicit reported EBITDA versus adjusted/margin/operating
+  profit substitutions, and avoiding unnecessary LLM calls. Reported-EBITDA extraction
+  is tested with a rendered synthetic statement; neither real demo filing reports it.
+- Full backend regression: **154 passed**, followed by two added targeted EBITDA
+  cases (156 total). Hosted CI runs the complete final suite. No unrelated backend
+  suite was repeated per theme.
 - Production TypeScript/Vite build and privileged-credential asset scan pass.
 - Affected results/evidence/calculation views pass Light/Dark checks at 390×844 and
   1440×1000, including contrast and overflow. The live follow-up runs once, not once
   per theme. Real CCL coverage and negative standalone changes are also checked.
 - The server-only financial-search RPC accepts privileged calls; anonymous execution
   is denied (401). Existing private-table RLS remains enabled.
+- Render's deployed financial job completed both a cached request and an explicit
+  live source refresh for POLYCAB, resolving/downloading the primary filing and
+  validating its quarter/figures again. The deployed Light/Dark phone/desktop browser
+  checks also pass with direct API requests (no local forwarding). Actual artifacts
+  distinguish cached delivery from a successful live refresh.
 
 Apply `supabase/migrations/0008_quarterly_results.sql` once with RLS enabled (already
 applied to this project). Its initial sort-reference error was corrected before the

@@ -18,6 +18,12 @@
   components pass four viewport/theme combinations, build, contrast/overflow and
   credential scanning. Verified the follow-up once; other theme checks reuse source data without model calls.
 - See [QUARTERLY_RESULTS.md](QUARTERLY_RESULTS.md) for real figures, policies and limits.
+- Final deployment checks passed all four affected UI combinations with direct API
+  access, a cached financial job and a live primary-source refresh from Render.
+  Added two targeted EBITDA policy cases using rendered synthetic statements:
+  explicit EBITDA is accepted, while adjusted EBITDA, margins and operating profit
+  cannot substitute. This brings coverage to 156 tests without another local full-suite
+  or unrelated browser replay.
 
 ### Evidence-first research interaction (31 October)
 

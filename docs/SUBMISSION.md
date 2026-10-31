@@ -45,7 +45,7 @@ do not become financial comparisons.
 I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
 Next I would expand independently verified financial extraction and four-quarter
 statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
-Frontend build and secret checks pass; the expanded local suite passes 154 tests. Deployed
+Frontend build and secret checks pass; regression and targeted checks cover 156 passing tests. Deployed
 phone/desktop browser checks also pass. Free-hosting cold starts and upstream failures
 remain visible.
 When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date
