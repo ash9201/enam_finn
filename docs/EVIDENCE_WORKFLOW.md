@@ -96,6 +96,7 @@ Financial table comparisons remain disabled.
 | POLYCAB optional history acquisition | Two real annual reports and four transcripts ready through generic ingestion; original source metadata retained. |
 | Backend regression | 129 tests passed, including company-bound references, same-passage claim identity, stale quotes, chronology, general questions without dated anchors, complete-quote checks, duplicate-call exclusion, cache isolation, job context and abstention. |
 | Browser interaction | Four viewport/theme combinations: 390×844 and 1440×1000, Light and Dark. Exact passage, real API evidence reads and cached follow-up jobs, source ordering, focus, context removal/restoration, company reset and missing-context failure guard passed. |
+| Deployment | The four interaction combinations also pass against Render. An additional phone-browser run uses the deployed public CCL answer and direct API requests without fixtures, routing or a proxy: verified passage, retained company/claim, cross-document cached answer and actual browser CORS all pass. Hosted CI passes tests, build and credential scan. |
 | Theme regression | 44 existing scenes passed: system preference, persistence, contrast, startup and responsive states. |
 | Build/security | TypeScript/Vite production build and privileged-credential bundle scan passed. |
 

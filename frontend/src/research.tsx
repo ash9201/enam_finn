@@ -594,7 +594,7 @@ export default function ResearchApp() {
           <aside className="active-evidence" aria-label="Active evidence context">
             <div className="context-heading">
               <span className="eyebrow">
-                {context.symbol} ?{' '}
+                {context.symbol} ·{' '}
                 {PATHS.find((path) => path.intent === context.intent)?.label || 'EVIDENCE CONTEXT'}
               </span>
               <button
