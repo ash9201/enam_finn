@@ -1,5 +1,11 @@
 # Working-prototype acceptance
 
+**Quarterly results (31 October):** 154 backend tests pass, including 25 financial
+cases. POLYCAB/CCL primary filings validate the full results/evidence workflow,
+with partial CCL cells and unreported EBITDA honestly withheld. Four affected
+viewport/theme combinations pass contrast/overflow, basis, formula and evidence
+checks, with one actual cross-document follow-up. [Details](QUARTERLY_RESULTS.md).
+
 **Evidence-first research update (31 October):** 129 backend tests, production frontend
 build, bundle credential scan, four real-API viewport/theme interaction checks and
 44 theme scenes pass. CCL July→October cross-document research and zero-model

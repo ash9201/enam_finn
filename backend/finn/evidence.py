@@ -22,7 +22,7 @@ class EvidenceReference(BaseModel):
     model_config = ConfigDict(extra="forbid")
     research_id: UUID
     citation_id: UUID
-    claim_index: int | None = Field(default=None, ge=0, le=6)
+    claim_index: int | None = Field(default=None, ge=0, le=255)
     intent: Literal["question", "repeated", "later", "perspective"] = "question"
 
 
@@ -168,6 +168,15 @@ def resolve_context(store, symbol, reference):
             "document_url": doc["final_url"],
             **date,
         },
+        **(
+            {
+                "financial_documents": answer["financial_results"]["document_ids"],
+                "financial_source_checked_at": answer["source_checked_at"],
+                "financial_context_policy": "quarter-context-v2",
+            }
+            if answer.get("financial_results")
+            else {}
+        ),
     }
     return context, anchor
 
@@ -183,6 +192,22 @@ def retrieve_followup(store, symbol, question, context, anchor, profile):
     related = retrieve_with_diagnostics(store, symbol, topic, profile=profile, **scope)
     searches = [primary, related]
     ranked = reciprocal_rank_fusion(primary["evidence"], related["evidence"])
+    if context.get("financial_documents") and context["intent"] != "repeated":
+        # A numerical anchor must not drown out a qualitative follow-up. Search
+        # the actual question in management commentary separately, then fuse it.
+        commentary = retrieve_with_diagnostics(store,symbol,question,kinds=['transcript'],profile=profile)
+        searches.append(commentary)
+        ranked = reciprocal_rank_fusion(commentary['evidence'],ranked)
+        extra = store.rpc(
+            "finn_results_keyword_search",
+            {
+                "p_symbol": symbol,
+                "p_query": " OR ".join(re.findall(r"[A-Za-z]{3,}", question + " " + topic)[:45]),
+                "p_document_ids": context["financial_documents"],
+                "p_limit": 10,
+            },
+        )
+        ranked = reciprocal_rank_fusion(ranked, extra)
     anchor_date = anchor.get("document_date", "")[:10]
     later_ids = []
     if context["intent"] == "later" and anchor_date:

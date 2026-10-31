@@ -22,6 +22,11 @@ evidence. It deliberately withholds a delivery verdict when a completed, compara
 target period is not established. This shows the distinction between reading management
 and evaluating what the evidence can support.
 
+Quarterly results add source-validated figures and deterministic QoQ/YoY changes,
+with accounting-basis controls and evidence for each figure and calculation. POLYCAB
+validates cleanly; CCL deliberately withholds damaged native cells. EBITDA stays
+unavailable where the primary filing does not report it.
+
 I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL keyword
 retrieval is complemented by a feature-flagged Gemini/pgvector/RRF implementation with
 incremental indexing and keyword fallback. The small CCL study and a later unprepared
@@ -40,7 +45,7 @@ do not become financial comparisons.
 I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
 Next I would expand independently verified financial extraction and four-quarter
 statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
-Frontend build and secret checks pass; the expanded local suite passes 112 tests. Deployed
+Frontend build and secret checks pass; the expanded local suite passes 154 tests. Deployed
 phone/desktop browser checks also pass. Free-hosting cold starts and upstream failures
 remain visible.
 When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date

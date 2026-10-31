@@ -34,6 +34,10 @@ See [acceptance](docs/ACCEPTANCE.md).
   removable; unsupported chronology abstains. See [workflow and checks](docs/EVIDENCE_WORKFLOW.md).
 - **Narrative/evidence:** one prepared INFY comparison traces earlier guidance against
   later call evidence, without pretending one quarter settles a full-year target.
+- **Quarterly results:** source-validated Revenue, reported EBITDA, PBT and group PAT
+  with deterministic QoQ/YoY changes, basis controls and figure-level evidence. POLYCAB
+  validates cleanly; CCL demonstrates withheld damaged cells. EBITDA stays unavailable
+  where it is not reported. [Implementation, examples and limits](docs/QUARTERLY_RESULTS.md).
 - **Resilience:** persistent jobs, content-hash document versions, answer caches, limited
   model calls, explicit errors, and a visibly dated recorded-demo snapshot if live
   saved updates cannot be read. Failed live research never becomes a fabricated answer.
@@ -76,7 +80,9 @@ verified corpora remain intact. A native decoding failure falls back to pypdf ov
 the same original PDF and records the warning.
 Every document retains original/final URLs, hash, fetch time and page numbers. Unknown
 publication/reporting dates stay unknown. Table cells are **candidates**, not approved
-facts. Financial table comparisons remain disabled. A quote repaired for PDF whitespace
+facts. Quarterly comparisons run only through the separate source-cell validation
+pipeline; ordinary narrative generation cannot invent financial table comparisons.
+A quote repaired for PDF whitespace
 is replaced with the original source slice; split/ambiguous numbers cannot validate a
 new figure. Citation matching does not mechanically prove semantic entailment: prepared
 claims are also reviewed against their primary evidence.

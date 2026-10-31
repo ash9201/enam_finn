@@ -290,7 +290,7 @@ def evidence_details(
     research_id: uuid.UUID,
     citation_id: uuid.UUID,
     symbol: str = Query(pattern=r"^[A-Z0-9&-]{1,30}$"),
-    claim_index: int | None = Query(default=None, ge=0, le=6),
+    claim_index: int | None = Query(default=None, ge=0, le=255),
 ):
     try:
         with open_store() as store:

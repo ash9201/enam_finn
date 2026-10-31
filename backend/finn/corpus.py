@@ -21,11 +21,19 @@ def now() -> str:
 
 
 def ingest_document(
-    store, client, company: dict, document: dict, *, progress=lambda stage: None
+    store,
+    client,
+    company: dict,
+    document: dict,
+    *,
+    progress=lambda stage: None,
+    downloaded=None,
+    extractor=None,
+    extraction_version=None,
 ) -> dict:
     progress("download")
     try:
-        data, final_url = fetch_pdf(client, document["source_url"])
+        data, final_url = downloaded or fetch_pdf(client, document["source_url"])
     except (httpx.TransportError, OSError):
         raise ValueError(
             f"The original {document['kind'].replace('_', ' ')} PDF could not be reached from this server. No other content was substituted."
@@ -39,12 +47,18 @@ def ingest_document(
         existing
         and existing[0]["state"] == "ready"
         and existing[0]["extraction_notes"].get("chunk_version") == CHUNK_VERSION
+        and (
+            not extraction_version
+            or existing[0]["extraction_notes"].get("financial_extraction_version")
+            == extraction_version
+        )
     ):
-        store.patch("finn_documents", {"fetched_at": now()}, id="eq." + document_id)
-        return {**existing[0], "reused_extraction": True}
+        checked_at = now()
+        store.patch("finn_documents", {"fetched_at": checked_at}, id="eq." + document_id)
+        return {**existing[0], "fetched_at": checked_at, "reused_extraction": True}
     fetched_at = now()
     logging.getLogger("pypdf").setLevel(logging.ERROR)
-    extracted = extract_document(
+    extracted = (extractor or extract_document)(
         data, {**document, "final_url": final_url, "fetched_at": fetched_at}, progress=progress
     )
     progress("saving")
@@ -74,6 +88,7 @@ def ingest_document(
             "financial_comparisons_enabled": False,
             "chunk_version": CHUNK_VERSION,
             "text_extractor": extracted.get("text_extractor", "pypdf"),
+            **({"financial_extraction_version": extraction_version} if extraction_version else {}),
         },
     }
     store.upsert("finn_documents", [record])

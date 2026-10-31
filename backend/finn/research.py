@@ -178,7 +178,18 @@ anchor. Explain the selected statement or investigate the user's new question wi
 assuming every follow-up is a chronological comparison.
 """
     request = {
-        "systemInstruction": {"parts": [{"text": instructions}]},
+        "systemInstruction": {
+            "parts": [
+                {
+                    "text": instructions
+                    + (
+                        "\nThe selected financial cell is for the specified reporting quarter. Other-period commentary is historical context, not proof of what caused this quarter's figures. Preserve forecasts and do not infer causation or calculate financial figures; validated figures and arithmetic are in the financial-results view."
+                        if context and context["citation"].get("financial_evidence")
+                        else ""
+                    )
+                }
+            ]
+        },
         "contents": [
             {
                 "parts": [
@@ -257,6 +268,10 @@ def research_company(
     progress=lambda stage: None,
 ) -> dict:
     symbol = symbol.upper().removesuffix(".NS")
+    from finn.financials import QUESTION as RESULTS_QUESTION, analyse_results
+
+    if question == RESULTS_QUESTION and not context_reference:
+        return analyse_results(store, symbol, refresh=refresh, publish=publish, progress=progress)
     context, anchor = None, None
     if context_reference:
         from finn.evidence import resolve_context
@@ -265,7 +280,32 @@ def research_company(
     corpus_options = {"refresh": refresh, "progress": progress}
     if include_history:
         corpus_options["include_history"] = True
-    corpus = ensure_corpus(store, symbol, **corpus_options)
+    if context and context.get("financial_documents") and not refresh and not include_history:
+        # A financial-only company need not have an annual report/transcript before
+        # its verified filing can be investigated. Explicit refresh/history requests
+        # still use normal discovery and propagate source failures.
+        company = store.rows("finn_companies", symbol="eq." + symbol, limit=1)[0]
+        coverage = company.get("coverage") or {}
+        corpus = {
+            **company,
+            "corpus_fingerprint": hashlib.sha256(
+                json.dumps(
+                    [company.get("corpus_fingerprint"), context["financial_documents"]]
+                ).encode()
+            ).hexdigest(),
+            "source_checked_at": company.get("source_checked_at")
+            or context["financial_source_checked_at"],
+            "coverage": {
+                "annual_reports": coverage.get("annual_reports", 0),
+                "transcripts": coverage.get("transcripts", 0),
+                "notes": coverage.get("notes", [])
+                + [
+                    "Financial filing evidence is included. Other company documents use their existing saved coverage; request fresh sources explicitly."
+                ],
+            },
+        }
+    else:
+        corpus = ensure_corpus(store, symbol, **corpus_options)
     from finn.comparison import COMPARISON_QUESTION, compare_management
 
     if question == COMPARISON_QUESTION and not context:
@@ -367,6 +407,22 @@ def research_company(
         ):
             claims = []
             assessment = "The retrieved documents did not support an independently cited answer. The selected passage has not been treated as corroboration."
+        if context and context["citation"].get("financial_evidence"):
+            from finn.financial_tables import shift_quarter
+
+            end = context["citation"]["financial_evidence"]["period_end"]
+            previous_end = shift_quarter(end, -3)
+            for claim in claims:
+                observed = claim["citation"].get("document_date", "")[:10]
+                claim["financial_context_timing"] = (
+                    "Source date unverified"
+                    if not observed
+                    else "Historical commentary"
+                    if observed <= previous_end
+                    else "After reporting quarter"
+                    if observed > end
+                    else "During reporting quarter"
+                )
     notes = list(corpus["coverage"]["notes"])
     if retrieval["fallback_reason"] == "index_incomplete":
         notes.append(
@@ -393,6 +449,10 @@ def research_company(
             "The available source passages do not support a reliable answer to this question. Try a narrower question or refresh the documents."
         )
     if context:
+        if context["citation"].get("financial_evidence"):
+            notes.append(
+                "Management commentary from other periods provides context, not proof of this quarter's drivers. Verified figures and deterministic changes remain in the financial-results view."
+            )
         notes.append(
             "The selected statement is a research anchor. Other company documents were searched; repetition alone does not establish delivery of a target."
         )

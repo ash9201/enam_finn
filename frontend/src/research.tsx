@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import Navigation from './navigation'
 import { publicRead } from './data'
 import ThemeSelector from './theme'
+import FinancialResults, {
+  RESULTS_QUESTION,
+  type ResultsData,
+  type FinancialEvidence,
+} from './financial-results'
 
 type Citation = {
   id: string
@@ -18,8 +23,9 @@ type Citation = {
   document_date?: string
   document_date_basis?: string
   document_date_pdf_page?: number
+  financial_evidence?: FinancialEvidence
 }
-type Claim = { statement: string; citation: Citation }
+type Claim = { statement: string; citation: Citation; financial_context_timing?: string }
 type Intent = 'question' | 'repeated' | 'later' | 'perspective'
 type EvidenceContext = {
   research_id: string
@@ -78,6 +84,7 @@ type Answer = {
   generated_at: string
   cached: boolean
   retrieval_mode: string
+  financial_results?: ResultsData
   evidence_context?: EvidenceContext
   investigation?: {
     other_documents_retrieved: number
@@ -218,13 +225,45 @@ function Evidence({
             ×
           </button>
         </div>
-        <h2 id="evidence-title">{citation.document_label}</h2>
+        <h2 id="evidence-title">
+          {citation.financial_evidence
+            ? `${citation.financial_evidence.metric} evidence`
+            : citation.document_label}
+        </h2>
+        {citation.financial_evidence && <p className="muted">{citation.document_label}</p>}
         <p className="muted">
-          {citation.kind === 'annual_report' ? 'Annual report' : 'Call transcript'} · PDF page{' '}
-          {citation.pdf_page}
+          {citation.kind === 'quarterly_results'
+            ? 'Quarterly results filing'
+            : citation.kind === 'annual_report'
+              ? 'Annual report'
+              : 'Call transcript'}{' '}
+          · PDF page {citation.pdf_page}
         </p>
       </div>
       <div className="evidence-scroll">
+        {citation.financial_evidence && (
+          <section className="financial-cell-evidence" aria-label="Selected financial source cell">
+            <p className="eyebrow">SELECTED SOURCE CELL</p>
+            <h3>
+              {citation.financial_evidence.currency} {citation.financial_evidence.raw_value}{' '}
+              {citation.financial_evidence.unit}
+            </h3>
+            <p>
+              {citation.financial_evidence.accounting_basis} · quarter ended{' '}
+              {citation.financial_evidence.period_end}
+            </p>
+            <p>
+              <strong>Reported row:</strong> {citation.financial_evidence.row_label}
+            </p>
+            <p>
+              <strong>Selected column:</strong> {citation.financial_evidence.column_header}
+            </p>
+            <details>
+              <summary>Original statement header</summary>
+              <pre>{citation.financial_evidence.table_header}</pre>
+            </details>
+          </section>
+        )}
         <p className="eyebrow">THE CLAIM YOU OPENED</p>
         <p className="evidence-claim">{selection.claim.statement}</p>
         <p className="eyebrow">EXACT SUPPORTING PASSAGE</p>
@@ -312,7 +351,8 @@ export default function ResearchApp() {
   const initial = new URLSearchParams(window.location.search)
   const [ticker, setTicker] = useState(initial.get('symbol') || 'INFY')
   const [question, setQuestion] = useState(
-    initial.get('question')?.slice(0, 600) || DEFAULT_QUESTION,
+    initial.get('question')?.slice(0, 600) ||
+      (initial.get('analysis') === 'results' ? RESULTS_QUESTION : DEFAULT_QUESTION),
   )
   const [needsRefresh, setNeedsRefresh] = useState(initial.get('refresh') === '1')
   const [answer, setAnswer] = useState<Answer | null>(null)
@@ -327,6 +367,7 @@ export default function ResearchApp() {
   const questionInput = useRef<HTMLTextAreaElement>(null)
   const composer = useRef<HTMLElement>(null)
   const [savedComparison, setSavedComparison] = useState<Answer | null>(null)
+  const [savedResults, setSavedResults] = useState<Answer | null>(null)
   const generation = useRef(0)
   const mounted = useRef(true)
 
@@ -352,7 +393,7 @@ export default function ResearchApp() {
     publicRead('finn_research_cache', {
       select: 'result,created_at',
       symbol: `eq.${ticker}`,
-      question: `eq.${DEFAULT_QUESTION}`,
+      question: `eq.${initial.get('analysis') === 'results' ? RESULTS_QUESTION : DEFAULT_QUESTION}`,
       is_public: 'eq.true',
       order: 'created_at.desc',
       limit: '1',
@@ -382,6 +423,19 @@ export default function ResearchApp() {
       })
       .catch(() => {})
     // A completed job should remain visible; switching companies triggers this read.
+    publicRead('finn_research_cache', {
+      select: 'result',
+      symbol: `eq.${ticker}`,
+      question: `eq.${RESULTS_QUESTION}`,
+      is_public: 'eq.true',
+      order: 'created_at.desc',
+      limit: '1',
+    })
+      .then((rows) => {
+        if (generation.current === token)
+          setSavedResults(rows[0] ? { ...rows[0].result, cached: true } : null)
+      })
+      .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker])
 
@@ -441,6 +495,7 @@ export default function ResearchApp() {
               'The service did not preserve the selected evidence context. No contextual answer was substituted. Retry after the service finishes updating.',
             )
           if (job.result.comparison) setSavedComparison(job.result)
+          if (job.result.financial_results) setSavedResults(job.result)
           if (answer?.symbol === symbol)
             setTrail((items) =>
               [...items.filter((item) => item.id !== answer.id), answer].slice(-6),
@@ -498,6 +553,7 @@ export default function ResearchApp() {
     setTrail([])
     setSelected(null)
     setSavedComparison(null)
+    setSavedResults(null)
     setQuestion(DEFAULT_QUESTION)
     setError('')
     setAnswer(null)
@@ -538,10 +594,11 @@ export default function ResearchApp() {
     setQuestion(DEFAULT_QUESTION)
     if (answer?.evidence_context) {
       setTrail((items) => [...items.filter((item) => item.id !== answer.id), answer].slice(-6))
-      setAnswer(
-        [...trail].reverse().find((item) => !item.evidence_context && item.symbol === ticker) ||
-          null,
-      )
+      const previous = [...trail]
+        .reverse()
+        .find((item) => !item.evidence_context && item.symbol === ticker)
+      setAnswer(previous || null)
+      if (previous?.financial_results) setQuestion(RESULTS_QUESTION)
     }
     setError('')
     focusComposer()
@@ -718,6 +775,24 @@ export default function ResearchApp() {
           </div>
         )}
         <div className="question-options" aria-label="Suggested questions">
+          {!context && (
+            <button
+              className="text-chip"
+              disabled={busy}
+              onClick={() => {
+                setQuestion(RESULTS_QUESTION)
+                if (savedResults?.symbol === ticker) {
+                  if (answer && answer.id !== savedResults.id)
+                    setTrail((items) =>
+                      [...items.filter((item) => item.id !== answer.id), answer].slice(-6),
+                    )
+                  setAnswer(savedResults)
+                } else void ask(false, RESULTS_QUESTION, null, false)
+              }}
+            >
+              Quarterly results ↗
+            </button>
+          )}
           {!context &&
             QUESTIONS.slice(1).map((prompt) => (
               <button
@@ -838,14 +913,35 @@ export default function ResearchApp() {
             </p>
           )}
           <div className="coverage-line">
-            <span>
-              {current.coverage.annual_reports} annual{' '}
-              {current.coverage.annual_reports === 1 ? 'report' : 'reports'}
-            </span>
-            <span>{current.coverage.transcripts} call transcripts</span>
-            <span>{current.retrieval_mode === 'hybrid' ? 'Hybrid search' : 'Keyword search'}</span>
+            {current.financial_results ? (
+              <>
+                <span>{current.financial_results.sources.length} primary results filings</span>
+                <span>Validated source cells</span>
+                <span>Deterministic comparisons</span>
+              </>
+            ) : (
+              <>
+                <span>
+                  {current.coverage.annual_reports} annual{' '}
+                  {current.coverage.annual_reports === 1 ? 'report' : 'reports'}
+                </span>
+                <span>{current.coverage.transcripts} call transcripts</span>
+                <span>
+                  {current.retrieval_mode === 'hybrid' ? 'Hybrid search' : 'Keyword search'}
+                </span>
+              </>
+            )}
           </div>
-          {current.claims.length ? (
+          {current.financial_results ? (
+            <FinancialResults
+              key={current.id}
+              data={current.financial_results}
+              onEvidence={(index) => {
+                const claim = current.claims[index]
+                if (claim) setSelected(evidenceSelection(current, claim))
+              }}
+            />
+          ) : current.claims.length ? (
             <ol className="claim-list">
               {current.claims.map((claim, index) => (
                 <li key={`${claim.citation.id}-${index}`}>
@@ -853,20 +949,21 @@ export default function ResearchApp() {
                   <div>
                     {current.evidence_context && (
                       <span className="source-relation">
-                        {claim.citation.document_id ===
-                        current.evidence_context.citation.document_id
-                          ? 'Starting document'
-                          : claim.citation.document_date &&
-                              current.evidence_context.citation.document_date &&
-                              claim.citation.document_date.slice(0, 10) >
-                                current.evidence_context.citation.document_date.slice(0, 10)
-                            ? 'Later source'
+                        {claim.financial_context_timing ||
+                          (claim.citation.document_id ===
+                          current.evidence_context.citation.document_id
+                            ? 'Starting document'
                             : claim.citation.document_date &&
                                 current.evidence_context.citation.document_date &&
-                                claim.citation.document_date.slice(0, 10) <
+                                claim.citation.document_date.slice(0, 10) >
                                   current.evidence_context.citation.document_date.slice(0, 10)
-                              ? 'Earlier source'
-                              : 'Another company document'}
+                              ? 'Later source'
+                              : claim.citation.document_date &&
+                                  current.evidence_context.citation.document_date &&
+                                  claim.citation.document_date.slice(0, 10) <
+                                    current.evidence_context.citation.document_date.slice(0, 10)
+                                ? 'Earlier source'
+                                : 'Another company document')}
                         {claim.citation.document_date
                           ? ' · ' +
                             new Intl.DateTimeFormat('en-IN', {

@@ -1,5 +1,24 @@
 # Build history summary
 
+### Quarterly financial results (31 October)
+
+- Added generic primary quarterly-filing discovery, geometry-preserving native cell
+  extraction, schema-bound optional row mapping and deterministic comparison policy.
+  Shared storage/jobs/caches/evidence remain in use; no new paid service/dependency.
+- Applied 0008 with RLS preserved. Fixed an initial incorrect SQL ORDER BY ordinal
+  after the owner's error report; the revised private RPC passes access checks.
+- Validated original POLYCAB/CCL PDFs before coverage expansion. Fixed merged/wrapped
+  quarter headers so six-month columns cannot enter quarterly comparisons. CCL's
+  decimal-damaged native text is withheld, not repaired. EBITDA is not fabricated.
+- Added a compact two-table view, explicit accounting basis, restatement labels,
+  formula/source inspection and financial-context research. A numerical anchor had
+  overwhelmed a qualitative question: added question-only transcript retrieval and
+  labelled other-period commentary; retained validation abstentions.
+- Used targeted tests while building; final backend regression 154 passed. Affected
+  components pass four viewport/theme combinations, build, contrast/overflow and
+  credential scanning. Verified the follow-up once; other theme checks reuse source data without model calls.
+- See [QUARTERLY_RESULTS.md](QUARTERLY_RESULTS.md) for real figures, policies and limits.
+
 ### Evidence-first research interaction (31 October)
 
 - Made claims and citation chips open a responsive evidence panel with exact quote,

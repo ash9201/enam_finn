@@ -42,3 +42,11 @@ return to general company research. Repetition can add available earlier calls u
 the same generic pipeline. A lack of independently dated later sources should display
 “not yet assessable,” rather than suggest that a financial target was met or missed.
 See [verified real-source cases](EVIDENCE_WORKFLOW.md).
+
+Optional financial segment: open POLYCAB → **Quarterly results**, compare the three
+reported quarter columns, inspect a QoQ calculation, and open either source figure.
+Switch accounting basis to see explicitly labelled restated comparatives. CCL shows
+why source validation matters: damaged native cells remain missing. EBITDA remains
+unreported in these filings. Ask about a figure to investigate primary company
+commentary, keeping other-period statements distinct from proven quarter drivers.
+See [quarterly policies and verified examples](QUARTERLY_RESULTS.md).

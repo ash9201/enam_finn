@@ -14,6 +14,7 @@
     "test:prices": "node scripts/verify-price-sources.mjs",
     "test:theme": "node scripts/verify-theme.mjs",
     "test:evidence": "node scripts/verify-evidence.mjs",
+    "test:financial": "node scripts/verify-financial-results.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "record:demo": "node scripts/record-demo.mjs"
   },

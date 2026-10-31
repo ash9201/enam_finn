@@ -213,6 +213,14 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
         <p className="filing-description">{filing.description.split('|SUBJECT:')[0]}</p>
         <p className="review-reason">{filing.review_reason}</p>
         <div className="filing-actions">
+          {filing.category === 'results' && (
+            <a
+              href={`?view=research&symbol=${encodeURIComponent(filing.symbol)}&analysis=results`}
+              className="investigate-link"
+            >
+              Compare quarters ↗
+            </a>
+          )}
           <a href={researchLink(filing.symbol, true)} className="investigate-link">
             Investigate ↗
           </a>
