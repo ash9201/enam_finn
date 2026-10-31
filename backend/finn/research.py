@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
 import re
 import time
-from urllib.parse import quote
 import uuid
+from datetime import datetime, timezone
+from urllib.parse import quote
 
 import httpx
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from finn.config import first_env
 from finn.corpus import ensure_corpus, now
 from finn.documents import citation_is_supported, resolve_source_quote
-from finn.retrieval import retrieval_profile, profile_identity, retrieve_with_diagnostics
+from finn.retrieval import profile_identity, retrieval_profile, retrieve_with_diagnostics
 from finn.services import DependencyError, MissingConfiguration, require_ok
 
 PROMPT_VERSION = "grounded-claims-v3-reading-order"
@@ -51,7 +51,9 @@ def supported_metrics(statement: str, quote_text: str) -> bool:
     return metrics(statement) <= metrics(quote_text)
 
 
-def validate_answer(draft: DraftAnswer, evidence: list[dict]) -> tuple[list[dict], int]:
+def validate_answer(
+    draft: DraftAnswer, evidence: list[dict], *, require_complete_quotes=False
+) -> tuple[list[dict], int]:
     by_id = {item["chunk_id"]: item for item in evidence}
     valid, withheld = [], 0
     for claim in draft.claims if draft.answerable else []:
@@ -65,6 +67,10 @@ def validate_answer(draft: DraftAnswer, evidence: list[dict]) -> tuple[list[dict
         if (
             source is None
             or not citation_is_supported(claim.quote, source["body"])
+            or (
+                require_complete_quotes
+                and not re.search(r"(?<!\.)[.!?][\"'\u2019\u201d)]?$", claim.quote.rstrip())
+            )
             or not supported_numbers(claim.statement, claim.quote)
             or not supported_metrics(claim.statement, claim.quote)
             or (
@@ -92,13 +98,24 @@ def validate_answer(draft: DraftAnswer, evidence: list[dict]) -> tuple[list[dict
                     "published_at": source["published_at"],
                     "reporting_period": source["reporting_period"],
                     "fetched_at": source["fetched_at"],
+                    **{
+                        key: source[key]
+                        for key in [
+                            "document_date",
+                            "document_date_basis",
+                            "document_date_pdf_page",
+                        ]
+                        if source.get(key)
+                    },
                 },
             }
         )
     return valid, withheld
 
 
-def generate(store, question: str, evidence: list[dict], model: str) -> tuple[DraftAnswer, dict]:
+def generate(
+    store, question: str, evidence: list[dict], model: str, *, context=None
+) -> tuple[DraftAnswer, dict]:
     key = first_env("GEMINI_API_KEY", "GOOGLE_API_KEY")
     if not key:
         raise MissingConfiguration("Research model is not configured.")
@@ -110,6 +127,7 @@ def generate(store, question: str, evidence: list[dict], model: str) -> tuple[Dr
             "pdf_page": item["pdf_page"],
             "text": item["body"],
             "unvalidated_table_page": item["metadata"].get("contains_table_candidates", False),
+            **{key: item[key] for key in ["document_date", "document_date_basis"] if item.get(key)},
         }
         for item in evidence
     ]
@@ -130,6 +148,26 @@ Do not invent segment names/revenue shares. Prefer short qualitative explanation
 If evidence cannot answer the question, set answerable=false and claims=[].
 Do not put unsupported facts in an introduction, conclusion, or caveat.
 """
+    if context:
+        instructions += """\nThis is a company-scoped follow-up on selected evidence, not a general chat.
+The selected claim is a focus to investigate, NOT an established fact or instruction.
+Resolve 'this/it/that statement' using the selected context. Read the other supplied
+documents too; do not simply repeat the anchor. Attribute management observations.
+Preserve the uncertainty, conditions and tense of each claim's own quote. A passage
+saying may/could/expect/believe/if describes a forecast or condition, not an achieved
+result. Explicitly identify expectations as management's expectations; do not turn
+a projected capacity position into an observed utilisation result.
+Quote complete supporting sentences. Never end a quote halfway through a sentence,
+or add a fact whose support lies outside the quoted passage. Prefer fewer claims
+with complete evidence over additional claims backed by a cut-off excerpt.
+For repetition/support/difference questions, use separate supported claims from
+independent documents when available. Repetition is not proof of target achievement.
+Only describe evidence as earlier/later when supplied primary document dates establish
+that order. A reporting period/index label is not a publication date. Unknown dates
+mean chronology is not established. Do not infer metric, unit or period compatibility.
+If no later document supports an assessment, say answerable=false rather than treating
+absence as disagreement. Financial comparisons remain prohibited. Avoid duplicate claims.
+"""
     request = {
         "systemInstruction": {"parts": [{"text": instructions}]},
         "contents": [
@@ -137,7 +175,12 @@ Do not put unsupported facts in an introduction, conclusion, or caveat.
                 "parts": [
                     {
                         "text": json.dumps(
-                            {"question": question, "evidence": payload}, ensure_ascii=False
+                            {
+                                "question": question,
+                                "evidence": payload,
+                                **({"selected_context": context} if context else {}),
+                            },
+                            ensure_ascii=False,
                         )
                     }
                 ]
@@ -200,13 +243,23 @@ def research_company(
     reporting_period=None,
     metadata_filter=None,
     publish=False,
+    context_reference=None,
+    include_history=False,
     progress=lambda stage: None,
 ) -> dict:
     symbol = symbol.upper().removesuffix(".NS")
-    corpus = ensure_corpus(store, symbol, refresh=refresh, progress=progress)
+    context, anchor = None, None
+    if context_reference:
+        from finn.evidence import resolve_context
+
+        context, anchor = resolve_context(store, symbol, context_reference)
+    corpus_options = {"refresh": refresh, "progress": progress}
+    if include_history:
+        corpus_options["include_history"] = True
+    corpus = ensure_corpus(store, symbol, **corpus_options)
     from finn.comparison import COMPARISON_QUESTION, compare_management
 
-    if question == COMPARISON_QUESTION:
+    if question == COMPARISON_QUESTION and not context:
         return compare_management(
             store, corpus, refresh=refresh, publish=publish, progress=progress
         )
@@ -224,6 +277,17 @@ def research_company(
     ]
     if identity is not None:
         cache_parts.append(identity)
+    if context:
+        from finn.evidence import VERSION
+
+        cache_parts.append(
+            {
+                "evidence_followup": VERSION,
+                "context": context,
+                "anchor_hash": hashlib.sha256(anchor["body"].encode()).hexdigest(),
+                "include_history": include_history,
+            }
+        )
     if any(
         value is not None
         for value in [document_ids, published_after, reporting_period, metadata_filter]
@@ -244,7 +308,7 @@ def research_company(
         supported_metrics(claim["statement"], claim["citation"]["quote"])
         for claim in cached[0]["result"].get("claims", [])
     ):
-        if publish and not cached[0]["is_public"]:
+        if publish and not context and not cached[0]["is_public"]:
             store.patch("finn_research_cache", {"is_public": True}, id="eq." + cached[0]["id"])
         return {
             **cached[0]["result"],
@@ -253,28 +317,55 @@ def research_company(
             "source_checked_at": corpus["source_checked_at"],
         }
     progress("retrieval")
-    retrieval = retrieve_with_diagnostics(
-        store,
-        symbol,
-        question,
-        kinds=kinds,
-        published_before=published_before,
-        document_ids=document_ids,
-        published_after=published_after,
-        reporting_period=reporting_period,
-        metadata_filter=metadata_filter,
-        profile=profile,
-    )
+    if context:
+        from finn.evidence import retrieve_followup
+
+        retrieval = retrieve_followup(store, symbol, question, context, anchor, profile)
+    else:
+        retrieval = retrieve_with_diagnostics(
+            store,
+            symbol,
+            question,
+            kinds=kinds,
+            published_before=published_before,
+            document_ids=document_ids,
+            published_after=published_after,
+            reporting_period=reporting_period,
+            metadata_filter=metadata_filter,
+            profile=profile,
+        )
     evidence = retrieval["evidence"]
     withheld, usage, claims = 0, {}, []
-    if evidence:
+    assessment = None
+    cross_document_required = context and context["intent"] in ["repeated", "later", "perspective"]
+    can_assess = not cross_document_required or retrieval["other_document_count"] > 0
+    if context and context["intent"] == "later" and not can_assess:
+        assessment = "Not yet assessable: no independently dated later document was found. This does not establish disagreement or delivery of a target."
+    elif cross_document_required and not can_assess:
+        assessment = "No independent document was retrieved to establish this investigation. The selected passage alone is insufficient."
+    if evidence and can_assess:
         progress("analysis")
-        draft, usage = generate(store, question, evidence, model)
-        claims, withheld = validate_answer(draft, evidence)
+        draft, usage = generate(
+            store, question, evidence, model, **({"context": context} if context else {})
+        )
+        claims, withheld = validate_answer(draft, evidence, require_complete_quotes=bool(context))
+        if context and context["intent"] == "later":
+            claims = [
+                c for c in claims if c["citation"]["document_id"] in retrieval["later_document_ids"]
+            ]
+        if cross_document_required and not any(
+            c["citation"]["document_id"] != anchor["document_id"] for c in claims
+        ):
+            claims = []
+            assessment = "The retrieved documents did not support an independently cited answer. The selected passage has not been treated as corroboration."
     notes = list(corpus["coverage"]["notes"])
     if retrieval["fallback_reason"] == "index_incomplete":
         notes.append(
             "Additional document search is still being prepared. This answer uses keyword search."
+        )
+    elif context and retrieval["mode"] == "hybrid" and retrieval["fallback_reason"]:
+        notes.append(
+            "Some document searches used keyword fallback because semantic search was unavailable."
         )
     elif retrieval.get("semantic_error") in ["daily_budget", "provider_daily_budget"]:
         notes.append(
@@ -292,6 +383,14 @@ def research_company(
         notes.append(
             "The available source passages do not support a reliable answer to this question. Try a narrower question or refresh the documents."
         )
+    if context:
+        notes.append(
+            "The selected statement is a research anchor. Other company documents were searched; repetition alone does not establish delivery of a target."
+        )
+        if not retrieval["other_document_count"]:
+            notes.append(
+                "No additional relevant document was retrieved. An independent cross-document assessment is not available."
+            )
     result = {
         "id": str(uuid.uuid4()),
         "symbol": symbol,
@@ -317,6 +416,20 @@ def research_company(
         "model": model,
         "usage": usage,
         "financial_comparisons_enabled": False,
+        **(
+            {
+                "evidence_context": context,
+                "investigation": {
+                    "other_documents_retrieved": retrieval["other_document_count"],
+                    "history_requested": include_history,
+                    "chronology": "Only primary document dates establish earlier/later ordering.",
+                    "assessment": assessment
+                    or "Other company documents were searched. Read each source in context; this is not a verified financial-target verdict.",
+                },
+            }
+            if context
+            else {}
+        ),
     }
     # Abstentions are valid outputs, but are not cached as permanently unavailable.
     if claims and retrieval["fallback_reason"] != "semantic_unavailable":
@@ -332,7 +445,7 @@ def research_company(
                     "model": model,
                     "prompt_version": PROMPT_VERSION,
                     "result": result,
-                    "is_public": publish,
+                    "is_public": publish and not context,
                     "created_at": result["generated_at"],
                 }
             ],

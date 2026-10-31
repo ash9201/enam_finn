@@ -1,5 +1,23 @@
 # Build history summary
 
+### Evidence-first research interaction (31 October)
+
+- Made claims and citation chips open a responsive evidence panel with exact quote,
+  original PDF/page/link and separately verified dates. Added contextual follow-ups,
+  three investigation paths, removable context and a short research trail.
+- Reused persisted jobs, generic ingestion, keyword/hybrid retrieval and answer caches.
+  Context references are resolved server-side; private answers cannot publish through
+  the prepared-answer flag. Added optional two-report/four-call history acquisition.
+- Later investigations require primary chronology and independently cited later sources;
+  absent support abstains without a model call. Source review caught forecast wording
+  becoming an observation; tightened the versioned follow-up prompt and rechecked it.
+- Verified real CCL July/October documents and generic POLYCAB history. Browser testing
+  caught and fixed modal focus restoration. Also guarded partial-sentence quotes and
+  disambiguated individual claims sharing a chunk. 128 backend tests, four evidence interaction
+  combinations, 44 theme scenes, build and credential scan pass. No new migration,
+  dependency, paid service, scheduler change or semantic flag change.
+- Details and reproducible opt-in checks: [EVIDENCE_WORKFLOW.md](EVIDENCE_WORKFLOW.md).
+
 This record does not replace the assignment's required coding-agent conversation
 exports/share links. Export those separately, redact credentials, and never bundle
 `.env.local` into build history.

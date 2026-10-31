@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
 import json
 import logging
 import uuid
-import httpx
-from finn import embeddings
+from datetime import datetime, timezone
 
+import httpx
+
+from finn import embeddings
 from finn.documents import extract_document
 from finn.retrieval import CHUNK_VERSION, chunk_pages
 from finn.sources import discover_documents, fetch_pdf, public_client, resolve_company
@@ -99,7 +100,9 @@ def ingest_document(
     return {**record, "state": "ready", "chunks": len(chunks), "reused_extraction": False}
 
 
-def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: None) -> dict:
+def ensure_corpus(
+    store, symbol: str, *, refresh=False, include_history=False, progress=lambda stage: None
+) -> dict:
     existing = store.rows("finn_companies", symbol="eq." + symbol, limit=1)
     if existing and existing[0]["manifest"] and existing[0]["source_checked_at"] and not refresh:
         checked = datetime.fromisoformat(existing[0]["source_checked_at"])
@@ -113,7 +116,14 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
             and doc["extraction_notes"].get("chunk_version") == CHUNK_VERSION
             for doc in documents
         )
-        if current_index and (datetime.now(timezone.utc) - checked).total_seconds() < 86400:
+        history_ready = not include_history or existing[0].get("coverage", {}).get(
+            "history_requested", False
+        )
+        if (
+            current_index
+            and history_ready
+            and (datetime.now(timezone.utc) - checked).total_seconds() < 86400
+        ):
             embeddings.schedule_backfill(symbol)
             return {**existing[0], "reused_corpus": True}
     progress("discovery")
@@ -138,8 +148,11 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
             conflict="symbol",
         )
         discovery = discover_documents(client, company)
+        history = include_history or previous.get("coverage", {}).get("history_requested", False)
+        reports, calls = (2, 4) if history else (1, 2)
         selected = (
-            discovery["documents"]["annual_report"][:1] + discovery["documents"]["transcript"][:2]
+            discovery["documents"]["annual_report"][:reports]
+            + discovery["documents"]["transcript"][:calls]
         )
         documents = []
         for index, document in enumerate(selected):
@@ -156,6 +169,7 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
             )
     # Activate the manifest only after every selected document is fully stored. A failed
     # refresh cannot replace the last complete corpus with partially ingested evidence.
+    documents = list({doc["id"]: doc for doc in documents}.values())
     manifest = sorted({doc["id"] for doc in documents})
     fingerprint = hashlib.sha256(
         json.dumps([CHUNK_VERSION, sorted(doc["sha256"] for doc in documents)]).encode()
@@ -163,13 +177,18 @@ def ensure_corpus(store, symbol: str, *, refresh=False, progress=lambda stage: N
     coverage = {
         "annual_reports": sum(doc["kind"] == "annual_report" for doc in documents),
         "transcripts": sum(doc["kind"] == "transcript" for doc in documents),
-        "target_annual_reports": 1,
-        "target_transcripts": 2,
+        "target_annual_reports": reports,
+        "target_transcripts": calls,
+        "history_requested": history,
         "notes": [
             "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
             "Financial table candidates are not approved for comparisons.",
         ],
     }
+    if coverage["annual_reports"] < reports or coverage["transcripts"] < calls:
+        coverage["notes"].append(
+            "Fewer historical documents were exposed by the primary-link index than requested; available coverage is shown."
+        )
     updated = {
         "manifest": manifest,
         "corpus_fingerprint": fingerprint,

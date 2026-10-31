@@ -1,23 +1,23 @@
 from __future__ import annotations
 
+import hmac
 import re
 import uuid
-import hmac
-from typing import Literal
 from concurrent.futures import ThreadPoolExecutor
+from typing import Literal
 
 import httpx
-
-from fastapi import APIRouter, HTTPException, Query, Header
+from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from finn import jobs
 from finn.config import supabase_configuration
 from finn.corpus import now
+from finn.evidence import EvidenceReference, resolve_context
 from finn.research import DEFAULT_QUESTION
 from finn.services import DependencyError, MissingConfiguration
-from finn.store import open_store
 from finn.source_sync import run_sync, scheduled_mode
+from finn.store import open_store
 
 router = APIRouter()
 
@@ -146,6 +146,8 @@ class ResearchRequest(BaseModel):
     symbol: str = Field(min_length=1, max_length=30, pattern=r"^[A-Z0-9&-]+$")
     question: str = Field(default=DEFAULT_QUESTION, min_length=8, max_length=600)
     refresh: bool = False
+    context: EvidenceReference | None = None
+    include_history: bool = False
 
     @field_validator("symbol", mode="before")
     @classmethod
@@ -212,6 +214,16 @@ def prepared_research(symbol: str):
 def start_research(request: ResearchRequest):
     try:
         with open_store() as store:
+            context_request = (
+                request.context.model_dump(mode="json", exclude_none=True)
+                if request.context
+                else None
+            )
+            if context_request:
+                try:
+                    resolve_context(store, request.symbol, context_request)
+                except ValueError as exc:
+                    raise HTTPException(422, str(exc)) from None
             security = store.rpc("finn_research_security_status", {})
             if (
                 len(security.get("rls", {})) != 7
@@ -227,14 +239,23 @@ def start_research(request: ResearchRequest):
             active = store.rows(
                 "finn_research_jobs",
                 state="in.(queued,running)",
-                select="id,symbol,question,refresh",
+                select="id,symbol,question,refresh,result",
                 limit=3,
             )
             for job in active:
-                if (job["symbol"], job["question"], job["refresh"]) == (
+                saved_request = (job.get("result") or {}).get("_request", {})
+                if (
+                    job["symbol"],
+                    job["question"],
+                    job["refresh"],
+                    saved_request.get("context"),
+                    saved_request.get("include_history", False),
+                ) == (
                     request.symbol,
                     request.question,
                     request.refresh,
+                    context_request,
+                    request.include_history,
                 ):
                     return {"job_id": job["id"], "state": "queued"}
             if len(active) >= 3:
@@ -248,11 +269,41 @@ def start_research(request: ResearchRequest):
                     "question": request.question,
                     "refresh": request.refresh,
                     "updated_at": now(),
-                    "result": {"_worker": jobs.INSTANCE_ID, "_service": jobs.SERVICE_SCOPE},
+                    "result": {
+                        "_worker": jobs.INSTANCE_ID,
+                        "_service": jobs.SERVICE_SCOPE,
+                        "_request": {
+                            "context": context_request,
+                            "include_history": request.include_history,
+                        },
+                    },
                 },
             )
         jobs.submit(job_id)
         return {"job_id": job_id, "state": "queued"}
+    except (DependencyError, MissingConfiguration) as exc:
+        raise HTTPException(503, jobs.safe_error(exc)) from None
+
+
+@router.get("/research/{research_id}/evidence/{citation_id}")
+def evidence_details(
+    research_id: uuid.UUID,
+    citation_id: uuid.UUID,
+    symbol: str = Query(pattern=r"^[A-Z0-9&-]{1,30}$"),
+    claim_index: int | None = Query(default=None, ge=0, le=6),
+):
+    try:
+        with open_store() as store:
+            context, _ = resolve_context(
+                store,
+                symbol,
+                EvidenceReference(
+                    research_id=research_id, citation_id=citation_id, claim_index=claim_index
+                ),
+            )
+            return context
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None
     except (DependencyError, MissingConfiguration) as exc:
         raise HTTPException(503, jobs.safe_error(exc)) from None
 

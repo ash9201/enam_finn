@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
 import os
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 
 from finn.corpus import now
 from finn.research import research_company
@@ -79,8 +79,19 @@ def run_job(job_id: str):
 
         try:
             progress("discovery")
+            request = (job.get("result") or {}).get("_request", {})
+            extra = {}
+            if request.get("context"):
+                extra["context_reference"] = request["context"]
+            if request.get("include_history"):
+                extra["include_history"] = True
             result = research_company(
-                store, job["symbol"], job["question"], refresh=job["refresh"], progress=progress
+                store,
+                job["symbol"],
+                job["question"],
+                refresh=job["refresh"],
+                progress=progress,
+                **extra,
             )
             store.patch(
                 "finn_research_jobs",

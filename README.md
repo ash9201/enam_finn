@@ -25,8 +25,13 @@ See [acceptance](docs/ACCEPTANCE.md).
 - **Portfolio:** 15 verified NSE companies, real saved EOD closes, sector labels and
   explicit session/refresh dates. This is a mock watchlist, without trading or P&L.
 - **Research:** any valid NSE ticker with accessible primary reports/transcripts uses
-  the same generic pipeline. Prepared examples: INFY, POLYCAB and CCL, each with one
-  annual report and two transcripts. Answers have page-level source quotes.
+  the same generic pipeline. Prepared examples: INFY, POLYCAB and CCL, initially with
+  one annual report and two transcripts. POLYCAB history now covers two reports/four calls.
+  Answers have page-level source quotes.
+- **Evidence investigation:** clickable claims and citations open exact source passages.
+  Ask a contextual follow-up across company documents, investigate repetition/later
+  evidence, add available history, or return to general research. Context is visible and
+  removable; unsupported chronology abstains. See [workflow and checks](docs/EVIDENCE_WORKFLOW.md).
 - **Narrative/evidence:** one prepared INFY comparison traces earlier guidance against
   later call evidence, without pretending one quarter settles a full-year target.
 - **Resilience:** persistent jobs, content-hash document versions, answer caches, limited

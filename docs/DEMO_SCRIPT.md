@@ -33,3 +33,12 @@ python scripts/npm.py run record:demo
 ```
 
 Browser emulation is not a physical-device test.
+
+For a longer evidence investigation, open a CCL claim, select **What happened later?**,
+and inspect the visible selected statement before submitting. Follow-up answers cite
+other documents with their actual observed dates; the selected passage stays accessible.
+Use **Ask about this evidence** on a new claim to continue, or remove the context to
+return to general company research. Repetition can add available earlier calls using
+the same generic pipeline. A lack of independently dated later sources should display
+“not yet assessable,” rather than suggest that a financial target was met or missed.
+See [verified real-source cases](EVIDENCE_WORKFLOW.md).

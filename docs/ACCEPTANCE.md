@@ -1,5 +1,12 @@
 # Working-prototype acceptance
 
+**Evidence-first research update (31 October):** 128 backend tests, production frontend
+build, bundle credential scan, four real-API viewport/theme interaction checks and
+44 theme scenes pass. CCL July→October cross-document research and zero-model
+abstention with no later source are verified. POLYCAB history ingestion reaches two
+reports/four calls. [Detailed evidence workflow and limits](EVIDENCE_WORKFLOW.md).
+Earlier milestone counts and source failures below are historical records.
+
 The deployment/dependency gate was verified on 30 October 2026. A reasoning-model timeout
 passed a bounded minimal retry; later complex requests exposed repeated latency. The
 working prototype therefore records actual model routing and uses a bounded fallback.
