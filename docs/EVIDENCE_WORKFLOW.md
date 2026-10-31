@@ -91,9 +91,10 @@ Financial table comparisons remain disabled.
 | July cost-plus statement → later-document investigation | Insufficient support; no forced corroboration from unrelated October commentary. |
 | Focused freeze-dried demand repetition check | October p. 7 supplies an independent supporting statement. This does not establish repetition of July's aggregate utilisation percentage. |
 | Pricing perspective follow-up | October pp. 7/13 supply management's pricing explanation and explicitly conditional demand belief; no fabricated disagreement or target verdict. |
+| General follow-up from an annual-report business claim without a verified date | Retrieved calls and answered the demand question. Direct deployed-browser testing exposed an overly broad chronological instruction; it now applies only to the later-evidence path. |
 | October statement → no independently dated later document | `insufficient_evidence`, no claims and zero model usage. |
 | POLYCAB optional history acquisition | Two real annual reports and four transcripts ready through generic ingestion; original source metadata retained. |
-| Backend regression | 128 tests passed, including company-bound references, same-passage claim identity, stale quotes, chronology, complete-quote checks, duplicate-call exclusion, cache isolation, job context and abstention. |
+| Backend regression | 129 tests passed, including company-bound references, same-passage claim identity, stale quotes, chronology, general questions without dated anchors, complete-quote checks, duplicate-call exclusion, cache isolation, job context and abstention. |
 | Browser interaction | Four viewport/theme combinations: 390×844 and 1440×1000, Light and Dark. Exact passage, real API evidence reads and cached follow-up jobs, source ordering, focus, context removal/restoration, company reset and missing-context failure guard passed. |
 | Theme regression | 44 existing scenes passed: system preference, persistence, contrast, startup and responsive states. |
 | Build/security | TypeScript/Vite production build and privileged-credential bundle scan passed. |

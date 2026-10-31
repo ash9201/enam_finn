@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from finn.documents import resolve_source_quote
 from finn.retrieval import diversify, reciprocal_rank_fusion, retrieve_with_diagnostics
 
-VERSION = "evidence-followup-v4"
+VERSION = "evidence-followup-v5"
 DOCUMENT_FIELDS = (
     "id,kind,source_url,final_url,discovery_label,published_at,reporting_period,fetched_at"
 )

@@ -1,6 +1,6 @@
 # Working-prototype acceptance
 
-**Evidence-first research update (31 October):** 128 backend tests, production frontend
+**Evidence-first research update (31 October):** 129 backend tests, production frontend
 build, bundle credential scan, four real-API viewport/theme interaction checks and
 44 theme scenes pass. CCL July→October cross-document research and zero-model
 abstention with no later source are verified. POLYCAB history ingestion reaches two

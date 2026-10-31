@@ -326,6 +326,47 @@ def test_no_later_evidence_abstains_without_model_call(monkeypatch):
     assert "Not yet assessable" in result["investigation"]["assessment"]
 
 
+def test_general_evidence_question_can_answer_without_chronology(monkeypatch):
+    store = Store()
+    context = setup_research(monkeypatch, store, other=False)
+    context["citation"].pop("document_date")
+    monkeypatch.setattr(
+        evidence,
+        "retrieve_followup",
+        lambda *a: {
+            "evidence": [passage()],
+            "mode": "keyword",
+            "fallback_reason": None,
+            "latency_ms": 1,
+            "other_document_count": 0,
+            "later_document_ids": [],
+            "chronology_available": False,
+        },
+    )
+    monkeypatch.setattr(
+        research,
+        "generate",
+        lambda *a, **kw: (
+            research.DraftAnswer(
+                answerable=True,
+                claims=[
+                    research.DraftClaim(
+                        statement="Management describes a cost-plus model.",
+                        evidence_id=CHUNK,
+                        quote=BODY,
+                    )
+                ],
+            ),
+            {},
+        ),
+    )
+    result = research.research_company(
+        store, "CCL", "What did management describe?", context_reference=ref()
+    )
+    assert result["status"] == "answered" and result["claims"]
+    assert not result["evidence_context"]["citation"].get("document_date")
+
+
 def test_followup_withholds_a_quote_cut_off_before_the_supporting_fact():
     source = passage()
     source["body"] = "The trend was accentuated when coffee prices"

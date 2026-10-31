@@ -165,8 +165,17 @@ independent documents when available. Repetition is not proof of target achievem
 Only describe evidence as earlier/later when supplied primary document dates establish
 that order. A reporting period/index label is not a publication date. Unknown dates
 mean chronology is not established. Do not infer metric, unit or period compatibility.
-If no later document supports an assessment, say answerable=false rather than treating
-absence as disagreement. Financial comparisons remain prohibited. Avoid duplicate claims.
+Financial comparisons remain prohibited. Avoid duplicate claims.
+"""
+        if context["intent"] == "later":
+            instructions += """\nThis is a later-evidence investigation. If no later document
+supports an assessment, say answerable=false rather than treating absence as disagreement.
+"""
+        else:
+            instructions += """\nAnswer from any relevant supplied company evidence, including
+the other documents. This investigation does NOT require a later document or a dated
+anchor. Explain the selected statement or investigate the user's new question without
+assuming every follow-up is a chronological comparison.
 """
     request = {
         "systemInstruction": {"parts": [{"text": instructions}]},

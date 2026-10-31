@@ -13,7 +13,10 @@
   becoming an observation; tightened the versioned follow-up prompt and rechecked it.
 - Verified real CCL July/October documents and generic POLYCAB history. Browser testing
   caught and fixed modal focus restoration. Also guarded partial-sentence quotes and
-  disambiguated individual claims sharing a chunk. 128 backend tests, four evidence interaction
+  disambiguated individual claims sharing a chunk. Direct deployed-browser testing
+  exposed an overly broad chronological instruction for general follow-ups; restricted
+  that rule to the later-evidence intent and verified a date-unknown annual-report anchor.
+  129 backend tests, four evidence interaction
   combinations, 44 theme scenes, build and credential scan pass. No new migration,
   dependency, paid service, scheduler change or semantic flag change.
 - Details and reproducible opt-in checks: [EVIDENCE_WORKFLOW.md](EVIDENCE_WORKFLOW.md).
