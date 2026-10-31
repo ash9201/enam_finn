@@ -6,6 +6,9 @@
   gap: 28px;
   align-items: center;
   font-size: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
 .research-header a {
   text-decoration: none;
@@ -15,7 +18,7 @@
   font-weight: 650;
 }
 .muted {
-  color: #6b786f;
+  color: var(--text-muted);
 }
 .research-intro {
   margin: 58px 0 36px;
@@ -29,8 +32,8 @@
 }
 .research-form {
   padding: 26px;
-  background: #fffefa;
-  border: 1px solid #dedfd5;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
 }
 .research-form h2 {
@@ -46,7 +49,7 @@
   flex-direction: column;
   gap: 9px;
   font-size: 11px;
-  color: #627367;
+  color: var(--text-secondary);
   font-weight: 550;
 }
 .ticker-label {
@@ -58,10 +61,10 @@
 }
 .research-form input,
 .research-form textarea {
-  background: #f8f8f2;
-  border: 1px solid #dce0d5;
+  background: var(--surface-input);
+  border: 1px solid var(--control-border);
   border-radius: 7px;
-  color: #1d3b30;
+  color: var(--text);
   font: inherit;
   font-size: 14px;
   line-height: 1.6;
@@ -77,7 +80,7 @@
 }
 .research-form input:focus,
 .research-form textarea:focus {
-  outline: 2px solid #a8bca8;
+  outline: 2px solid var(--accent-border);
   outline-offset: 2px;
 }
 .form-bottom {
@@ -89,7 +92,7 @@
 }
 .form-bottom p {
   font-size: 11px;
-  color: #728073;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 .question-options {
@@ -97,15 +100,15 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 22px;
-  border-top: 1px solid #ecece3;
+  border-top: 1px solid var(--divider);
   padding-top: 18px;
 }
 .text-chip {
   padding: 8px 11px !important;
   display: inline-block !important;
-  border: 1px solid #dfe5d9 !important;
+  border: 1px solid var(--border) !important;
   background: transparent !important;
-  color: #5d7060 !important;
+  color: var(--text-secondary) !important;
   font-size: 11px !important;
   line-height: 1.5;
   gap: 0 !important;
@@ -127,18 +130,18 @@
   gap: 12px !important;
   padding: 9px 12px !important;
   background: transparent !important;
-  color: #61715f !important;
-  border: 1px solid #dde2d6 !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
   font-size: 11px !important;
   border-radius: 7px !important;
 }
 .company-chip.chosen {
-  background: #e5ede2 !important;
-  border-color: #bccbb6 !important;
-  color: #2e4b30 !important;
+  background: var(--accent-fill) !important;
+  border-color: var(--accent-border) !important;
+  color: var(--accent-strong) !important;
 }
 .company-chip span {
-  color: #8ca17e;
+  color: var(--text-muted);
 }
 .research-progress {
   display: flex;
@@ -146,7 +149,7 @@
   gap: 16px;
   margin: 26px 0;
   padding: 22px;
-  background: #e9efe4;
+  background: var(--surface-tint);
   border-radius: 10px;
 }
 .research-progress strong {
@@ -155,7 +158,7 @@
 }
 .research-progress p {
   font-size: 11px;
-  color: #67785d;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 .pulse-dot {
@@ -163,7 +166,7 @@
   height: 8px;
   flex-shrink: 0;
   margin-top: 7px;
-  background: #668254;
+  background: var(--accent);
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -180,10 +183,10 @@
 .research-error {
   padding: 18px 22px;
   margin: 24px 0;
-  border: 1px solid #e9d2bd;
-  background: #fff3e6;
+  border: 1px solid var(--warning-border);
+  background: var(--warning-bg);
   border-radius: 10px;
-  color: #84542f;
+  color: var(--warning-text);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -195,8 +198,8 @@
   margin-top: 10px;
 }
 .answer-panel {
-  background: #fffefa;
-  border: 1px solid #dedfd5;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   margin-top: 28px;
   padding: 28px;
@@ -220,14 +223,14 @@
   font-size: 10px;
   padding: 7px 11px;
   border-radius: 30px;
-  color: #647753;
-  background: #edf1e7;
+  color: var(--text-muted);
+  background: var(--surface-tint);
   white-space: nowrap;
 }
 .answer-question {
   font-size: 13px;
   line-height: 1.6;
-  color: #637168;
+  color: var(--text-muted);
   margin: 20px 0 16px;
 }
 .coverage-line {
@@ -237,8 +240,8 @@
 }
 .coverage-line span {
   font-size: 10px;
-  color: #73806b;
-  border: 1px solid #e6e9df;
+  color: var(--text-muted);
+  border: 1px solid var(--divider);
   padding: 5px 8px;
   border-radius: 5px;
 }
@@ -250,7 +253,7 @@
 .claim-list li {
   display: flex;
   gap: 20px;
-  border-top: 1px solid #ebede5;
+  border-top: 1px solid var(--divider);
   padding: 22px 0;
 }
 .claim-list li:last-child {
@@ -258,7 +261,7 @@
 }
 .claim-number {
   font-size: 10px;
-  color: #aa956b;
+  color: var(--gold);
   line-height: 2.7;
 }
 .claim-list p {
@@ -269,7 +272,7 @@
 .citation-button {
   padding: 0 !important;
   background: none !important;
-  color: #627b57 !important;
+  color: var(--accent) !important;
   gap: 8px !important;
   font-size: 10px !important;
   line-height: 1.5;
@@ -280,7 +283,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #e8eadf;
+  border-top: 1px solid var(--divider);
   margin-top: 24px;
   padding-top: 17px;
   gap: 16px;
@@ -288,21 +291,21 @@
 .answer-bottom p {
   font-size: 10px;
   line-height: 1.9;
-  color: #7a8272;
+  color: var(--text-muted);
   margin: 0;
 }
 .text-button {
   padding: 7px 0 !important;
   background: transparent !important;
-  color: #536e45 !important;
+  color: var(--accent) !important;
   font-size: 11px !important;
   gap: 0 !important;
 }
 .coverage-notes {
-  border-top: 1px solid #eef0e8;
+  border-top: 1px solid var(--divider);
   margin-top: 20px;
   padding-top: 16px;
-  color: #76816d;
+  color: var(--text-muted);
   font-size: 10px;
   line-height: 1.7;
 }
@@ -316,11 +319,11 @@
 .research-empty {
   text-align: center;
   padding: 64px 30px;
-  color: #66765e;
+  color: var(--text-muted);
 }
 .research-empty > span {
   font-size: 28px;
-  color: #a7b59b;
+  color: var(--text-muted);
 }
 .research-empty h2 {
   font-family: Georgia, serif;
@@ -335,10 +338,10 @@
   margin: 14px auto;
 }
 .evidence-dialog {
-  border: 1px solid #d9dfd0;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  background: #fffefa;
-  color: #25412f;
+  background: var(--surface);
+  color: var(--text);
   max-width: 600px;
   width: calc(100% - 32px);
   padding: 28px;
@@ -346,7 +349,7 @@
   overflow: auto;
 }
 .evidence-dialog::backdrop {
-  background: #1b30295c;
+  background: var(--backdrop);
   backdrop-filter: blur(3px);
 }
 .drawer-head {
@@ -360,7 +363,7 @@
 }
 .icon-button {
   background: transparent !important;
-  color: #61705c !important;
+  color: var(--text-muted) !important;
   font-size: 25px !important;
   padding: 0 5px !important;
   line-height: 1 !important;
@@ -377,8 +380,8 @@
 .evidence-dialog blockquote {
   margin: 24px 0;
   padding: 20px;
-  border-left: 3px solid #a6b88d;
-  background: #f1f4eb;
+  border-left: 3px solid var(--accent-border);
+  background: var(--surface-tint);
   font-size: 14px;
   line-height: 1.9;
   white-space: pre-wrap;
@@ -390,11 +393,11 @@
   display: flex;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #e8ecdf;
+  border-bottom: 1px solid var(--divider);
   gap: 20px;
 }
 .evidence-dialog dt {
-  color: #7d8675;
+  color: var(--text-muted);
 }
 .evidence-dialog dd {
   margin: 0;
@@ -403,12 +406,12 @@
 .fine-print {
   font-size: 10px;
   line-height: 1.8;
-  color: #818976;
+  color: var(--text-muted);
 }
 .source-link {
   display: inline-block;
-  background: #254c37;
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
   text-decoration: none;
   border-radius: 7px;
   padding: 12px 16px;
@@ -503,8 +506,8 @@
 }
 .comparison-panel {
   margin-top: 24px;
-  background: #edf1e6;
-  border: 1px solid #d8e2ca;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
   border-radius: 13px;
   padding: 26px;
 }
@@ -526,7 +529,7 @@
   margin: 28px 0 22px;
 }
 .comparison-sides > div {
-  border-top: 1px solid #d5dfc7;
+  border-top: 1px solid var(--border);
   padding-top: 18px;
 }
 .comparison-sides > div > p:not(.eyebrow) {
@@ -541,9 +544,9 @@
 .comparison-assessment {
   font-size: 13px;
   line-height: 1.9;
-  border-top: 1px solid #d5dfc7;
+  border-top: 1px solid var(--border);
   padding-top: 18px;
-  color: #62764f;
+  color: var(--text-secondary);
 }
 .comparison-action {
   display: flex;
@@ -553,7 +556,7 @@
 }
 .comparison-action > span {
   font-size: 10px;
-  color: #7f8a70;
+  color: var(--text-muted);
 }
 .citation-button {
   min-height: 34px;

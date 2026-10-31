@@ -12,6 +12,7 @@
     "test:browser": "node scripts/verify-foundation.mjs",
     "test:product": "node scripts/verify-product.mjs",
     "test:prices": "node scripts/verify-price-sources.mjs",
+    "test:theme": "node scripts/verify-theme.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "record:demo": "node scripts/record-demo.mjs"
   },

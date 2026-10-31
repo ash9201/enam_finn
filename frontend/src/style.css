@@ -1,26 +1,26 @@
 @import 'tailwindcss';
 
 .cache-check {
-  border-top: 1px solid #e9e9df;
+  border-top: 1px solid var(--divider);
   margin-top: 24px;
   padding-top: 8px;
 }
 .cache-check small {
   display: block;
   font-size: 11px;
-  color: #6f786e;
+  color: var(--text-muted);
   line-height: 1.7;
   margin-top: 12px;
 }
 .secondary {
-  background: #e9eee8 !important;
-  color: #214635 !important;
+  background: var(--accent-fill) !important;
+  color: var(--accent-strong) !important;
 }
 
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
-  color: #172f28;
-  background: #f6f5f0;
+  color: var(--text);
+  background: var(--canvas);
   font-synthesis: none;
   font-weight: 400;
 }
@@ -39,7 +39,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #dedfd5;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
 }
 .wordmark {
@@ -51,7 +51,7 @@ header {
   color: inherit;
 }
 .wordmark span {
-  color: #b48b47;
+  color: var(--brand-mark);
 }
 .milestone,
 .eyebrow {
@@ -60,14 +60,14 @@ header {
   letter-spacing: 2px;
 }
 .milestone {
-  color: #637168;
+  color: var(--text-muted);
 }
 .intro {
   margin: 76px 0 40px;
   max-width: 650px;
 }
 .eyebrow {
-  color: #947542;
+  color: var(--gold);
   margin-bottom: 20px;
 }
 h1 {
@@ -80,13 +80,13 @@ h1 {
 }
 .lead {
   font-size: 16px;
-  color: #5f6c64;
+  color: var(--text-secondary);
   line-height: 1.8;
   max-width: 510px;
 }
 .panel {
-  background: #fffefa;
-  border: 1px solid #dedfd5;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 28px;
 }
@@ -105,22 +105,22 @@ h2 {
   font-size: 11px;
   border-radius: 30px;
   padding: 7px 11px;
-  background: #eeeee7;
-  color: #626b5e;
+  background: var(--surface-soft);
+  color: var(--text-muted);
   white-space: nowrap;
 }
 .status.reachable {
-  background: #e1efe7;
-  color: #205d42;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 .status.unavailable {
-  background: #faeee4;
-  color: #8a4c28;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 .status-message {
   font-size: 14px;
   line-height: 1.7;
-  color: #637168;
+  color: var(--text-muted);
   min-height: 48px;
   max-width: 650px;
 }
@@ -128,8 +128,8 @@ button {
   display: flex;
   align-items: center;
   gap: 30px;
-  background: #1d4639;
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: 8px;
   padding: 14px 17px;
@@ -143,32 +143,104 @@ button:disabled {
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #b48b47;
+  outline: 3px solid var(--brand-mark);
   outline-offset: 4px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.theme-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.theme-picker select {
+  min-width: 0;
+  width: 73px;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.theme-picker option {
+  color: var(--text);
+  background: var(--surface);
+}
+.theme-picker:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.theme-picker select:focus-visible {
+  outline: none;
+}
+.theme-chevron {
+  display: none;
+}
+@media (max-width: 600px) {
+  header {
+    gap: 12px;
+  }
+  .theme-picker {
+    width: 44px;
+    gap: 4px;
+    padding: 0 6px;
+  }
+  .theme-picker select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+  }
+  .theme-chevron {
+    display: block;
+  }
 }
 .checklist {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  border-top: 1px solid #e9e9df;
+  border-top: 1px solid var(--divider);
   margin-top: 28px;
   padding-top: 24px;
 }
 .checklist > div > span {
   font-size: 10px;
-  color: #a28f69;
+  color: var(--gold);
 }
 .checklist p {
   font-size: 13px;
   margin: 8px 0;
 }
 .checklist small {
-  color: #6f786e;
+  color: var(--text-muted);
   font-size: 11px;
 }
 footer {
   font-size: 10px;
-  color: #6c776e;
+  color: var(--text-muted);
   display: flex;
   justify-content: space-between;
   gap: 20px;

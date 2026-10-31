@@ -1,0 +1,95 @@
+/* Shared semantic palette. Components use these tokens in both themes. */
+:root {
+  color-scheme: light;
+  --canvas: #f6f5f0;
+  --surface: #fffefa;
+  --surface-input: #f8f8f2;
+  --surface-soft: #f0f2e9;
+  --surface-tint: #edf1e6;
+  --surface-read: #f7f8f1;
+  --text: #172f28;
+  --text-secondary: #52634e;
+  --text-muted: #606c58;
+  --border: #dce2d3;
+  --divider: #e6e9df;
+  --control-border: #7d8a70;
+  --accent: #426436;
+  --accent-strong: #2f5035;
+  --accent-fill: #e7eddc;
+  --accent-border: #7d916a;
+  --gold: #87672f;
+  --brand-mark: #af8541;
+  --focus: #947542;
+  --button-bg: #1d4639;
+  --button-text: #fffefa;
+  --positive: #426b35;
+  --negative: #9a4e35;
+  --warning-bg: #f8f0dc;
+  --warning-text: #785626;
+  --warning-border: #b39a6a;
+  --success-bg: #e1efe7;
+  --success-text: #205d42;
+  --nav-bg: #fffefbf5;
+  --shadow: #263c2412;
+  --backdrop: #1b30295c;
+  color: var(--text);
+  background: var(--canvas);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #1c211c;
+  --surface: #252b24;
+  --surface-input: #20261f;
+  --surface-soft: #2c3428;
+  --surface-tint: #2b3527;
+  --surface-read: #222820;
+  --text: #e7eadd;
+  --text-secondary: #c5cfba;
+  --text-muted: #adb6a4;
+  --border: #46513e;
+  --divider: #3d4737;
+  --control-border: #849477;
+  --accent: #b1cc9c;
+  --accent-strong: #bed5b0;
+  --accent-fill: #3a4932;
+  --accent-border: #829d70;
+  --gold: #d2b57d;
+  --brand-mark: #d2b57d;
+  --focus: #d2b57d;
+  --button-bg: #b1c79c;
+  --button-text: #182319;
+  --positive: #a3ce8b;
+  --negative: #efa88e;
+  --warning-bg: #382f21;
+  --warning-text: #e0c289;
+  --warning-border: #987b4f;
+  --success-bg: #253c30;
+  --success-text: #a9d2b6;
+  --nav-bg: #252b24f5;
+  --shadow: #00000040;
+  --backdrop: #080c0ac4;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+}
+
+::selection {
+  background: var(--accent-fill);
+  color: var(--text);
+}
+
+input,
+textarea,
+select {
+  accent-color: var(--accent);
+  caret-color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}

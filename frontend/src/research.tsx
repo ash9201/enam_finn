@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Navigation from './navigation'
 import { publicRead } from './data'
+import ThemeSelector from './theme'
 
 type Citation = {
   id: string
@@ -318,6 +319,7 @@ export default function ResearchApp() {
           <a href="?view=foundation" className="muted">
             Connection status ↗
           </a>
+          <ThemeSelector />
         </div>
       </header>
       <section className="research-intro">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { publicRead } from './data'
 import Navigation from './navigation'
+import ThemeSelector from './theme'
 
 type Filing = {
   id: string
@@ -244,6 +245,7 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
           <button className="text-button" onClick={() => setShowSettings(!showSettings)}>
             Alert settings ⚙
           </button>
+          <ThemeSelector />
         </div>
       </header>
       <section className="briefing-intro">

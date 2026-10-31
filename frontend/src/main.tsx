@@ -6,6 +6,7 @@ import './research.css'
 import BriefingApp from './briefing'
 import './briefing.css'
 import { RecordedDataNotice } from './data'
+import ThemeSelector from './theme'
 
 type Status = 'unchecked' | 'checking' | 'reachable' | 'unavailable'
 
@@ -71,7 +72,10 @@ function App() {
         <a href="/" className="wordmark" aria-label="FINN home">
           finn<span>.</span>
         </a>
-        <span className="milestone">MILESTONE 00</span>
+        <div className="header-actions">
+          <span className="milestone">MILESTONE 00</span>
+          <ThemeSelector />
+        </div>
       </header>
       <section className="intro">
         <p className="eyebrow">A LITTLE LESS NOISE.</p>
