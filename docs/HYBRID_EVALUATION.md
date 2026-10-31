@@ -110,5 +110,14 @@ The live local persisted-job workflow also passed: a fresh, validated CCL answer
 hybrid retrieval and the next identical request returned the same cached answer. Source
 PDF page 11 and its original link were preserved; financial comparisons remained off.
 The 112-test suite, production build/secret scan and 44 Light/Dark/System browser
-regression scenes passed. The live quota-accounting gate remains the owner-applied
-0007 migration; it must pass before further backfill or production opt-in.
+regression scenes passed.
+
+### Quota migration verified — 31 October, 13:02 IST
+
+The owner applied migration 0007. Live isolated checks confirmed that two batches of
+two texts exceed a three-unit daily/minute allowance; audit reservations were removed.
+The quota RPC remains server-only, and embedding-table security checks pass. Cached
+CCL hybrid retrieval worked with zero provider calls; the deployed keyword job also
+completed successfully. After the daily reset, one bounded 24-chunk resume test
+advanced INFY from 264 to 288 of 1,125 chunks. This updates indexing progress, not the
+frozen evaluation scores above. Production's semantic flag remains off.

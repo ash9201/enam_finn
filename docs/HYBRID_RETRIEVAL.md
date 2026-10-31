@@ -73,8 +73,9 @@ ready corpora, not archived document versions.
 ## Rollout and rollback
 
 1. Apply `supabase/migrations/0006_hybrid_retrieval.sql` with RLS enabled. The owner
-   applied it successfully. Also apply `0007_embedding_input_quota.sql`, which corrects
-   quota accounting after the observed live daily limit. Original keyword RPCs remain available.
+   applied it successfully. Apply `0007_embedding_input_quota.sql` too; the owner has
+   now applied and verified it. It corrects quota accounting after the observed live
+   daily limit. Original keyword RPCs remain available.
    Run `python scripts/verify_embedding_quota.py` to verify input accounting with isolated,
    promptly removed audit reservations; it never calls Gemini.
 2. Backfill and inspect status, then run the evaluation below. Keep

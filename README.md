@@ -50,8 +50,8 @@ Reciprocal Rank Fusion, with company/document/date/metadata filters in both bran
 [Hybrid retrieval](docs/HYBRID_RETRIEVAL.md) is behind the existing feature flag;
 production remains keyword-only during controlled rollout. The completed CCL
 [evaluation](docs/HYBRID_EVALUATION.md) improves early reference-page recall, with equal
-reviewed answer quality and additional latency. Other backfills await the free-tier
-input allowance. Partial
+reviewed answer quality and additional latency. Other corpora require additional
+quota-bounded backfill. Partial
 indexes and semantic failures use the working keyword path with explicit limitations.
 Existing citation/table guards remain in force; an added metric-name check withholds
 unsupported financial acronyms.

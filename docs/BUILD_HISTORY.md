@@ -181,3 +181,15 @@ exports/share links. Export those separately, redact credentials, and never bund
   Production rollout stays off pending broader evaluation/allowance; private vectors
   remain useful cached state. No paid resources, scheduler changes or fabricated
   coverage were introduced. See HYBRID_RETRIEVAL.md and HYBRID_EVALUATION.md.
+
+
+### Input-quota migration verified (31 October, 13:02 IST)
+
+- The owner applied 0007. Both live minute/day tests now pass using individual
+  batch inputs; isolated audit reservations are removed. Anonymous quota-RPC access
+  is denied and embedding security status remains true.
+- Cached CCL hybrid retrieval succeeds without provider calls. The deployed keyword
+  workflow returns its valid cached answer; the production semantic flag stays off.
+- A bounded resume after the allowance reset indexed 24 more INFY chunks, reaching
+  288/1,125. The verification run has ended; it did not launch a continuous backfill.
+  The earlier evaluation snapshot and its limitations remain unchanged.
