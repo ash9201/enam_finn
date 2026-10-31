@@ -15,9 +15,22 @@ try {
     const context = await browser.newContext({ viewport })
     const page = await context.newPage()
     const errors = []
+    const failedRequests = []
     page.on('pageerror', (error) => errors.push(error.name))
-    await page.goto(base, { waitUntil: 'networkidle' })
-    await page.getByRole('heading', { name: /What deserves/ }).waitFor()
+    page.on('requestfailed', (request) =>
+      failedRequests.push({ url: request.url(), failure: request.failure()?.errorText }),
+    )
+    try {
+      await page.goto(base, { waitUntil: 'networkidle' })
+      await page.getByRole('heading', { name: /What deserves/ }).waitFor()
+    } catch (error) {
+      await page.screenshot({ path: `${output}/${name}-load-failure.png` })
+      await writeFile(
+        `${output}/${name}-load-failure.json`,
+        JSON.stringify({ url: page.url(), errors, failedRequests }, null, 2),
+      )
+      throw error
+    }
     await page.getByText('companies followed', { exact: true }).waitFor({ timeout: 20000 })
     if ((await page.locator('.filing-card').count()) < 1)
       throw new Error('No actual portfolio filings loaded.')
