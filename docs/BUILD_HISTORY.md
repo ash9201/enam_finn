@@ -1,5 +1,22 @@
 # Build history summary
 
+### Selective production hybrid rollout (31 October)
+
+- Audited all active manifests: CCL 694/694 and GOKEX 711/711 complete; INFY 288/1,125
+  and expanded POLYCAB 0/2,584 incomplete. Resumed both important backfills with bounded
+  attempts; the already-consumed 800-unit bulk budget stopped them without provider
+  calls. Paginated cache checks found no unused vectors to restore.
+- Verified fresh and cached hybrid retrieval/answers, actual incomplete-index keyword
+  answers, controlled provider/semantic-SQL failures and rollback. All 25 targeted
+  hybrid tests and shared minute/day accounting audit pass, with frozen settings.
+- The owner set the two documented Render variables and deployed the Singapore API.
+  Verified its enabled flag, a fresh CCL hybrid answer, cached GOKEX hybrid answer
+  and explicit INFY keyword fallback. Existing prepared answer history remains intact.
+- No application retrieval, chunking, quota, scheduler, dependency or evaluation-setting
+  changes. Added a repeatable opt-in verifier and [rollout report](HYBRID_ROLLOUT.md).
+- Removed the Blueprint's pinned-false rollout value in favour of operator-managed
+  `sync: false`, preserving the owner's Dashboard choice on future Blueprint updates.
+
 ### Quarterly financial results (31 October)
 
 - Added generic primary quarterly-filing discovery, geometry-preserving native cell

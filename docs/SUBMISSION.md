@@ -31,8 +31,9 @@ I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL 
 retrieval is complemented by a feature-flagged Gemini/pgvector/RRF implementation with
 incremental indexing and keyword fallback. The small CCL study and a later unprepared
 GOKEX check with frozen settings improve early reference-page recall, with a modest
-observed answer-quality difference and higher latency. Production stays keyword-only
-during controlled rollout. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
+observed answer-quality difference and higher latency. Production enables hybrid for
+complete company indexes, with keyword fallback otherwise; incomplete backfills remain
+bounded by the free allowance. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
 cached, with an explicitly recorded fallback when its free-tier service is unavailable.
 GitHub Actions drives automatic source updates; its full filing scan and 15-company
 price refresh were verified. A tested Supabase Cron fallback is retained but inactive.

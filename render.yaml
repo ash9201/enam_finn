@@ -23,7 +23,8 @@ services:
       - key: GEMINI_EMBEDDING_MODEL
         value: gemini-embedding-001
       - key: FINN_ENABLE_SEMANTIC_SEARCH
-        value: "false"
+        # Operator-controlled rollout/rollback; preserve the deployed value on sync.
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SECRET_KEY

@@ -1,5 +1,10 @@
 # Working-prototype acceptance
 
+**Hybrid production rollout (31 October):** enabled on the Singapore API. Fresh CCL
+and cached GOKEX hybrid answers pass; incomplete INFY/POLYCAB use keyword fallback.
+All 25 targeted hybrid tests and live quota-accounting audit pass. Backfills are
+pending the next daily bulk allowance. [Current coverage and configuration](HYBRID_ROLLOUT.md).
+
 **Quarterly results (31 October):** full regression 154 plus two targeted EBITDA
 cases pass (156 total, including 27 financial cases). POLYCAB/CCL primary filings
 validate the full results/evidence workflow,

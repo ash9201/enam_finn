@@ -1,5 +1,10 @@
 # Hybrid retrieval
 
+**Production rollout:** enabled and verified on 31 October. Complete CCL/GOKEX indexes
+use hybrid; incomplete INFY/POLYCAB and other companies use keyword fallback. Bulk
+resumes currently stop at the daily budget. See [coverage, exact Render settings,
+verification and reset/resume instructions](HYBRID_ROLLOUT.md).
+
 The implementation stays in FastAPI and Supabase. Gemini `gemini-embedding-001`
 embeds text; PostgreSQL full-text search and pgvector cosine search retrieve primary
 passages. Python combines **ranks**, not incompatible raw scores, with Reciprocal
@@ -19,7 +24,8 @@ are resolved from server-owned document records. Existing exact-quote, numeric s
 and financial-table guards remain in force after generation. Evaluation also added a
 conservative named-metric check: a margin quote cannot validate added EBITDA/EBIT/EPS/
 PAT/PBT claims. Cached answers with that mismatch are regenerated. Financial table
-comparisons remain disabled. The specialised narrative/evidence comparison keeps its
+comparisons require the separate [validated quarterly pipeline](QUARTERLY_RESULTS.md);
+ordinary narrative generation cannot invent them. The specialised narrative/evidence comparison keeps its
 conservative statement selector and chronology/metric checks; it is not relabelled hybrid.
 
 Cosine search is exact **after** company/document filtering. Current per-company corpora
@@ -78,8 +84,9 @@ ready corpora, not archived document versions.
    daily limit. Original keyword RPCs remain available.
    Run `python scripts/verify_embedding_quota.py` to verify input accounting with isolated,
    promptly removed audit reservations; it never calls Gemini.
-2. Backfill and inspect status, then run the evaluation below. Keep
-   `FINN_ENABLE_SEMANTIC_SEARCH=false` until reviewed results justify rollout.
+2. Backfill and inspect status, then run the evaluation below. For a new deployment,
+   keep `FINN_ENABLE_SEMANTIC_SEARCH=false` until reviewed results justify rollout.
+   The current project has passed this gate for selective complete-index rollout.
 3. In the **Singapore API** Render environment, set `GEMINI_EMBEDDING_MODEL` to
    `gemini-embedding-001` and `FINN_ENABLE_SEMANTIC_SEARCH=true`; redeploy. No frontend
    secret or Gemini key belongs in Vite. No new GitHub Actions secret is required.

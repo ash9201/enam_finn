@@ -1,5 +1,10 @@
 # Retrieval evaluation — 31 October 2026
 
+This report preserves the evaluation snapshots and decisions at their original stages.
+The subsequent [production rollout](HYBRID_ROLLOUT.md) is now enabled for complete
+company indexes, with keyword fallback otherwise. Its settings and these scores were
+not retuned or rewritten for rollout.
+
 This is a small engineering check with live Supabase/Gemini retrieval and source
 inspection by the coding assistant. It is **not an independent human assessment** or
 a representative accuracy benchmark. Reviewable questions, source-page links, ratings
