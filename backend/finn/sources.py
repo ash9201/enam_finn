@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-from email.utils import parsedate_to_datetime
 import csv
 import io
 import ipaddress
@@ -11,13 +9,17 @@ import math
 import re
 import socket
 import time
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from threading import Lock
 from urllib.parse import parse_qs, quote, urljoin, urlparse
-import xml.etree.ElementTree as ET
 
-from bs4 import BeautifulSoup
 import httpx
+from bs4 import BeautifulSoup
+
 from finn.price_primary import exchange_session_bar
+from finn.timing import timed
 
 USER_AGENT = "Mozilla/5.0 (compatible; FINN/0.1; public financial document research)"
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -81,6 +83,7 @@ def company_directory(client: httpx.Client) -> list[dict]:
         return rows
 
 
+@timed("company_resolution")
 def resolve_company(client: httpx.Client, symbol: str) -> dict:
     symbol = symbol.upper().removesuffix(".NS")
     if not re.fullmatch(r"[A-Z0-9&-]{1,30}", symbol):
@@ -91,6 +94,7 @@ def resolve_company(client: httpx.Client, symbol: str) -> dict:
     raise ValueError(f"NSE symbol {symbol} was not found in the live company directory.")
 
 
+@timed("discovery")
 def discover_documents(client: httpx.Client, company: dict) -> dict:
     """Read link sections only; do not ingest Screener commentary or financial tables."""
     symbol = quote(company["symbol"], safe="")
@@ -146,13 +150,14 @@ def discover_documents(client: httpx.Client, company: dict) -> dict:
                         "metadata_note": "Discovery label is not a verified reporting period or publication date.",
                     }
                 )
-    if not all(documents.values()):
+    if not any(documents.values()):
         raise ValueError(
-            "The company index does not expose both an annual report and a raw transcript; no summary was substituted."
+            "The company index exposes no annual report or raw transcript links; no summary was substituted."
         )
     return {"company": company, "discovery_url": str(response.url), "documents": documents}
 
 
+@timed("download")
 def fetch_pdf(
     client: httpx.Client, url: str, max_bytes: int = 50 * 1024 * 1024
 ) -> tuple[bytes, str]:

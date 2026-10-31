@@ -3,7 +3,6 @@ import json
 
 import httpx
 import pytest
-
 from finn import embeddings, retrieval
 
 
@@ -36,6 +35,8 @@ class Store:
         self.semantic = [candidate("semantic", page=3), candidate("both", page=2)]
 
     def rows(self, table, **filters):
+        if table == "finn_embedding_jobs":
+            return []
         if table == "finn_embedding_cache":
             return [
                 row
@@ -55,6 +56,8 @@ class Store:
 
     def rpc(self, name, values):
         self.calls.append((name, values))
+        if name == "finn_claim_embedding_job":
+            return True
         if name == "finn_reserve_embedding_request":
             return self.reservation
         if name == "finn_embedding_status":
@@ -64,6 +67,9 @@ class Store:
         if name == "finn_semantic_search":
             return self.semantic
         raise AssertionError(name)
+
+    def patch(self, table, values, **filters):
+        assert table == "finn_embedding_jobs"
 
 
 def client(store, handler):
@@ -379,6 +385,7 @@ def test_generic_ingestion_only_schedules_embeddings_after_manifest_activation(
     monkeypatch, fail_second_document
 ):
     from contextlib import nullcontext
+
     from finn import corpus
 
     events, current = [], {}
@@ -421,19 +428,18 @@ def test_generic_ingestion_only_schedules_embeddings_after_manifest_activation(
         return {"id": document["id"], "sha256": document["id"], "kind": document["kind"]}
 
     def schedule(symbol):
-        assert symbol == "UNPREPARED" and len(current["manifest"]) == 3
+        assert symbol == "UNPREPARED" and len(current["manifest"]) == (
+            2 if fail_second_document else 3
+        )
         events.append("embedding")
 
     monkeypatch.setattr(corpus, "ingest_document", ingest)
     monkeypatch.setattr(embeddings, "schedule_backfill", schedule)
-    if fail_second_document:
-        with pytest.raises(ValueError, match="unavailable"):
-            corpus.ensure_corpus(NewCompanyStore(), "UNPREPARED")
-        assert not events and "manifest" not in current
-    else:
-        result = corpus.ensure_corpus(NewCompanyStore(), "UNPREPARED")
-        assert result["coverage"]["annual_reports"] == 1
-        assert events == ["manifest", "embedding"]
+    result = corpus.ensure_corpus(NewCompanyStore(), "UNPREPARED")
+    assert result["coverage"]["annual_reports"] == 1
+    assert result["coverage"]["transcripts"] == (1 if fail_second_document else 2)
+    assert bool(result["coverage"]["failed_documents"]) == fail_second_document
+    assert events == ["manifest", "embedding"]
 
 
 @pytest.mark.parametrize("response", [[], {"embeddings": [None]}])
@@ -516,7 +522,7 @@ def test_document_diversity_cap_fills_single_document_budget_without_losing_page
 
 
 def test_quote_about_margin_cannot_validate_an_added_ebitda_claim():
-    from finn.research import DraftAnswer, DraftClaim, validate_answer, supported_metrics
+    from finn.research import DraftAnswer, DraftClaim, supported_metrics, validate_answer
 
     row = {
         **candidate("margin"),

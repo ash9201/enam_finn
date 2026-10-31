@@ -24,7 +24,8 @@ and evaluating what the evidence can support.
 
 Quarterly results add source-validated figures and deterministic QoQ/YoY changes,
 with accounting-basis controls and evidence for each figure and calculation. POLYCAB
-validates cleanly; CCL deliberately withholds damaged native cells. EBITDA stays
+validates cleanly; bounded image recovery now restores CCL native-damaged cells. All 15
+portfolio companies have some verified figures, with explicit remaining gaps. EBITDA stays
 unavailable where the primary filing does not report it.
 
 I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL keyword
@@ -33,8 +34,9 @@ incremental indexing and keyword fallback. The small CCL study and a later unpre
 GOKEX check with frozen settings improve early reference-page recall, with a modest
 observed answer-quality difference and higher latency. Production enables hybrid for
 complete company indexes, with keyword fallback otherwise; incomplete backfills remain
-bounded by the free allowance. Gemini Flash-Lite handles ordinary work. The stronger model is bounded and
-cached, with an explicitly recorded fallback when its free-tier service is unavailable.
+bounded by the free allowance. Gemini Flash-Lite handles grounded explanations, bounded financial image extraction
+and the reviewed management comparisons. Completed indexes use hybrid without making
+keyword research wait for bulk backfills.
 GitHub Actions drives automatic source updates; its full filing scan and 15-company
 price refresh were verified. A tested Supabase Cron fallback is retained but inactive.
 
@@ -46,7 +48,7 @@ do not become financial comparisons.
 I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
 Next I would expand independently verified financial extraction and four-quarter
 statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
-Frontend build and secret checks pass; regression and targeted checks cover 156 passing tests. Deployed
+Frontend build and secret checks pass; the final backend regression covers 173 passing tests. Deployed
 phone/desktop browser checks also pass. Free-hosting cold starts and upstream failures
 remain visible.
 When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date

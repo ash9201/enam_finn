@@ -28,9 +28,11 @@ from finn.financial_tables import (
 )
 from finn.services import DependencyError, MissingConfiguration, require_ok
 from finn.sources import fetch_pdf, public_client, resolve_company, source_get, validate_source_url
+from finn.timing import timed
 
 QUESTION = "Compare the latest reported quarterly Revenue, EBITDA, PBT and PAT with the previous quarter and year-ago quarter."
-RESULTS_VERSION = "quarterly-results-v2"
+RESULTS_VERSION = "quarterly-results-v3"
+ROW_MAPPING_VERSION = "quarterly-row-map-v2"
 
 
 def company_identity(text):
@@ -58,13 +60,22 @@ class RowMap(BaseModel):
 
 
 def eligible_rows(table, metric):
-    rows = [r for r in table["rows"] if metric_allowed(metric, r["cells"][0])]
+    rows = [
+        r
+        for r in table["rows"]
+        if r.get("verified_metric") == metric
+        or (not r.get("verified_metric") and metric_allowed(metric, r["cells"][0]))
+    ]
     if metric == "PAT":
         cutoff = next(
             (
                 r["index"]
                 for r in table["rows"]
-                if re.search(r"(?:other|total) comprehensive", r["text"], re.IGNORECASE)
+                if re.search(
+                    r"(?:other|total) comprehensive|^\s*(?:\d+[.)]?\s*)?(?:less[: ]*)?(?:minority|non[- ]controlling) interest|(?:profit|earnings).*attributable to",
+                    r["cells"][0],
+                    re.IGNORECASE,
+                )
             ),
             10000,
         )
@@ -75,7 +86,16 @@ def eligible_rows(table, metric):
             if re.search(r"and share|including.*(?:associate|joint)", r["cells"][0], re.IGNORECASE)
         ]
         rows = associates or rows
+        final = [
+            r
+            for r in rows
+            if re.search(r"profit for (?:the )?(?:period|quarter|year)", r["cells"][0], re.I)
+        ]
+        rows = final or rows
     if metric == "Revenue":
+        rows = [
+            r for r in rows if re.search(r"revenue from operations", r["cells"][0], re.I)
+        ] or rows
         rows = [
             r for r in rows if re.search(r"total.*(?:revenue|income)", r["cells"][0], re.IGNORECASE)
         ] or rows
@@ -88,7 +108,8 @@ def eligible_rows(table, metric):
     return rows
 
 
-def map_rows(store, tables):
+@timed("financial_mapping")
+def map_rows(store, tables, *, allow_model=True):
     unique, ambiguous = [], []
     for table in tables:
         for metric in METRICS:
@@ -101,7 +122,7 @@ def map_rows(store, tables):
                 )
             elif len(rows) > 1:
                 ambiguous.append((table["table_id"], metric))
-    if not ambiguous:
+    if not ambiguous or not allow_model:
         return RowMap(selections=unique), {"method": "deterministic_unique_rows"}
     model = os.getenv("GEMINI_LITE_MODEL", "gemini-3.5-flash-lite")
     key = first_env("GEMINI_API_KEY", "GOOGLE_API_KEY")
@@ -195,14 +216,17 @@ def validate_cells(tables, mapping):
             for v in raw_values
             if re.search(r"\.(\d+)$", v.rstrip(")"))
         )
-        expected_precision = precision.most_common(1)[0][0] if precision else 2
+        expected_precision = precision.most_common(1)[0][0] if precision else 0
         for column in table["columns"]:
             raw = row["cells"][column["index"]]
             value = parse_number(raw)
             if value is None or (
-                expected_precision
-                and value
-                and not re.search(r"\.\d{" + str(expected_precision) + r"}\)?$", raw)
+                table.get("extraction_method") != "two_image_reads"
+                and (
+                    expected_precision
+                    and value
+                    and not re.search(r"\.\d{" + str(expected_precision) + r"}\)?$", raw)
+                )
             ):
                 rejected.append(
                     f"{table_id} {metric} {column['period_end']}: damaged/missing or inconsistent-precision source cell ({raw!r})."
@@ -234,16 +258,24 @@ def validate_cells(tables, mapping):
                     "table_header": table["header"],
                     "pdf_page": table["pdf_page"],
                     "quote": row["text"],
-                    "definition": "group_pat_including_associates"
-                    if metric == "PAT"
-                    and re.search(r"and share|including", row["cells"][0], re.IGNORECASE)
-                    else "group_pat"
-                    if metric == "PAT"
-                    else "revenue_from_operations"
-                    if metric == "Revenue"
-                    else "reported_ebitda"
-                    if metric == "EBITDA"
-                    else "reported_pbt",
+                    **(
+                        {"image_verification": table["image_verification"]}
+                        if table.get("image_verification")
+                        else {}
+                    ),
+                    "definition": row.get("verified_definition")
+                    or (
+                        "group_pat_including_associates"
+                        if metric == "PAT"
+                        and re.search(r"and share|including", row["cells"][0], re.IGNORECASE)
+                        else "group_pat"
+                        if metric == "PAT"
+                        else "revenue_from_operations"
+                        if metric == "Revenue"
+                        else "reported_ebitda"
+                        if metric == "EBITDA"
+                        else "reported_pbt"
+                    ),
                 }
             )
     return facts, rejected
@@ -300,8 +332,11 @@ def compare(current, base, target_period, display_unit):
     }
 
 
-def discover_results(client, company):
-    index = f"https://www.screener.in/company/{company['symbol']}/consolidated/"
+@timed("discovery")
+def discover_results(client, company, *, consolidated=True):
+    index = f"https://www.screener.in/company/{company['symbol']}/" + (
+        "consolidated/" if consolidated else ""
+    )
     response = source_get(client, index, "Quarterly primary-link index", allow_not_found=True)
     if response.status_code == 404:
         index = index.replace("consolidated/", "")
@@ -340,6 +375,142 @@ def primary_result_pdf(client, locator):
         )
     validate_source_url(url)
     return url, fetch_pdf(client, url)
+
+
+def statement_tables(store, document, company, data, *, progress=lambda stage: None):
+    """Use native statements first; visually verify only incomplete statement pages."""
+    from finn.financial_tables import statement_page
+    from finn.financial_vision import enrich_document
+
+    pages = store.rows(
+        "finn_document_pages",
+        document_id="eq." + document["id"],
+        select="pdf_page,layout_text,metadata",
+        order="pdf_page",
+    )
+    texts = {
+        p["pdf_page"]: p.get("metadata", {}).get("reading_text") or p["layout_text"] for p in pages
+    }
+    identity = company_identity(company["name"])
+    cover_matches = identity in company_identity(texts.get(1, ""))
+
+    def matched(table):
+        header = table.get("company_name") or table["header"]
+        if identity in company_identity(header):
+            return True
+        # Some original statements show only the issuer's logo. Inherit the verified
+        # filing identity only if the statement has no competing legal entity name.
+        return (
+            cover_matches
+            and not re.search(r"\b(?:limited|ltd)\b", header, re.I)
+            and statement_page(texts.get(table["pdf_page"], ""))
+        )
+
+    native = [
+        t
+        for t in document["table_candidates"]
+        if matched(t) and statement_page(texts.get(t["pdf_page"], ""))
+    ]
+    mapping, _ = map_rows(store, native, allow_model=False)
+    native_facts, _ = validate_cells(native, mapping)
+    complete_pages = {
+        p
+        for p in texts
+        if len(
+            {
+                (f["metric"], f["period_end"])
+                for f in native_facts
+                if f["pdf_page"] == p and f["metric"] in ["Revenue", "PBT", "PAT"]
+            }
+        )
+        >= 9
+    }
+    candidates = []
+    for page, text in texts.items():
+        if page in complete_pages or not statement_page(text):
+            continue
+        header = text[:1800]
+        basis = (
+            "consolidated"
+            if re.search(r"\bconsolidated\b", header, re.I)
+            else "standalone"
+            if re.search(r"\bstandalone\b", header, re.I)
+            else "unknown"
+        )
+        score = (
+            10 * bool(re.search(r"revenue from operations|interest earned", text, re.I))
+            + 5 * (basis != "unknown")
+            + 5 * bool(re.search(r"\bCIN\b", header[:700]))
+            + 10 * (identity in company_identity(header))
+            - 5 * bool(re.search(r"US\s*\$|USD|IFRS", header))
+        )
+        candidates.append((score, -page, basis, page))
+    selected, bases = [], {t["basis"] for t in native if t["pdf_page"] in complete_pages}
+    for _, _, basis, page in sorted(candidates, reverse=True):
+        if basis not in bases:
+            selected.append(page)
+            bases.add(basis)
+    visual, notes, warnings = (
+        enrich_document(store, document, data, selected, progress=progress)
+        if selected
+        else ([], document["extraction_notes"], [])
+    )
+    visual = [t for t in visual if matched(t)]
+    for image in visual:
+        originals = [t for t in native if t["pdf_page"] == image["pdf_page"]]
+        if any(
+            re.search(r"and share|including.*(?:associate|joint)", r["cells"][0], re.I)
+            for t in originals
+            for r in eligible_rows(t, "PAT")
+        ):
+            image["rows"] = [
+                r
+                for r in image["rows"]
+                if r["verified_metric"] != "PAT"
+                or r["verified_definition"] == "group_pat_including_associates"
+            ]
+    replaced = {t["pdf_page"] for t in visual}
+    tables = [t for t in native if t["pdf_page"] not in replaced] + visual
+    # Preserve every verified native-only metric if the image reader omitted it,
+    # but only when all metadata and quarter columns independently agree.
+    for table in native:
+        image = next((v for v in visual if v["pdf_page"] == table["pdf_page"]), None)
+        if not image or any(
+            table[k] and table[k] != image[k] for k in ["basis", "currency", "unit"]
+        ):
+            continue
+        native_periods = [c["period_end"] for c in table["columns"]]
+        if len(native_periods) != len(set(native_periods)) or not set(native_periods) <= {
+            c["period_end"] for c in image["columns"]
+        }:
+            continue
+        enriched = {**table, **{k: table[k] or image[k] for k in ["basis", "currency", "unit"]}}
+        missing = [
+            r
+            for r in table["rows"]
+            if any(
+                metric_allowed(m, r["cells"][0])
+                and not any(v["verified_metric"] == m for v in image["rows"])
+                for m in METRICS
+            )
+        ]
+        if missing:
+            tables.append(
+                {
+                    **enriched,
+                    "rows": missing,
+                    "image_verification": {
+                        **image["image_verification"],
+                        "method": "native_cells_verified_header",
+                    },
+                }
+            )
+    store.patch(
+        "finn_documents",
+        {"table_candidates": tables, "extraction_notes": notes},
+        id="eq." + document["id"],
+    )
+    return tables, notes, warnings
 
 
 def build_result(company, documents, facts, rejected, usage):
@@ -442,10 +613,10 @@ def build_result(company, documents, facts, rejected, usage):
                 for d in documents
             ],
             "rejected_cells": rejected,
-            "policy": "Revenue from operations; group PAT before attribution. Reported EBITDA only. Same-statement comparatives preferred; no YTD subtraction or guessed decimals.",
+            "policy": "Revenue from operations (banks: explicitly labelled total income); group PAT before attribution. Reported EBITDA only. Same-statement comparatives preferred; no YTD subtraction or guessed decimals.",
         },
         "limitations": [
-            "Only native-text, geometry-aligned statements are supported; image/OCR errors remain missing.",
+            "Native statements are used first. Where needed, two separate page-image reads must agree; unresolved figures remain missing.",
             "Comparisons use exact quarter ends and compatible definitions/bases. Missing EBITDA is not zero.",
             "Percentage changes are withheld for zero or negative bases.",
         ]
@@ -494,7 +665,7 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
             )
         index, links = discover_results(client, company)
         wanted = [links[0]]
-        seen = set()
+        seen, alternate_checked = set(), False
         while wanted and len(documents) < 3:
             label, locator = wanted.pop(0)
             source, downloaded = primary_result_pdf(client, locator)
@@ -520,16 +691,43 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
                 progress=lambda phase: progress(f"extraction:{len(documents) + 1}:" + phase),
             )
             documents.append(document)
-            tables = document["table_candidates"]
-            tables = [
-                t
-                for t in tables
-                if company_identity(company["name"]) in company_identity(t["header"])
-            ]
-            if not tables:
-                raise ValueError(
-                    "No company-matched statement with verifiable native quarter columns was found. Scanned, ambiguous or mismatched filings are unsupported; no substitute figures were used."
+            if hasattr(progress, "source_ready"):
+                progress.source_ready(document)
+            tables, notes, warnings = statement_tables(
+                store, document, company, downloaded[0], progress=progress
+            )
+            document["extraction_notes"] = notes
+            if not any(eligible_rows(t, "EBITDA") for t in tables):
+                from finn.reported_metrics import extract_reported_ebitda
+
+                extra, notes = extract_reported_ebitda(
+                    store, document, downloaded[0], company["name"]
                 )
+                if extra:
+                    tables.extend(extra)
+                document["extraction_notes"] = notes
+                store.patch(
+                    "finn_documents",
+                    {"table_candidates": tables, "extraction_notes": notes},
+                    id="eq." + document["id"],
+                )
+            rejected.extend(warnings)
+            document = {**document, "table_candidates": tables}
+            documents[-1] = document
+            if not tables:
+                rejected.append(
+                    f"{label}: no company-matched statement could be verified in this original filing."
+                )
+                if not alternate_checked:
+                    alternate_checked = True
+                    try:
+                        _, alternatives = discover_results(client, company, consolidated=False)
+                        wanted[:0] = [
+                            (p, link) for p, link in alternatives if p == label and link != locator
+                        ]
+                    except (ValueError, httpx.HTTPError, DependencyError):
+                        rejected.append("The alternative primary-link index was unavailable.")
+                continue
             document = {**document, "table_candidates": tables}
             documents[-1] = document
             primary_latest = max(c["period_end"] for t in tables for c in t["columns"])
@@ -540,18 +738,31 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
             progress("analysis")
             # Content-version cache also prevents repeat LLM row mapping on refresh.
             notes = document["extraction_notes"]
-            if notes.get("financial_mapping_version") == VERSION:
+            mapping_signature = hashlib.sha256(
+                json.dumps(tables, sort_keys=True).encode()
+            ).hexdigest()
+            if (
+                notes.get("financial_mapping_version") == ROW_MAPPING_VERSION
+                and notes.get("financial_mapping_signature") == mapping_signature
+            ):
                 mapping = RowMap.model_validate(notes["financial_mapping"])
                 cost = {}
             else:
-                mapping, cost = map_rows(store, tables)
+                try:
+                    mapping, cost = map_rows(store, tables)
+                except (DependencyError, MissingConfiguration, httpx.HTTPError, ValueError):
+                    mapping, cost = map_rows(store, tables, allow_model=False)
+                    rejected.append(
+                        "Some ambiguous rows could not be resolved; independently validated figures are retained."
+                    )
                 store.patch(
                     "finn_documents",
                     {
                         "extraction_notes": {
                             **notes,
-                            "financial_mapping_version": VERSION,
+                            "financial_mapping_version": ROW_MAPPING_VERSION,
                             "financial_mapping": mapping.model_dump(),
+                            "financial_mapping_signature": mapping_signature,
                         }
                     },
                     id="eq." + document["id"],
@@ -619,6 +830,7 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
                             "accounting_basis",
                             "definition",
                         ]
+                        + (["image_verification"] if f.get("image_verification") else [])
                     },
                 }
                 facts.append(f)
@@ -631,10 +843,31 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
                     for period, link in links[1:]
                     if period in {x[:7] for x in targets}
                 )
+    signature = [
+        [
+            f.get(k)
+            for k in [
+                "document_id",
+                "metric",
+                "period_end",
+                "accounting_basis",
+                "currency",
+                "unit",
+                "value",
+                "definition",
+            ]
+        ]
+        + [
+            f["citation"]["id"],
+            hashlib.sha256(f["citation"]["quote"].encode()).hexdigest(),
+            f.get("image_verification", {}).get("method"),
+        ]
+        for f in facts
+    ]
     result = build_result(company, documents, facts, rejected, usage)
     fingerprint = hashlib.sha256(
         json.dumps(
-            [VERSION, RESULTS_VERSION, [d["sha256"] for d in documents]], sort_keys=True
+            [VERSION, RESULTS_VERSION, [d["sha256"] for d in documents], signature], sort_keys=True
         ).encode()
     ).hexdigest()
     key = hashlib.sha256((symbol + fingerprint + QUESTION).encode()).hexdigest()

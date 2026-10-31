@@ -1,5 +1,31 @@
 # Build history summary
 
+### Research experience improvements (31 October, latest)
+
+- Preserved main at release/pre-research-improvements-20261031 before development.
+  Investigated real job/source/cache records and timed first acquisition, prepared
+  generation and cache hits separately. Recorded actual measurements and limitations
+  in [the release report](RESEARCH_IMPROVEMENTS.md).
+- Expanded grounded answer synthesis with independently resolved supporting passages;
+  isolated prepared answering from acquisition, removed automatic aged-corpus refresh
+  and excessive progress writes, and exposed saved source documents during preparation.
+- Audited all 15 original quarterly filings. Added bounded native/image recovery,
+  reliable partial outputs and versioned evidence; recovered CCL cells, bank total
+  income/group PAT and one explicitly reported quarterly EBITDA amount. No inferred
+  EBITDA, YTD subtraction or guessed decimals. Two image reads use the same model;
+  original pages and actual verification method remain inspectable.
+- Replaced the poor KPIT comparison with complete, verified management speech and
+  primary call dates. CCL reaffirmation is distinguished from delivered guidance.
+  Assessment sees only selected quotes and never adds uncited candidate-page facts.
+- Owner applied 0009 with RLS, added the embedding Actions secret/opt-in variable.
+  Implemented leased, truthful indexing status and daily bounded maintenance without
+  changing evaluated RRF settings or portfolio scheduling. Incomplete indexes still
+  answer via keyword. Public access to the private operational objects is denied.
+- Used targeted tests throughout, then full regression: 173 pass. The final suite
+  exposed an obsolete all-or-nothing source-discovery assertion; it now verifies that
+  partial original-source coverage never substitutes a generated summary. Build,
+  credential scan and four affected viewport/theme checks pass with one live follow-up.
+
 ### Selective production hybrid rollout (31 October)
 
 - Audited all active manifests: CCL 694/694 and GOKEX 711/711 complete; INFY 288/1,125

@@ -3,20 +3,24 @@
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import logging
 import math
 import os
-from threading import Event, Lock
 import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
+from threading import Event, Lock
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 import httpx
 
 from finn.config import first_env, load_local_env
 from finn.services import DependencyError, MissingConfiguration
+from finn.timing import timed
 
 DIMENSIONS = 768
 VERSION = "gemini-retrieval-body-v1"
@@ -25,6 +29,65 @@ _scheduled: set[str] = set()
 _lock = Lock()
 _stop = Event()
 _cooldowns: dict[str, float] = {}
+_activity: dict[str, dict] = {}
+
+
+def next_reset():
+    pacific = datetime.now(ZoneInfo("America/Los_Angeles"))
+    return (
+        (pacific + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    )
+
+
+def activity(store, symbol):
+    """A recorded attempt is not proof that a worker is still running."""
+    try:
+        rows = store.rows(
+            "finn_embedding_jobs",
+            symbol="eq." + symbol,
+            model="eq." + model_name(),
+            version="eq." + VERSION,
+            limit=1,
+        )
+        value = {"state": "pending", **rows[0]} if rows else {"state": "pending"}
+        if value["state"] in ["running", "queued"]:
+            lease = value.get("lease_until")
+            if not lease or datetime.fromisoformat(lease) <= datetime.now(timezone.utc):
+                value = {**value, "state": "pending", "reason": "worker_not_running"}
+        if (
+            value["state"] == "paused_quota"
+            and value.get("retry_at")
+            and datetime.fromisoformat(value["retry_at"]) <= datetime.now(timezone.utc)
+        ):
+            value = {**value, "state": "pending", "reason": "resume_pending"}
+        return {k: value.get(k) for k in ["state", "reason", "retry_at", "updated_at"]}
+    except (DependencyError, httpx.HTTPError, AttributeError, ValueError):
+        return {"state": "unavailable", "reason": "status_unavailable"}
+
+
+def record_activity(store, symbol, owner, state, index, reason=None, *, hold=False, retry_at=None):
+    if symbol is None:
+        return
+    values = {
+        "state": state,
+        "reason": reason,
+        "retry_at": retry_at,
+        "ready": index["ready"],
+        "total": index["total"],
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "lease_until": (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
+        if hold
+        else None,
+        "lease_owner": owner if hold else None,
+    }
+    store.patch(
+        "finn_embedding_jobs",
+        values,
+        symbol="eq." + symbol,
+        model="eq." + model_name(),
+        version="eq." + VERSION,
+        lease_owner="eq." + owner,
+    )
 
 
 def enabled() -> bool:
@@ -178,6 +241,7 @@ class EmbeddingClient:
         self._token_counts[cache_key] = count
         return count
 
+    @timed("embedding")
     def embed(self, texts: list[str], task: str) -> list[list[float]]:
         if task not in ["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"] or not texts or len(texts) > 32:
             raise ValueError("Invalid embedding batch/task.")
@@ -261,7 +325,25 @@ def backfill(
     store, symbol: str | None, *, max_batches=1000, wait=True, progress=lambda value: None
 ) -> dict:
     initial = status(store, symbol)
-    client = EmbeddingClient(store, timeout=30)
+    owner = str(uuid.uuid4())
+    if symbol is not None and not store.rpc(
+        "finn_claim_embedding_job",
+        {"p_symbol": symbol, "p_model": model_name(), "p_version": VERSION, "p_owner": owner},
+    ):
+        return {
+            **initial,
+            "updated": 0,
+            "provider_calls": 0,
+            "cache_hits": 0,
+            "state": "pending",
+            "reason": "another_worker",
+        }
+    record_activity(store, symbol, owner, "running", initial, hold=True)
+    try:
+        client = EmbeddingClient(store, timeout=30)
+    except (DependencyError, MissingConfiguration, ValueError):
+        record_activity(store, symbol, owner, "failed", initial, "provider_unavailable")
+        raise
     updated, reason, attempts = 0, None, 0
     batch_limit = 24
     try:
@@ -302,6 +384,14 @@ def backfill(
                         "total": initial["total"],
                     }
                 )
+                record_activity(
+                    store,
+                    symbol,
+                    owner,
+                    "running",
+                    {**initial, "ready": initial["ready"] + updated},
+                    hold=True,
+                )
             except EmbeddingUnavailable as exc:
                 reason = exc.reason
                 if reason == "batch_too_large" and batch_limit > 1:
@@ -314,6 +404,18 @@ def backfill(
                     or exc.retry_after > 120
                 ):
                     break
+                record_activity(
+                    store,
+                    symbol,
+                    owner,
+                    "paused_quota",
+                    {**initial, "ready": initial["ready"] + updated},
+                    reason,
+                    hold=True,
+                    retry_at=(
+                        datetime.now(timezone.utc) + timedelta(seconds=exc.retry_after)
+                    ).isoformat(),
+                )
                 progress(
                     {
                         "symbol": symbol,
@@ -336,6 +438,25 @@ def backfill(
                     break
                 reason = None
         final = status(store, symbol)
+        state = (
+            "complete"
+            if final["total"] > 0 and final["ready"] == final["total"]
+            else "paused_quota"
+            if reason
+            in ["daily_budget", "provider_daily_budget", "minute_budget", "provider_throttled"]
+            else "failed"
+            if reason
+            else "pending"
+        )
+        record_activity(
+            store,
+            symbol,
+            owner,
+            state,
+            final,
+            reason,
+            retry_at=next_reset() if reason in ["daily_budget", "provider_daily_budget"] else None,
+        )
         return {
             **final,
             "updated": updated,
@@ -362,6 +483,13 @@ def schedule_backfill(symbol: str):
 
         try:
             with open_store() as store:
+                prior = activity(store, symbol)
+                if (
+                    prior["state"] == "paused_quota"
+                    and prior.get("retry_at")
+                    and datetime.fromisoformat(prior["retry_at"]) > datetime.now(timezone.utc)
+                ):
+                    return
                 current = status(store, symbol)
                 if current["ready"] < current["total"]:
                     backfill(store, symbol)

@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from contextlib import contextmanager
 import hashlib
 import os
+from collections.abc import Iterator
+from contextlib import contextmanager
 from urllib.parse import quote
+
+import httpx
 
 from finn.config import supabase_configuration
 from finn.services import DependencyError, MissingConfiguration, require_ok, supabase_client
+from finn.timing import span
 
 
 class Store:
@@ -23,18 +26,36 @@ class Store:
         self.client.close()
 
     def rows(self, table: str, **params) -> list[dict]:
-        response = self.client.get(f"rest/v1/{table}", params={"select": "*", **params})
+        with span("cache_read" if table == "finn_research_cache" else "database_read"):
+            try:
+                response = self.client.get(f"rest/v1/{table}", params={"select": "*", **params})
+            except (httpx.RemoteProtocolError, httpx.ConnectError):
+                # Retry an interrupted read once. Quota RPCs are never retried.
+                response = self.client.get(f"rest/v1/{table}", params={"select": "*", **params})
         require_ok(response, "Database read")
         return response.json()
 
     def upsert(self, table: str, rows: list[dict], *, conflict="id", batch_size=70):
         for start in range(0, len(rows), batch_size):
-            response = self.client.post(
-                f"rest/v1/{table}",
-                params={"on_conflict": conflict},
-                json=rows[start : start + batch_size],
-                headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
-            )
+            with span("cache_write" if table == "finn_research_cache" else "database_write"):
+                values = rows[start : start + batch_size]
+                try:
+                    response = self.client.post(
+                        f"rest/v1/{table}",
+                        params={"on_conflict": conflict},
+                        json=values,
+                        headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+                    )
+                except (httpx.RemoteProtocolError, httpx.ConnectError):
+                    # The same unique keys and values make this specific write
+                    # idempotent, even if the first response was lost. No model
+                    # call, insert or quota reservation is repeated.
+                    response = self.client.post(
+                        f"rest/v1/{table}",
+                        params={"on_conflict": conflict},
+                        json=values,
+                        headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+                    )
             require_ok(response, "Database upsert (apply the research migration if missing)")
 
     def patch(self, table: str, values: dict, **filters):
@@ -52,7 +73,8 @@ class Store:
         require_ok(response, "Evidence index replacement")
 
     def rpc(self, name: str, values: dict):
-        response = self.client.post(f"rest/v1/rpc/{name}", json=values)
+        with span("database_rpc"):
+            response = self.client.post(f"rest/v1/rpc/{name}", json=values)
         require_ok(response, "Database function (apply the research migration if missing)")
         return response.json()
 
@@ -78,6 +100,14 @@ class Store:
                 )
         else:
             require_ok(response, "Private PDF upload")
+
+    def get_pdf(self, path, digest):
+        bucket = os.getenv("SUPABASE_STORAGE_BUCKET", "finn-documents")
+        response = self.client.get(f"storage/v1/object/{quote(bucket, safe='')}/{path}")
+        require_ok(response, "Stored primary PDF")
+        if hashlib.sha256(response.content).hexdigest() != digest:
+            raise DependencyError("The stored document failed its integrity check.")
+        return response.content
 
 
 @contextmanager

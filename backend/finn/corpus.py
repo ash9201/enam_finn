@@ -14,6 +14,7 @@ from finn import embeddings
 from finn.documents import extract_document
 from finn.retrieval import CHUNK_VERSION, chunk_pages
 from finn.sources import discover_documents, fetch_pdf, public_client, resolve_company
+from finn.timing import timed
 
 
 def now() -> str:
@@ -30,7 +31,30 @@ def ingest_document(
     downloaded=None,
     extractor=None,
     extraction_version=None,
+    force_download=False,
 ) -> dict:
+    if not downloaded and not force_download:
+        saved = store.rows(
+            "finn_documents",
+            symbol="eq." + company["symbol"],
+            kind="eq." + document["kind"],
+            source_url="eq." + document["source_url"],
+            state="eq.ready",
+            order="extracted_at.desc",
+            limit=1,
+        )
+        if (
+            saved
+            and saved[0]["extraction_notes"].get("chunk_version") == CHUNK_VERSION
+            and (
+                not extraction_version
+                or saved[0]["extraction_notes"].get("financial_extraction_version")
+                == extraction_version
+            )
+        ):
+            # Discovery found the same immutable source link. Reuse without claiming
+            # that its PDF was downloaded or checked again.
+            return {**saved[0], "reused_extraction": True, "reused_download": True}
     progress("download")
     try:
         data, final_url = downloaded or fetch_pdf(client, document["source_url"])
@@ -39,9 +63,10 @@ def ingest_document(
             f"The original {document['kind'].replace('_', ' ')} PDF could not be reached from this server. No other content was substituted."
         ) from None
     digest = hashlib.sha256(data).hexdigest()
-    document_id = str(
-        uuid.uuid5(uuid.NAMESPACE_URL, f"finn:{company['symbol']}:{document['kind']}:{digest}")
-    )
+    identity = f"finn:{company['symbol']}:{document['kind']}:{digest}"
+    if extraction_version:
+        identity += ":" + extraction_version
+    document_id = str(uuid.uuid5(uuid.NAMESPACE_URL, identity))
     existing = store.rows("finn_documents", id="eq." + document_id, limit=1)
     if (
         existing
@@ -81,6 +106,7 @@ def ingest_document(
         "storage_path": storage_path,
         "table_candidates": extracted["tables"],
         "state": "extracting",
+        "extraction_version": extraction_version or "legacy",
         "extraction_notes": {
             "table_coverage": extracted["table_coverage"],
             "table_pages_checked": extracted["table_pages_checked"],
@@ -88,6 +114,7 @@ def ingest_document(
             "financial_comparisons_enabled": False,
             "chunk_version": CHUNK_VERSION,
             "text_extractor": extracted.get("text_extractor", "pypdf"),
+            "statement_pages": extracted.get("statement_pages", []),
             **({"financial_extraction_version": extraction_version} if extraction_version else {}),
         },
     }
@@ -115,12 +142,12 @@ def ingest_document(
     return {**record, "state": "ready", "chunks": len(chunks), "reused_extraction": False}
 
 
+@timed("corpus_check")
 def ensure_corpus(
     store, symbol: str, *, refresh=False, include_history=False, progress=lambda stage: None
 ) -> dict:
     existing = store.rows("finn_companies", symbol="eq." + symbol, limit=1)
     if existing and existing[0]["manifest"] and existing[0]["source_checked_at"] and not refresh:
-        checked = datetime.fromisoformat(existing[0]["source_checked_at"])
         documents = store.rows(
             "finn_documents",
             id="in.(" + ",".join(existing[0]["manifest"]) + ")",
@@ -134,12 +161,7 @@ def ensure_corpus(
         history_ready = not include_history or existing[0].get("coverage", {}).get(
             "history_requested", False
         )
-        if (
-            current_index
-            and history_ready
-            and (datetime.now(timezone.utc) - checked).total_seconds() < 86400
-        ):
-            embeddings.schedule_backfill(symbol)
+        if current_index and history_ready:
             return {**existing[0], "reused_corpus": True}
     progress("discovery")
     with public_client() as client:
@@ -169,19 +191,38 @@ def ensure_corpus(
             discovery["documents"]["annual_report"][:reports]
             + discovery["documents"]["transcript"][:calls]
         )
-        documents = []
+        documents, failures = [], []
         for index, document in enumerate(selected):
             progress(f"extraction:{index + 1}/{len(selected)}")
             prefix = f"extraction:{index + 1}/{len(selected)}"
-            documents.append(
-                ingest_document(
-                    store,
-                    client,
-                    company,
-                    document,
-                    progress=lambda phase, prefix=prefix: progress(f"{prefix}:{phase}"),
+            try:
+                documents.append(
+                    ingest_document(
+                        store,
+                        client,
+                        company,
+                        document,
+                        progress=lambda phase, prefix=prefix: progress(f"{prefix}:{phase}"),
+                        force_download=refresh,
+                    )
                 )
-            )
+                if hasattr(progress, "source_ready"):
+                    progress.source_ready(documents[-1])
+            except (ValueError, httpx.HTTPError) as exc:
+                failures.append(
+                    f"{document['kind'].replace('_', ' ')} ({document.get('discovery_label', 'date unknown')}): {str(exc)[:220]}"
+                )
+    if not documents:
+        raise ValueError(
+            "None of the discovered primary documents could be processed. " + " ".join(failures[:3])
+        )
+    if refresh and failures and previous.get("manifest"):
+        # A failed refresh must not silently substitute either the old corpus or a
+        # smaller one. First-time preparation can honestly use partial coverage.
+        raise ValueError(
+            "Source refresh was incomplete; the existing saved documents remain available. "
+            + " ".join(failures[:3])
+        )
     # Activate the manifest only after every selected document is fully stored. A failed
     # refresh cannot replace the last complete corpus with partially ingested evidence.
     documents = list({doc["id"]: doc for doc in documents}.values())
@@ -199,6 +240,7 @@ def ensure_corpus(
             "Publication/reporting dates are unverified where null; discovery labels are shown separately.",
             "Financial table candidates are not approved for comparisons.",
         ],
+        "failed_documents": failures,
     }
     if coverage["annual_reports"] < reports or coverage["transcripts"] < calls:
         coverage["notes"].append(

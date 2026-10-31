@@ -403,7 +403,7 @@ def test_job_deduplication_distinguishes_general_and_contextual_requests(monkeyp
     monkeypatch.setattr(api, "open_store", open_store)
     monkeypatch.setattr(jobs, "expire_stale_jobs", lambda s: None)
     submitted = []
-    monkeypatch.setattr(jobs, "submit", submitted.append)
+    monkeypatch.setattr(jobs, "submit", lambda job_id, **kwargs: submitted.append((job_id, kwargs)))
     assert (
         api.start_research(api.ResearchRequest(symbol="CCL", question="What does this mean?"))[
             "job_id"

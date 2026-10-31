@@ -1,5 +1,15 @@
 # Production hybrid rollout — 31 October 2026
 
+**Later research-experience update:** migrations 0009 and a daily indexing-maintenance
+workflow now add private attempt/lease state and truthful status. The owner configured
+Actions secret GEMINI_API_KEY and variable FINN_ENABLE_SEMANTIC_BACKFILL=true. The
+Render flag/model below remain unchanged. Indexing is eligible after the documented
+reset and resumes via requests or the daily 14:15 IST free-runner workflow. Existing
+portfolio scheduling and inactive Supabase fallback are unchanged. New LT/APLAPOLLO/
+other generic corpora mean the historical aggregate denominator below is no longer
+the current total; the four prepared-company counts were rechecked unchanged. See
+[current behaviour, quotas and checks](RESEARCH_IMPROVEMENTS.md).
+
 **Enabled and verified on the active Singapore API**
 (`https://finn-api-source-test.onrender.com`). The owner deployed the environment
 changes; the live configuration reports semantic search enabled. No application

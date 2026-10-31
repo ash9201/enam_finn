@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from collections import Counter
-from dataclasses import asdict, dataclass
 import re
 import time
 import uuid
+from collections import Counter
+from dataclasses import asdict, dataclass
 
 import httpx
 
 from finn import embeddings
 from finn.services import DependencyError, MissingConfiguration
+from finn.timing import timed
 
 CHUNK_VERSION = "page-chunks-v2-reading-order"
 STOP_WORDS = set(
@@ -101,9 +102,15 @@ def retrieval_profile(store, symbol: str, *, strategy=None, settings=SETTINGS) -
     try:
         index = embeddings.status(store, symbol)
         ready = index["total"] > 0 and index["ready"] == index["total"]
+        activity = embeddings.activity(store, symbol) if not ready else {"state": "ready"}
         return {
             "mode": "hybrid" if ready else "keyword",
-            "state": "ready" if ready else "indexing",
+            "state": "ready"
+            if ready
+            else "indexing"
+            if activity["state"] == "running"
+            else activity["state"],
+            "activity": activity,
             "model": embeddings.model_name(),
             "embedding_version": embeddings.VERSION,
             "index": index,
@@ -124,7 +131,9 @@ def retrieval_profile(store, symbol: str, *, strategy=None, settings=SETTINGS) -
 def profile_identity(profile: dict) -> dict | None:
     if profile["state"] == "disabled":
         return None  # Keep the original keyword answer cache usable after rollback.
-    result = {key: value for key, value in profile.items() if key != "index"}
+    result = {key: value for key, value in profile.items() if key not in ["index", "activity"]}
+    if profile["mode"] == "keyword":
+        result["state"] = "keyword_fallback"
     if profile["mode"] == "hybrid":
         result["index_fingerprint"] = profile["index"]["fingerprint"]
     # A partial index never changes keyword ranking, so do not burn answer calls
@@ -179,6 +188,7 @@ def diversify(candidates: list[dict], settings=SETTINGS) -> list[dict]:
     return selected
 
 
+@timed("retrieval")
 def retrieve_with_diagnostics(
     store,
     symbol: str,
@@ -253,8 +263,8 @@ def retrieve_with_diagnostics(
                 embedding_calls = getattr(client, "calls", 0)
                 query_cached = bool(getattr(client, "cache_hits", 0))
                 client.close()
-    elif profile["state"] in ["indexing", "unavailable"]:
-        reason = "index_incomplete" if profile["state"] == "indexing" else "semantic_unavailable"
+    elif profile["state"] != "disabled":
+        reason = "index_incomplete" if profile.get("index") else "semantic_unavailable"
     candidates = (
         reciprocal_rank_fusion(
             keyword, semantic, k=settings.rrf_k, semantic_weight=settings.semantic_weight

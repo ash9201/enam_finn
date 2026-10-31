@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -10,8 +11,10 @@ from datetime import datetime, timedelta, timezone
 from finn.corpus import now
 from finn.research import research_company
 from finn.store import open_store
+from finn.timing import tracing
 
 executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="finn-research")
+answer_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="finn-prepared")
 INSTANCE_ID = str(uuid.uuid4())
 SERVICE_SCOPE = os.getenv("RENDER_SERVICE_ID") or ("local-" + os.getenv("FINN_ENV", "development"))
 
@@ -70,34 +73,69 @@ def run_job(job_id: str):
             return
         job = jobs[0]
 
+        last_progress = ["", 0.0]
+        partial = {**(job.get("result") or {}), "_progress": {"sources": []}}
+
         def progress(stage):
+            phase = ":".join(stage.split(":")[:3]) if stage.startswith("extraction:") else stage
+            if phase == last_progress[0] and time.monotonic() - last_progress[1] < 3:
+                return
+            last_progress[:] = [phase, time.monotonic()]
             store.patch(
                 "finn_research_jobs",
                 {"state": "running", "stage": stage, "updated_at": now()},
                 id="eq." + job_id,
             )
 
+        def source_ready(document):
+            saved = partial["_progress"]["sources"]
+            if not any(s["id"] == document["id"] for s in saved):
+                saved.append(
+                    {
+                        "id": document["id"],
+                        "kind": document["kind"],
+                        "label": document["discovery_label"],
+                        "source_url": document["source_url"],
+                        "pages": document["page_count"],
+                    }
+                )
+                store.patch(
+                    "finn_research_jobs",
+                    {"result": partial, "updated_at": now()},
+                    id="eq." + job_id,
+                )
+
+        progress.source_ready = source_ready
+
         try:
-            progress("discovery")
+            progress("corpus_check")
             request = (job.get("result") or {}).get("_request", {})
             extra = {}
             if request.get("context"):
                 extra["context_reference"] = request["context"]
             if request.get("include_history"):
                 extra["include_history"] = True
-            result = research_company(
-                store,
-                job["symbol"],
-                job["question"],
-                refresh=job["refresh"],
-                progress=progress,
-                **extra,
-            )
+            queued = (
+                datetime.now(timezone.utc) - datetime.fromisoformat(job.get("created_at") or now())
+            ).total_seconds() * 1000
+            with tracing(queue_ms=queued) as trace:
+                result = research_company(
+                    store,
+                    job["symbol"],
+                    job["question"],
+                    refresh=job["refresh"],
+                    progress=progress,
+                    **extra,
+                )
+                result["timings"] = trace.summary()
             store.patch(
                 "finn_research_jobs",
                 {"state": "completed", "stage": "completed", "result": result, "updated_at": now()},
                 id="eq." + job_id,
             )
+            from finn import embeddings
+
+            embeddings.schedule_backfill(job["symbol"])
         except Exception as exc:
             store.patch(
                 "finn_research_jobs",
@@ -111,5 +149,7 @@ def run_job(job_id: str):
             )
 
 
-def submit(job_id: str):
-    executor.submit(run_job, job_id)
+def submit(job_id: str, *, prepared=False):
+    # One acquisition worker bounds PDF memory. A separate I/O/model lane prevents
+    # prepared-company questions waiting behind a long first-time download.
+    (answer_executor if prepared else executor).submit(run_job, job_id)

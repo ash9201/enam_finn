@@ -1,14 +1,10 @@
-from decimal import Decimal
 import io
+from decimal import Decimal
 from pathlib import Path
 
-from fastapi.testclient import TestClient
 import httpx
 import pytest
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-
+from fastapi.testclient import TestClient
 from finn.config import configuration_status
 from finn.documents import (
     FinancialFact,
@@ -18,6 +14,9 @@ from finn.documents import (
 )
 from finn.main import app
 from finn.sources import discover_documents, resolve_company
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 
 def test_health_does_not_claim_dependencies_are_verified():
@@ -86,6 +85,16 @@ def test_generic_discovery_uses_only_primary_links():
 
 def test_missing_transcript_cannot_turn_into_summary():
     html = '<h3>Annual reports</h3><ul class="list-links"><li><a href="https://issuer.example/ar.pdf">Annual Report 2026</a></li></ul><h3>Concalls</h3><ul class="list-links"><li><a href="/summary/1">AI Summary</a></li></ul>'
+    client = httpx.Client(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, text=html))
+    )
+    result = discover_documents(client, {"symbol": "ANY"})
+    assert result["documents"]["transcript"] == []
+    assert result["documents"]["annual_report"][0]["source_url"] == "https://issuer.example/ar.pdf"
+
+
+def test_discovery_without_any_primary_document_cannot_substitute_summary():
+    html = '<h3>Annual reports</h3><ul class="list-links"><li><a href="/summary/1">AI Summary</a></li></ul>'
     client = httpx.Client(
         transport=httpx.MockTransport(lambda request: httpx.Response(200, text=html))
     )

@@ -54,12 +54,12 @@ def main():
                 assert rows["PAT"]["figures"]["latest"]["value"] == "9899.97"
             else:
                 assert (
-                    "latest" not in rows["Revenue"]["figures"]
-                    and rows["Revenue"]["qoq"]["absolute"] is None
+                    rows["Revenue"]["figures"]["latest"]["value"] == "121076.24"
+                    and rows["Revenue"]["qoq"]["absolute"] == "1031.62"
                 )
                 assert (
-                    "previous" not in rows["PBT"]["figures"]
-                    and rows["PBT"]["qoq"]["absolute"] is None
+                    rows["PBT"]["figures"]["previous"]["value"] == "12901.75"
+                    and rows["PBT"]["qoq"]["absolute"] == "2184.54"
                 )
                 assert (
                     rows["PAT"]["figures"]["latest"]["value"] == "13010.97"

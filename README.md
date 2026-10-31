@@ -14,6 +14,10 @@ reactivated if needed after turning GitHub scheduling off. Prices preserve actua
 session dates, with bounded rate-limit retries and explicit primary-source recovery.
 See [acceptance](docs/ACCEPTANCE.md).
 
+The [latest research experience report](docs/RESEARCH_IMPROVEMENTS.md) records measured
+cache/acquisition latency, richer answers, 15-company financial coverage, reviewed
+management comparisons and resumable indexing. Full regression: **173 tests pass**.
+
 ## What works
 
 - **Briefing:** real NSE portfolio filings, explainable priority, routine disclosures
@@ -27,17 +31,20 @@ See [acceptance](docs/ACCEPTANCE.md).
 - **Research:** any valid NSE ticker with accessible primary reports/transcripts uses
   the same generic pipeline. Prepared examples: INFY, POLYCAB and CCL, initially with
   one annual report and two transcripts. POLYCAB history now covers two reports/four calls.
-  Answers have page-level source quotes.
+  Answers have substantive source-grounded explanations and interactive supporting
+  passages. Prepared caches return directly; new-company acquisition has visible progress.
 - **Evidence investigation:** clickable claims and citations open exact source passages.
   Ask a contextual follow-up across company documents, investigate repetition/later
   evidence, add available history, or return to general research. Context is visible and
   removable; unsupported chronology abstains. See [workflow and checks](docs/EVIDENCE_WORKFLOW.md).
-- **Narrative/evidence:** one prepared INFY comparison traces earlier guidance against
-  later call evidence, without pretending one quarter settles a full-year target.
+- **Narrative/evidence:** reviewed CCL and KPIT examples use complete management speech,
+  verified speakers and actual call dates. Reaffirmation and interim results do not
+  imply that a full-year target was delivered.
 - **Quarterly results:** source-validated Revenue, reported EBITDA, PBT and group PAT
   with deterministic QoQ/YoY changes, basis controls and figure-level evidence. POLYCAB
-  validates cleanly; CCL demonstrates withheld damaged cells. EBITDA stays unavailable
-  where it is not reported. [Implementation, examples and limits](docs/QUARTERLY_RESULTS.md).
+  validates cleanly; CCL's damaged native cells now have bounded image recovery. All 15
+  companies have some usable figures, with explicit remaining gaps. EBITDA stays
+  unavailable unless verified. [Implementation, examples and limits](docs/QUARTERLY_RESULTS.md).
 - **Resilience:** persistent jobs, content-hash document versions, answer caches, limited
   model calls, explicit errors, and a visibly dated recorded-demo snapshot if live
   saved updates cannot be read. Failed live research never becomes a fabricated answer.
@@ -68,14 +75,14 @@ indexes and semantic failures use the working keyword path with explicit limitat
 Existing citation/table guards remain in force; an added metric-name check withholds
 unsupported financial acronyms.
 
-Gemini 3.5 Flash-Lite handles ordinary answers. Gemini 3.8 Flash is preferred for deeper
-analysis but was intermittently slow in live testing; a bounded Flash-Lite fallback
-records the actual model and keeps the same source/chronology guards. Model reservations
+Gemini 3.5 Flash-Lite handles ordinary answers, bounded financial image extraction and
+the reviewed management comparisons. Earlier deeper-model experiments were slow;
+the actual model remains recorded. Model reservations
 in Postgres cap normal use below the user's stated free-tier limits; provider quotas
 can still reject requests. Caches avoid repeating model calls for identical evidence.
 
 PDF processing keeps layout text for tables and reading-order text for narrative.
-New documents over 200 pages use the already-installed PDFium native text engine,
+New documents over 40 pages use the already-installed PDFium native text engine,
 while pypdf preserves aligned financial-page text and pdfplumber preserves sampled
 table cells/context. Native calls are serialised and handles closed promptly. Existing
 verified corpora remain intact. A native decoding failure falls back to pypdf over

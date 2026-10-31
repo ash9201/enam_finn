@@ -10,13 +10,17 @@ from itertools import pairwise
 
 import pdfplumber
 
-VERSION = "quarterly-tables-v3"
+from finn.documents import native_page_texts
+from finn.timing import timed
+
+VERSION = "quarterly-tables-v4.2"
 METRICS = ["Revenue", "EBITDA", "PBT", "PAT"]
 
 
 def parse_number(raw):
     """Reject damaged grouping/decimal text; never repair an OCR figure."""
     text = raw.strip().replace("\u2212", "-")
+    text = re.sub(r"\s+(?=,)|(?<=,)\s+", "", text)
     if re.fullmatch(r"\(.*\)", text):
         text = "-" + text[1:-1]
     if not re.fullmatch(r"-?(?:\d+|\d{1,3}(?:,\d{3})+|\d{1,2}(?:,\d{2})*,\d{3})(?:\.\d+)?", text):
@@ -34,7 +38,8 @@ def parse_date(text):
             ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1
         )
     }
-    clean = re.sub(r"[^a-z0-9]", " ", text.lower())
+    clean = re.sub(r"(\d)(?:st|nd|rd|th)\b", r"\1", text.lower())
+    clean = re.sub(r"[^a-z0-9]", " ", clean)
     patterns = [
         r"\b(\d{1,2})\s+([a-z]{3,9})\s+(\d{4}|\d{2})\b",
         r"\b([a-z]{3,9})\s+(\d{1,2})\s+(\d{4}|\d{2})\b",
@@ -95,12 +100,29 @@ def metric_allowed(metric, label):
         )
     return bool(
         re.search(r"(?:net\s+)?profit.*(?:after\s*tax|for (?:the )?(?:period|quarter|year))", label)
-    ) and not re.search(r"comprehensive|attributable|before|margin", label)
+    ) and not re.search(r"comprehensive|attributable|before|margin|statement of", label)
 
 
 def candidate_table(words, page_number):
     lines = grouped_lines(words)
-    numeric = [w for row in lines for w in row if re.fullmatch(r"\(?-?[\d,]+\.\d{2}\)?", w["text"])]
+    right = max((w["x1"] for row in lines for w in row), default=0)
+    numeric = [
+        w
+        for row in lines
+        for w in row
+        if w["x0"] > right * 0.23
+        and parse_number(w["text"]) is not None
+        and ("." in w["text"] or "," in w["text"] or abs(parse_number(w["text"])) >= 100)
+    ]
+    fractional = [w for w in numeric if re.fullmatch(r"\(?-?[\d,]+\.\d{1,2}\)?", w["text"])]
+    preferred = []
+    for word in sorted(fractional, key=lambda w: w["x1"]):
+        if not preferred or abs(preferred[-1]["x"] - word["x1"]) > 3:
+            preferred.append({"x": word["x1"], "count": 1})
+        else:
+            preferred[-1]["count"] += 1
+    if sum(cluster["count"] >= 6 for cluster in preferred) >= 3:
+        numeric = fractional
     clusters = []
     for w in sorted(numeric, key=lambda w: w["x1"]):
         if not clusters or abs(clusters[-1]["x"] - w["x1"]) > 3:
@@ -108,7 +130,7 @@ def candidate_table(words, page_number):
         else:
             clusters[-1]["count"] += 1
     centres = sorted(c["x"] for c in clusters if c["count"] >= 6)
-    if not 3 <= len(centres) <= 9:
+    if not 3 <= len(centres) <= 12:
         return None
     gap = min(b - a for a, b in pairwise(centres))
     boundaries = [centres[0] - gap + 3] + [x + 3 for x in centres]
@@ -181,7 +203,7 @@ def candidate_table(words, page_number):
             group = line[i : i + 4]
             text = " ".join(v["text"] for v in group).lower()
             match = re.match(
-                r"(quarter\s*ended|three months\s*ended|(?:half[- ]?year|six(?: months)?|nine(?: months)?|twelve(?: months)?)(?:\s*ended)?|year\s*ended)",
+                r"(quarter\s*ended|(?:three|3)\s*months(?:\s*ended)?|(?:half(?:[- ]?(?:year|vear))?|six(?: months)?|nine(?: months)?|twelve(?: months)?)(?:\s*ended)?|(?:year|vear)\s*ended)",
                 text,
             )
             if match:
@@ -190,11 +212,11 @@ def candidate_table(words, page_number):
                 scopes.append(
                     (
                         (chosen[0]["x0"] + chosen[-1]["x1"]) / 2,
-                        "quarter" if text.startswith(("quarter", "three")) else "other",
+                        "quarter" if text.startswith(("quarter", "three", "3 months")) else "other",
                         row_index,
                     )
                 )
-                if text.startswith(("quarter", "three")):
+                if text.startswith(("quarter", "three", "3 months")):
                     scope_rows.append(row_index)
     scopes = [scope for scope in scopes if scope[2] >= max(scope_rows, default=0)]
     columns = []
@@ -226,12 +248,39 @@ def candidate_table(words, page_number):
     }
 
 
+def statement_page(text):
+    header = " ".join(text[:1600].split()).lower()
+    header = re.sub(r"res\s*ul\s*ts", "results", header)
+    if re.search(r"\bnotes\s*[:(]|fact sheet|independent auditor|auditor.s report", header[:450]):
+        return False
+    if re.search(
+        r"segment[- ]wise|segment (?:information|revenue)|cash flow|balance sheet", header[:500]
+    ):
+        return False
+    title = re.search(
+        r"statement.{0,150}(?:results|profit|income)|(?:unaudited|audited|standalone|consolidated)\s+(?:standalone\s+|consolidated\s+)?financial results",
+        header,
+    )
+    rows = re.search(r"revenue|interest earned|income from operations", text, re.I) and re.search(
+        r"profit|income tax", text, re.I
+    )
+    return bool(title and rows and len(re.findall(r"\d[\d,]*\.\d+|\b\d{3,}\b", text)) >= 15)
+
+
+@timed("pdf_processing")
 def extract_results_pdf(data, metadata, *, progress=lambda stage: None):
     pages, tables = [], []
+    native = native_page_texts(data, lambda stage: None)
+    if len(native) > 200:
+        raise ValueError("Quarterly filing exceeds the bounded 200-page extraction limit.")
+    selected = [i + 1 for i, text in enumerate(native) if statement_page(text)][:8]
+    # An image-only filing gets a bounded first-page sample for visual inspection.
+    if not selected and not any(len(text) > 100 for text in native):
+        selected = list(range(1, min(8, len(native)) + 1))
+    selected = sorted(set([1, *selected]))
     with pdfplumber.open(io.BytesIO(data)) as pdf:
-        if len(pdf.pages) > 60:
-            raise ValueError("Quarterly filing exceeds the bounded 60-page extraction limit.")
-        for number, page in enumerate(pdf.pages, 1):
+        for number in selected:
+            page = pdf.pages[number - 1]
             words = page.extract_words(x_tolerance=1.8, y_tolerance=2)
             lines = grouped_lines(words)
             text = "\n".join(" ".join(w["text"] for w in row) for row in lines)
@@ -248,15 +297,14 @@ def extract_results_pdf(data, metadata, *, progress=lambda stage: None):
             )
             progress(f"pages:{number}/{len(pdf.pages)}")
             page.close()
-    if not any(len(p["text"]) > 100 for p in pages):
-        raise ValueError(
-            "Scanned/unreadable filing: no reliable native figures; OCR is not enabled."
-        )
+    # Preserve image-only pages for the bounded visual fallback, rather than
+    # failing the entire filing before an alternative extractor can inspect it.
     return {
         **metadata,
         "pages": pages,
         "tables": tables,
-        "page_count": len(pages),
+        "page_count": len(native),
+        "statement_pages": [number for number in selected if statement_page(native[number - 1])],
         "sha256": hashlib.sha256(data).hexdigest(),
         "extracted_at": datetime.now(UTC).isoformat(),
         "table_coverage": "Geometry-aligned native quarterly statements; each mapped cell separately validated.",

@@ -1,6 +1,15 @@
 .financial-results {
   margin-top: 26px;
 }
+.financial-partial {
+  padding: 12px 14px;
+  border-left: 2px solid var(--warning-border);
+  color: var(--text-secondary);
+  background: var(--surface-read);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 16px 0;
+}
 .financial-heading {
   display: flex;
   align-items: flex-start;

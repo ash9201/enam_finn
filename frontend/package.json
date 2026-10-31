@@ -15,6 +15,7 @@
     "test:theme": "node scripts/verify-theme.mjs",
     "test:evidence": "node scripts/verify-evidence.mjs",
     "test:financial": "node scripts/verify-financial-results.mjs",
+    "test:research-experience": "node scripts/verify-research-experience.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "record:demo": "node scripts/record-demo.mjs"
   },

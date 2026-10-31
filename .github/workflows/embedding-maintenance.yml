@@ -1,0 +1,35 @@
+name: Resume document indexing
+on:
+  schedule:
+    - cron: '45 8 * * *' # 14:15 IST: after Pacific midnight in either DST season.
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: finn-embedding-maintenance
+  cancel-in-progress: false
+jobs:
+  backfill:
+    if: ${{ vars.FINN_ENABLE_SEMANTIC_BACKFILL == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_EMBEDDING_MODEL: gemini-embedding-001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.lock && pip install --no-deps -e .
+      - name: Require configured server credentials
+        shell: bash
+        run: |
+          if [ -z "$GEMINI_API_KEY" ] || [ -z "$SUPABASE_SECRET_KEY" ] || [ -z "$SUPABASE_URL" ]; then
+            echo 'Set the three server-side Actions secrets before enabling indexing maintenance.'
+            exit 1
+          fi
+      - run: python -m finn.embedding_maintenance --max-batches 40

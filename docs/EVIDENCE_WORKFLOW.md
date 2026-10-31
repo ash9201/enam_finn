@@ -1,5 +1,15 @@
 # Evidence-first company research
 
+The [latest research experience release](RESEARCH_IMPROVEMENTS.md) adds richer
+multi-source points, source switching, original financial page images, complete
+management speech and dated live index checks. A canonical citation may bind to an
+immutable stored page hash as well as a retrieval chunk. Server checks verify the
+original page before contextual research; client quotations remain untrusted.
+Cached research can return `{job_id, state: "completed", result}` immediately; uncached
+requests retain the persisted job/polling contract. Prepared-answer workers are
+separate from source acquisition. Ordinary questions reuse dated documents; explicit
+refresh checks for new sources. These changes supersede older timing/cache assumptions.
+
 Claims and citation chips open the same evidence panel: selected claim, exact stored
 source passage, original document, PDF page, dates and original PDF link. It is a right
 drawer on desktop and a scrolling bottom sheet on mobile, with a persistent follow-up

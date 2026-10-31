@@ -221,7 +221,7 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
               Compare quarters ↗
             </a>
           )}
-          <a href={researchLink(filing.symbol, true)} className="investigate-link">
+          <a href={researchLink(filing.symbol)} className="investigate-link">
             Investigate ↗
           </a>
           <a href={filing.source_url} target="_blank" rel="noopener noreferrer">

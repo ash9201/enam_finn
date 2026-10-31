@@ -1,151 +1,113 @@
 # Quarterly financial results
 
-FINN can acquire original quarterly filings, validate native statement cells, and
-compare Revenue, explicitly reported EBITDA, PBT and PAT. The **Quarterly results**
-action is in Research; results announcement cards offer **Compare quarters**. Prepared
-POLYCAB and CCL snapshots load directly from the existing public result cache.
-Refresh sources explicitly to check for a newer filing; saved results keep their
-reporting periods and original check/generation dates. This is on-demand acquisition,
-not another background schedule.
+FINN acquires original quarterly filings and compares verified Revenue, explicitly
+reported EBITDA, PBT and PAT. Research has a Quarterly results action; actual-results
+briefing cards offer Compare quarters. Acquisition is generic for NSE tickers with
+suitable primary filings. No company values are hardcoded or drawn from Screener's
+financial tables. Source/generation dates remain visible; refresh explicitly checks
+new original documents.
 
-## Actual source validation — 31 October 2026
+The [31 October experience audit](RESEARCH_IMPROVEMENTS.md) records coverage across
+all 15 portfolio companies, source recovery, timings and remaining gaps. All 15 now
+have some usable results, not complete coverage of every metric. Earlier acceptance
+records describing withheld CCL cells refer to the previous native-only release.
 
-The rendered primary consolidated statements were inspected during implementation.
-The following are dated acceptance cases, not a claim of independently audited or
-universal financial coverage.
+## Extraction and preservation
 
-| Case | Original statement | Actual behaviour |
-| --- | --- | --- |
-| POLYCAB, quarter ended 30 September 2026 | [BSE filing](https://www.bseindia.com/xml-data/corpfiling/AttachHis/4ac93ea0-d4d1-4b85-8849-14a19e0dcceb.pdf), consolidated PDF p. 4; standalone p. 10; INR million | Revenue 98,989.01 / 82,097.32 / 64,772.11 for latest / prior / year-ago. QoQ +16,891.69 (+20.58%); YoY +34,216.90 (+52.83%). PBT and group PAT also compare successfully. |
-| CCL, same quarter | [BSE filing](https://www.bseindia.com/xml-data/corpfiling/AttachHis/ac6a2647-0f4d-4ccc-8659-4101c055586a.pdf), consolidated PDF p. 7; standalone p. 3; INR lakh | Three consolidated cells withheld: current/prior Revenue and prior PBT. Native text loses decimals or has malformed grouping. PAT 13,010.97 / 11,688.05 / 10,085.75 supports QoQ +11.32%, YoY +29.00%. PBT YoY works; PBT QoQ remains unavailable. |
-| EBITDA in both filings | No eligible explicit unadjusted EBITDA row | Unavailable, not zero. No substitution of operating profit or an invented PBT/finance-cost/depreciation definition. |
-| Financial evidence follow-up | Published POLYCAB Revenue cell → company transcripts | Selected company, quarter, basis and claim are preserved. Narrative evidence comes from other documents. Earlier-period commentary is labelled historical context and is not proof of the selected quarter's drivers. A separate broad product-mix request had all candidate claims withheld by existing validation; no answer was fabricated. |
+1. Resolve through the live NSE directory and discover original quarterly source links.
+2. Download only permitted primary BSE/NSE/company PDFs, preserving original/final URL,
+   content hash, source check time and private original PDF.
+3. Read native text, identify statement pages and use geometry-aware extraction there.
+   The bound is 200 pages / three filings, allowing INFY's 195-page document. Quarter,
+   half-year and year columns remain distinct, including merged and wrapped headings.
+4. Check company identity, explicit period, basis, currency, scale, row meaning and
+   numeric formatting. Unambiguous row mapping is deterministic; bounded LLM selection
+   supplies row indices only when needed. It does not supply accepted native amounts.
+5. For incomplete eligible statements, read at most two statement pages using two
+   separate renders/reads of the same Gemini model. Each agreed cell/definition/header
+   is retained independently; disputed cells remain missing. Native validated values
+   are preserved, including CCL's separately reported associate share in group PAT.
+6. Some native-only cells retain image-verified headers rather than image-verified
+   amounts. Evidence distinguishes this method from two-image agreement. Explicit
+   whole-company quarterly EBITDA prose has a separate native-plus-image agreement
+   path; only an explicitly dated, matching quarter is accepted.
 
-Both bases are available. POLYCAB's standalone year-ago column is marked **Restated**
-from its actual header. Consolidated PAT uses total group profit before shareholder/
-non-controlling-interest attribution; CCL's separately reported associate share is
-included. The precise reported row is visible in evidence. Standalone PAT is the
-company's reported profit. No cross-company comparisons are offered.
+The two image reads are not independent models or accounting audits. Original page
+previews make verification inspectable. Source PDFs are never edited or corrected.
+Scanned/unfamiliar layouts without reliable metadata can still fail. There is no
+unbounded OCR pipeline, guessed decimal insertion, fiscal-label date inference or
+YTD subtraction. Same-quarter alternative index locators may be tried; an older
+quarter is never silently presented as the latest.
 
-## Acquisition and extraction
-
-1. Resolve any requested NSE ticker through the existing live company directory.
-2. Use only the quarterly **source links** on its Screener page. No Screener financial
-   table values or generated commentary enter the evidence.
-3. Resolve the source locator to the original BSE/NSE/company PDF through the existing
-   safe PDF downloader. Preserve URL, content hash, stored PDF and fetch date.
-4. Group native PDF words by geometry and retain the exact reading text, row cells,
-   horizontal columns and statement header. Quarter headings are distinguished from
-   half-year/year headings, including wrapped/merged headings. Dates must be explicit
-   month ends, unambiguous and not in the future.
-5. Verify the company name in the statement header, accounting basis, currency and unit.
-   The primary statement quarter must agree with its discovery locator; the locator
-   never supplies an accepted figure's period.
-6. Unambiguous eligible rows map deterministically. If multiple permitted candidates
-   remain, bounded Gemini schema output can select row indices. It cannot supply
-   figures, dates, units or substitute another metric. Every selected cell still passes
-   deterministic validation.
-
-The latest filing commonly contains all three required quarter columns. If required
-periods are absent, acquire up to two additional primary quarterly filings through
-the same directory/index flow. Missing cells within an otherwise available period
-are not silently repaired from an older/restated version. No YTD subtraction creates
-an unreported quarter. New companies use these same functions without a ticker list.
-
-Raw financial PDFs/pages/chunks remain private in the existing document store.
-Accepted facts, raw cells, headers and figure citations live in the existing versioned
-research-result JSON. Published prepared outputs use the existing public read policy;
-custom follow-ups stay private. Parser/mapping versions and result-schema versions
-participate in caching. Content-identical documents reuse extraction and row mapping;
-repeated analyses within 24 hours reuse the result without a model call. Explicit
-refresh rereads the index/files and preserves errors rather than presenting stale data
-as a successful refresh.
+Parser version `quarterly-tables-v4.2`, row-mapping version `quarterly-row-map-v2`,
+source cells and evidence hashes participate in cache identity. Document versions are
+additive, preserving old citations. Image reads can be reused by original PDF SHA.
+Repeated analyses reuse dated results within 24 hours. Explicit refresh checks original
+sources and reports failures. Results, jobs and raw documents use existing Supabase
+storage; no additional vector store or paid resource was introduced.
 
 ## Comparison policy
 
-- Revenue means **revenue from operations**, not total income including other income.
-- EBITDA must be explicitly reported, unadjusted and not a margin. Deriving it would
-  require agreeing on treatment of other income, exceptional items and other adjustments.
-- Use explicit quarter cells, the immediately previous quarter and the same quarter
-  one year earlier. Fiscal-year labels are not guessed.
-- Compare the same currency, accounting basis, period kind and metric definition.
-  Known lakh/crore/million/billion scales normalize with `Decimal`; currencies never
-  convert. Incompatible currency figures are not displayed under another currency.
-- Prefer comparative figures in the newest statement, including its restatements.
-  Conflicting same-filing cells are withheld. Detected regrouping/scope markers block
-  comparisons between separate filings pending review.
-- Absolute change = current − base. Percent = change ÷ base × 100. Calculations use
-  unrounded values and `ROUND_HALF_UP`; the UI shows two decimals. Zero/negative bases
-  retain valid absolute changes but no misleading percentage.
+- Revenue is revenue from operations. Banks may show explicitly identified **total
+  income**, clearly labelled in the view; it is not silently called industrial revenue.
+- Consolidated PAT is group profit before shareholder/noncontrolling attribution;
+  separately reported associate shares are included. Standalone PAT is company profit.
+- EBITDA must be explicitly reported, unadjusted and an amount, not a margin or segment
+  metric. No PBT/finance-cost/depreciation reconstruction is offered.
+- Require matching currency, accounting basis, period kind and metric definition.
+  Known units normalize with Decimal; currencies never convert. Cross-basis data and
+  incompatible definitions cannot produce changes.
+- Prefer same-statement comparative columns and preserve restatements. Conflicting
+  cells are withheld. Detected scope/regrouping changes can block cross-filing changes.
+- Absolute change = latest minus base. Percent = change / base x 100, using unrounded
+  Decimal values and ROUND_HALF_UP. Zero/negative bases retain valid absolute change
+  without a misleading percent. Missing is not zero.
 
-The results view separates figures from changes. Every figure opens the existing
-evidence panel with the exact source row plus selected column, raw amount, quarter,
-basis, unit, statement header, PDF page and original link. Changes open their formula
-and links to both underlying figures. The existing contextual question flow can search
-reports, transcripts and selected results filings. A numerical anchor also triggers
-question-only transcript retrieval so its numbers do not dominate a qualitative inquiry.
+## Reviewed original-source cases, 31 October 2026
 
-Financial pages use a small private keyword RPC alongside the existing research
-retrieval/RRF pipeline; they do not expand the annual-report/transcript manifest or
-trigger new embedding backfills. The semantic rollout flag remains unchanged.
-Ordinary narrative generation retains its existing quote/number/table guards and
-cannot invent new financial comparisons. Chronological investigations still need
-independently verified document dates; a quarter end is not a publication date.
+| Case | Original evidence | Verified behaviour |
+| --- | --- | --- |
+| POLYCAB | [BSE PDF](https://www.bseindia.com/xml-data/corpfiling/AttachHis/4ac93ea0-d4d1-4b85-8849-14a19e0dcceb.pdf), consolidated p.4, standalone p.10, INR million | Consolidated Revenue 98,989.01 / 82,097.32 / 64,772.11; QoQ +20.58%, YoY +52.83%. Revenue/PBT/PAT compare on both bases; standalone restatement preserved. |
+| CCL | [BSE PDF](https://www.bseindia.com/xml-data/corpfiling/AttachHis/ac6a2647-0f4d-4ccc-8659-4101c055586a.pdf), consolidated p.7, standalone p.3, INR lakh | Recovered consolidated Revenue 121,076.24 / 120,044.62 / 112,672.61 and PBT 15,086.29 / 12,901.75 / 12,709.25. Group PAT 13,010.97 / 11,688.05 / 10,085.75 includes associates. Both bases now support all three periods for these metrics. |
+| HDFCBANK | Original consolidated statement p.9, INR crore | Bank total income 129,358.69 / 133,110.36 / 118,560.63; group PAT 21,537.09 / 20,382.69 / 20,363.77 before NCI. Native damaged digits are not substituted for image-verified values. |
+| SUNPHARMA | Original press release p.17, INR million | Current consolidated EBITDA 47,439, native prose plus separate image verification. Prior EBITDA fiscal abbreviations are not inferred into dates; QoQ/YoY remain missing. |
+| Remaining partial cases | Original filings in the same generic pipeline | M&M has consolidated Revenue/PBT YoY only; Reliance PAT/standalone, NTPC consolidated PBT and Titan Revenue remain withheld. See the full coverage table. |
 
-## Limits and verification
+These are implementation spot checks, not an audit of every cell. All 15 pipeline
+runs passed their available-data comparison path. Source layouts and dates can change;
+acceptance scripts deliberately stop if the dated reviewed values change.
 
-Native English statements with reliable alignment and consistent decimal formats are
-supported, bounded to 60 PDF pages and at most three filings per acquisition. Scans,
-damaged text, ambiguous headers/units/bases and unsupported layouts fail or expose
-missing cells. No OCR recovery or guessed decimal placement is enabled. Banks and
-insurers do not get industrial revenue/EBITDA inferred from total income; specialized
-NII/NIM, underwriting and insurance metrics are outside this feature. Acquisition,
-company-name matching and table layout are deliberately conservative; not every NSE
-company is supported.
+## Evidence, research and UI
 
-Keyword retrieval can return older management commentary. Timing labels and source
-dates expose that limitation; a historical demand statement does not establish a
-current-quarter cause. Quote existence and native-cell validation do not prove semantic
-entailment or every possible accounting comparability issue. The bounded two-company
-review is retained as acceptance evidence.
+Figures open the existing evidence drawer with row, column, raw amount, quarter,
+basis, scale, PDF page, source URL and exact source passage/transcription. Original
+statement-page previews are generated server-side from hash-verified private PDFs;
+no storage secret reaches the browser. A calculation opens its formula and both
+figure references. Partial coverage has an explicit note and usable values remain.
 
-- 27 targeted financial tests cover malformed/negative/Indian-format numbers, merged
-  and wrapped quarter/YTD headings, exact periods, source-row substitution, decimal
-  damage, unit conversion, unvalidated figures, incompatible definitions/bases,
-  nonpositive denominators, explicit reported EBITDA versus adjusted/margin/operating
-  profit substitutions, and avoiding unnecessary LLM calls. Reported-EBITDA extraction
-  is tested with a rendered synthetic statement; neither real demo filing reports it.
-- Full backend regression: **154 passed**, followed by two added targeted EBITDA
-  cases (156 total). Hosted CI runs the complete final suite. No unrelated backend
-  suite was repeated per theme.
-- Production TypeScript/Vite build and privileged-credential asset scan pass.
-- Affected results/evidence/calculation views pass Light/Dark checks at 390×844 and
-  1440×1000, including contrast and overflow. The live follow-up runs once, not once
-  per theme. Real CCL coverage and negative standalone changes are also checked.
-- The server-only financial-search RPC accepts privileged calls; anonymous execution
-  is denied (401). Existing private-table RLS remains enabled.
-- Render's deployed financial job completed both a cached request and an explicit
-  live source refresh for POLYCAB, resolving/downloading the primary filing and
-  validating its quarter/figures again. The deployed Light/Dark phone/desktop browser
-  checks also pass with direct API requests (no local forwarding). Actual artifacts
-  distinguish cached delivery from a successful live refresh.
+Ask about this evidence retains the numerical anchor and retrieves other company
+reports/calls through the existing retrieval pipeline. Historical commentary is
+labelled as context; it cannot prove the selected quarter's causes. Financial keyword
+retrieval remains separate from the annual-report/transcript embedding manifest, so
+quarterly ingestion does not invalidate completed semantic indexes. Narrative models
+cannot invent new financial comparisons.
 
-Apply `supabase/migrations/0008_quarterly_results.sql` once with RLS enabled (already
-applied to this project). Its initial sort-reference error was corrected before the
-successful run. It extends the document-kind constraint and adds a restricted search
-function; it creates no tables or public grants.
+## Operations and tests
 
-```powershell
-.\.venv\Scripts\python -m pytest tests/test_financial_results.py -q
-.\.venv\Scripts\python scripts/verify_financial_results.py --followup
-# --publish is optional and publishes only the verified prepared financial snapshots.
-python scripts/npm.py run build
-python scripts/npm.py run test:financial
-```
+Migrations 0008 and 0009 were applied by the owner with RLS enabled. Private source
+search, documents, pages and image-verification data remain server-only. Only explicitly
+published prepared results are anonymously readable. Anonymous image requests require
+a valid canonical published/private result reference; no arbitrary path is accepted.
 
-The dated real-source check stops if the quarter or expected source cells change;
-review the new original filing before updating it. Browser tests use the real public
-snapshots. For a local API, set `FINN_FINANCIAL_API_URL=http://127.0.0.1:8001`; requests
-are forwarded there without fabricated responses. Without it the deployed API is
-accessed directly. Real follow-up results and two useful UI screenshots are ignored
-local artifacts under `artifacts/financial-results/` and `artifacts/financial-browser/`.
+`python scripts/verify_financial_results.py` checks the reviewed POLYCAB/CCL values,
+periods and cache reuse. `python scripts/verify_portfolio_financials.py` audits all 15;
+`--refresh` checks original files and `--publish` explicitly publishes reviewed results.
+Targeted tests cover amounts, metadata, units, ambiguous periods, image disagreement,
+PAT attribution, reported EBITDA versus margins/adjusted/YTD, provenance and arithmetic.
+The consolidated research browser matrix covers both themes/viewports, financial
+partial data, figure evidence, original pages and one real follow-up. See
+[acceptance](ACCEPTANCE.md) for final regression/build checks.
+
+Broader accounting review, fiscal-label EBITDA tables, insurance metrics, NII/NIM and
+full OCR remain outside this release. A successful generic discovery does not guarantee
+that a company's figures will be supported.

@@ -1,5 +1,18 @@
 # Working-prototype acceptance
 
+**Research experience release (31 October, latest):** **173 backend tests pass**,
+TypeScript/Vite build and privileged-credential asset scan pass. One consolidated
+390x844 / 1440x1000 Light/Dark browser matrix passes contrast, overflow, figure evidence,
+source switching, original statement preview, context removal, a real follow-up and
+partial/paused states. POLYCAB/CCL original-source acceptance and cache reuse pass.
+All 15 portfolio companies now yield some verified financial data, with remaining
+metric/basis gaps explicit. CCL/KPIT comparisons use verified management/date evidence.
+Public-key access to the new private embedding table and lease RPC is denied. See
+[actual before/after results and limits](RESEARCH_IMPROVEMENTS.md).
+
+Earlier results below are historical; CCL's native damage is now recoverable, the
+financial page bound is 200 and complete indexes use enabled hybrid retrieval.
+
 **Hybrid production rollout (31 October):** enabled on the Singapore API. Fresh CCL
 and cached GOKEX hybrid answers pass; incomplete INFY/POLYCAB use keyword fallback.
 All 25 targeted hybrid tests and live quota-accounting audit pass. Backfills are
@@ -92,9 +105,8 @@ note draft is [SUBMISSION.md](SUBMISSION.md).
 
 Semantic retrieval is implemented behind its rollout flag, with pgvector/RRF, private
 embedding caches, resumable indexing and keyword fallback. The [CCL evaluation](HYBRID_EVALUATION.md)
-records actual results and the input-quota limit; production remains keyword-only.
-Comprehensive OCR, full historical
-exchange coverage, financial-table comparisons, and a four-quarter tracker remain out.
+records actual results and the input-quota limit; production selectively uses hybrid.
+Comprehensive OCR, full historical exchange coverage and a four-quarter tracker remain out.
 
 Earlier foundation release checks: **64 tests passed**, production build and emitted-secret scan
 passed; phone/desktop product and connection-browser checks passed. Empty windows

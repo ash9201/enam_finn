@@ -8,6 +8,7 @@ from typing import Literal
 
 import httpx
 from fastapi import APIRouter, Header, HTTPException, Query
+from fastapi.responses import Response
 from pydantic import BaseModel, Field, field_validator
 
 from finn import jobs
@@ -235,6 +236,29 @@ def start_research(request: ResearchRequest):
                 raise HTTPException(
                     503, "Research access policies need repair before processing can begin."
                 )
+            if not request.refresh and not request.include_history and not context_request:
+                from finn.research import fast_cached_research
+
+                cached = fast_cached_research(store, request.symbol, request.question)
+                if cached:
+                    job_id = str(uuid.uuid4())
+                    store.insert(
+                        "finn_research_jobs",
+                        {
+                            "id": job_id,
+                            "symbol": request.symbol,
+                            "question": request.question,
+                            "refresh": False,
+                            "state": "completed",
+                            "stage": "completed",
+                            "result": cached,
+                            "updated_at": now(),
+                        },
+                    )
+                    from finn import embeddings
+
+                    embeddings.schedule_backfill(request.symbol)
+                    return {"job_id": job_id, "state": "completed", "result": cached}
             jobs.expire_stale_jobs(store)
             active = store.rows(
                 "finn_research_jobs",
@@ -261,6 +285,19 @@ def start_research(request: ResearchRequest):
             if len(active) >= 3:
                 raise HTTPException(429, "Research is busy. Please retry shortly.")
             job_id = str(uuid.uuid4())
+            company = store.rows(
+                "finn_companies", symbol="eq." + request.symbol, select="manifest", limit=1
+            )
+            prepared = bool(
+                company
+                and company[0].get("manifest")
+                and not request.refresh
+                and not request.include_history
+            )
+            from finn.financials import QUESTION as RESULTS_QUESTION
+
+            if request.question == RESULTS_QUESTION:
+                prepared = False  # Native/vision filing work stays in the acquisition lane.
             store.insert(
                 "finn_research_jobs",
                 {
@@ -279,7 +316,7 @@ def start_research(request: ResearchRequest):
                     },
                 },
             )
-        jobs.submit(job_id)
+        jobs.submit(job_id, prepared=prepared)
         return {"job_id": job_id, "state": "queued"}
     except (DependencyError, MissingConfiguration) as exc:
         raise HTTPException(503, jobs.safe_error(exc)) from None
@@ -306,6 +343,67 @@ def evidence_details(
         raise HTTPException(422, str(exc)) from None
     except (DependencyError, MissingConfiguration) as exc:
         raise HTTPException(503, jobs.safe_error(exc)) from None
+
+
+@router.get("/companies/{symbol}/search-status")
+def search_status(symbol: str):
+    from finn.retrieval import retrieval_profile
+
+    if not re.fullmatch(r"[A-Z0-9&-]{1,30}", symbol):
+        raise HTTPException(422, "Use an NSE symbol.")
+    with open_store() as store:
+        profile = retrieval_profile(store, symbol)
+        return {
+            "symbol": symbol,
+            "state": profile["state"],
+            "index": profile.get("index"),
+            "activity": profile.get("activity"),
+            "checked_at": now(),
+        }
+
+
+@router.get("/research/{research_id}/evidence/{citation_id}/image")
+def financial_page_image(
+    research_id: uuid.UUID,
+    citation_id: uuid.UUID,
+    symbol: str = Query(pattern=r"^[A-Z0-9&-]{1,30}$"),
+    claim_index: int | None = Query(default=None, ge=0, le=255),
+):
+    from finn.financial_vision import render_page
+
+    with open_store() as store:
+        try:
+            context, _ = resolve_context(
+                store,
+                symbol,
+                EvidenceReference(
+                    research_id=research_id, citation_id=citation_id, claim_index=claim_index
+                ),
+            )
+            citation = context["citation"]
+            if not citation.get("financial_evidence"):
+                raise HTTPException(
+                    404, "A statement image is available for financial evidence only."
+                )
+            document = store.rows(
+                "finn_documents",
+                id="eq." + citation["document_id"],
+                symbol="eq." + symbol,
+                state="eq.ready",
+                limit=1,
+            )[0]
+            image = render_page(
+                store.get_pdf(document["storage_path"], document["sha256"]), citation["pdf_page"]
+            )
+            return Response(
+                content=image,
+                media_type="image/jpeg",
+                headers={"Cache-Control": "private, max-age=86400"},
+            )
+        except (ValueError, IndexError) as exc:
+            raise HTTPException(422, jobs.safe_error(exc)) from None
+        except (DependencyError, MissingConfiguration, httpx.HTTPError) as exc:
+            raise HTTPException(503, jobs.safe_error(exc)) from None
 
 
 @router.get("/jobs/{job_id}")

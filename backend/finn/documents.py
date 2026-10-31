@@ -2,17 +2,20 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from decimal import Decimal
 import hashlib
 import io
 import re
+from datetime import datetime, timezone
+from decimal import Decimal
+from difflib import SequenceMatcher
 from threading import Lock
 
 import pdfplumber
 import pypdfium2 as pdfium
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
+
+from finn.timing import timed
 
 _PDFIUM_LOCK = Lock()  # PDFium calls must not run concurrently across threads.
 
@@ -149,6 +152,7 @@ def financial_header_settings(page) -> dict | None:
     return None
 
 
+@timed("pdf_processing")
 def extract_document(
     data: bytes,
     metadata: dict,
@@ -160,9 +164,9 @@ def extract_document(
     reader = PdfReader(io.BytesIO(data))
     if reader.is_encrypted and not reader.decrypt(""):
         raise ValueError("Password-protected PDF is unsupported.")
-    if len(reader.pages) > 700:
-        raise ValueError("This PDF exceeds the prototype's 700-page processing limit.")
-    use_native = len(reader.pages) > 200 if native_text is None else native_text
+    if len(reader.pages) > 1600:
+        raise ValueError("This PDF exceeds the bounded 1,600-page processing limit.")
+    use_native = len(reader.pages) > 40 if native_text is None else native_text
     native = None
     extraction_warnings = []
     if use_native:
@@ -320,6 +324,19 @@ def resolve_source_quote(quote: str, source_text: str) -> str | None:
     """
     if not quote.strip():
         return None
+    if "..." in quote or "\u2026" in quote:
+        pieces = [part.strip() for part in re.split(r"\.{3}|\u2026", quote) if part.strip()]
+        if 2 <= len(pieces) <= 3 and all(len(part) >= 25 for part in pieces):
+            resolved, cursor = [], 0
+            for part in pieces:
+                text = resolve_source_quote(part, source_text[cursor:])
+                if not text:
+                    break
+                start = source_text.find(text, cursor)
+                resolved.append((start, start + len(text)))
+                cursor = start + len(text)
+            if len(resolved) == len(pieces) and resolved[-1][1] - resolved[0][0] <= 8000:
+                return source_text[resolved[0][0] : resolved[-1][1]]
     compact, offsets = [], []
     for index, character in enumerate(source_text):
         if not character.isspace():
@@ -329,5 +346,56 @@ def resolve_source_quote(quote: str, source_text: str) -> str | None:
     wanted = "".join(quote.split()).casefold()
     position = "".join(compact).find(wanted)
     if position < 0:
-        return None
+        # Non-numeric punctuation may be copied differently by a model. Keep all
+        # decimal/grouping separators and signs; resolve back to original text.
+        def prose_canonical(value):
+            chars, locations = [], []
+            for i, character in enumerate(value):
+                if character.isspace():
+                    continue
+                if character in ",;:" and not (
+                    i > 0
+                    and i + 1 < len(value)
+                    and value[i - 1].isdigit()
+                    and value[i + 1].isdigit()
+                ):
+                    continue
+                for lowered in character.casefold():
+                    chars.append(lowered)
+                    locations.append(i)
+            return chars, locations
+
+        canonical, places = prose_canonical(source_text)
+        target, _ = prose_canonical(quote)
+        found = "".join(canonical).find("".join(target))
+        if found >= 0 and target:
+            return source_text[places[found] : places[found + len(target) - 1] + 1]
+    if position < 0:
+        # Recover a rare copied Unicode glyph error only inside a long word. All
+        # other words, numbers, negations and punctuation must remain unchanged.
+        # Return the ACTUAL source slice; never edit source text or repair figures.
+        joined = "".join(compact)
+        prefix, suffix = wanted[:28], wanted[-28:]
+        start = joined.find(prefix)
+        end = joined.find(suffix, start + len(prefix)) if start >= 0 else -1
+        if start < 0 or end < 0:
+            return None
+        candidate = source_text[offsets[start] : offsets[end + len(suffix) - 1] + 1]
+        a, b = candidate.split(), quote.split()
+        if len(a) != len(b):
+            return None
+        differing = [(x, y) for x, y in zip(a, b) if x.casefold() != y.casefold()]
+        if not 1 <= len(differing) <= 2:
+            return None
+        for x, y in differing:
+            if (
+                not any(ord(c) > 127 for c in x + y)
+                or any(c.isdigit() for c in x + y)
+                or min(len(x), len(y)) < 6
+                or x[:2].casefold() != y[:2].casefold()
+                or x[-3:].casefold() != y[-3:].casefold()
+                or SequenceMatcher(None, x.casefold(), y.casefold()).ratio() < 0.8
+            ):
+                return None
+        return candidate
     return source_text[offsets[position] : offsets[position + len(wanted) - 1] + 1]

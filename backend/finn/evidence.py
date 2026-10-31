@@ -1,11 +1,12 @@
 """Server-resolved research anchors and bounded cross-document follow-ups."""
 
+import hashlib
 import re
 import time
 from collections import Counter
 from datetime import datetime
 from typing import Literal
-from uuid import UUID
+from uuid import UUID, uuid5
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -30,7 +31,7 @@ def reference_dict(value):
     return EvidenceReference.model_validate(value).model_dump(mode="json", exclude_none=True)
 
 
-def document_date(store, document):
+def document_date(store, document, *, pages=None):
     """An observed call-header date is distinct from a publication date or index label."""
     if document.get("published_at") and document["kind"] != "transcript":
         return {
@@ -42,11 +43,15 @@ def document_date(store, document):
     cache = getattr(store, "_call_dates", {})
     if document["id"] in cache:
         return cache[document["id"]]
-    pages = store.rows(
-        "finn_document_pages",
-        document_id="eq." + document["id"],
-        pdf_page="lte.4",
-        select="pdf_page,layout_text,metadata",
+    pages = (
+        pages
+        if pages is not None
+        else store.rows(
+            "finn_document_pages",
+            document_id="eq." + document["id"],
+            pdf_page="lte.4",
+            select="pdf_page,layout_text,metadata",
+        )
     )
     found, locations = Counter(), {}
     for page in pages:
@@ -69,6 +74,29 @@ def document_date(store, document):
             found[value] += 1
             locations[value] = min(locations.get(value, page["pdf_page"]), page["pdf_page"])
     recurring = [date for date, count in found.items() if count >= 2]
+    explicit = []
+    for page in pages[:2]:
+        text = " ".join(
+            (page.get("metadata", {}).get("reading_text") or page.get("layout_text", "")).split()
+        )
+        if not re.search(r"transcript|earnings.*(?:call|meet)", text, re.I):
+            continue
+        for raw in re.findall(
+            r"(?:held|conducted)\s+on\s+((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+20\d{2})",
+            text,
+            re.I,
+        ):
+            try:
+                explicit.append(
+                    (
+                        datetime.strptime(raw.replace(",", "").title(), "%B %d %Y")
+                        .date()
+                        .isoformat(),
+                        page["pdf_page"],
+                    )
+                )
+            except ValueError:
+                continue
     result = (
         {
             "document_date": recurring[0],
@@ -82,6 +110,12 @@ def document_date(store, document):
             else {}
         )
     )
+    if not result and len({d for d, _ in explicit}) == 1:
+        result = {
+            "document_date": explicit[0][0],
+            "document_date_basis": "Call date stated in company filing",
+            "document_date_pdf_page": explicit[0][1],
+        }
     cache[document["id"]] = result
     store._call_dates = cache
     return result
@@ -101,7 +135,9 @@ def resolve_context(store, symbol, reference):
     comparison = answer.get("comparison") or {}
     claims += [comparison[key] for key in ["earlier", "later"] if comparison.get(key)]
     matches = [
-        (index, c) for index, c in enumerate(claims) if c["citation"]["id"] == ref["citation_id"]
+        (index, c)
+        for index, c in enumerate(claims)
+        if any(s["id"] == ref["citation_id"] for s in c.get("citations", [c["citation"]]))
     ]
     if "claim_index" in ref:
         matches = [(index, c) for index, c in matches if index == ref["claim_index"]]
@@ -112,7 +148,9 @@ def resolve_context(store, symbol, reference):
             "This passage supports multiple claims. Reopen the claim to select its exact evidence context."
         )
     claim_index, claim = matches[0]
-    citation = claim["citation"]
+    citation = next(
+        c for c in claim.get("citations", [claim["citation"]]) if c["id"] == ref["citation_id"]
+    )
     documents = store.rows(
         "finn_documents",
         id="eq." + citation["document_id"],
@@ -132,6 +170,36 @@ def resolve_context(store, symbol, reference):
         if documents
         else []
     )
+    if documents and citation.get("evidence_scope") == "page":
+        pages = store.rows(
+            "finn_document_pages",
+            document_id="eq." + citation["document_id"],
+            pdf_page="eq." + str(citation["pdf_page"]),
+            select="layout_text,metadata",
+            limit=1,
+        )
+        if pages:
+            text = " ".join(
+                (
+                    pages[0].get("metadata", {}).get("reading_text") or pages[0]["layout_text"]
+                ).split()
+            )
+            digest = hashlib.sha256(text.encode()).hexdigest()
+            expected = str(
+                uuid5(
+                    UUID(citation["document_id"]), f"page-evidence:{citation['pdf_page']}:{digest}"
+                )
+            )
+            if expected == ref["citation_id"] and digest == citation.get("page_hash"):
+                chunks = [
+                    {
+                        "id": expected,
+                        "document_id": citation["document_id"],
+                        "pdf_page": citation["pdf_page"],
+                        "body": text,
+                        "metadata": {"evidence_scope": "page", "page_hash": digest},
+                    }
+                ]
     quote = resolve_source_quote(citation["quote"], chunks[0]["body"]) if chunks else None
     if not quote:
         raise ValueError(
@@ -154,6 +222,8 @@ def resolve_context(store, symbol, reference):
             ]
         },
         "document_url": doc["final_url"],
+        **{k: citation[k] for k in ["evidence_scope", "page_hash"] if citation.get(k)},
+        **{k: citation[k] for k in ["source_identifiers", "context_pdf_page"] if citation.get(k)},
         **date,
     }
     context = {
@@ -195,9 +265,11 @@ def retrieve_followup(store, symbol, question, context, anchor, profile):
     if context.get("financial_documents") and context["intent"] != "repeated":
         # A numerical anchor must not drown out a qualitative follow-up. Search
         # the actual question in management commentary separately, then fuse it.
-        commentary = retrieve_with_diagnostics(store,symbol,question,kinds=['transcript'],profile=profile)
+        commentary = retrieve_with_diagnostics(
+            store, symbol, question, kinds=["transcript"], profile=profile
+        )
         searches.append(commentary)
-        ranked = reciprocal_rank_fusion(commentary['evidence'],ranked)
+        ranked = reciprocal_rank_fusion(commentary["evidence"], ranked)
         extra = store.rpc(
             "finn_results_keyword_search",
             {

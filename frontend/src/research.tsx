@@ -24,8 +24,15 @@ type Citation = {
   document_date_basis?: string
   document_date_pdf_page?: number
   financial_evidence?: FinancialEvidence
+  speaker?: { name: string; role: string; pdf_page: number }
 }
-type Claim = { statement: string; citation: Citation; financial_context_timing?: string }
+type Claim = {
+  statement: string
+  citation: Citation
+  citations?: Citation[]
+  heading?: string
+  financial_context_timing?: string
+}
 type Intent = 'question' | 'repeated' | 'later' | 'perspective'
 type EvidenceContext = {
   research_id: string
@@ -77,6 +84,10 @@ type Answer = {
     verdict: string
     basis: string
     assessment: string
+    topic?: string
+    uncertainty?: string
+    additional_context?: Claim[]
+    analysis_claims?: Claim[]
   } | null
   limitations: string[]
   coverage: { annual_reports: number; transcripts: number }
@@ -84,6 +95,26 @@ type Answer = {
   generated_at: string
   cached: boolean
   retrieval_mode: string
+  comparison_status?: string
+  assessment?: string
+  financial_context?: {
+    research_id: string
+    symbol: string
+    company_name: string
+    claim_index: number
+    claim: Claim
+    period_end: string
+    source_checked_at: string
+    note: string
+  }
+  investigation_suggestions?: string[]
+  retrieval?: {
+    state?: string
+    index?: { ready: number; total: number }
+    fallback_reason?: string
+    semantic_error?: string
+  }
+  timings?: { queue_ms: number; processing_ms: number; span_ms: Record<string, number> }
   financial_results?: ResultsData
   evidence_context?: EvidenceContext
   investigation?: {
@@ -91,6 +122,108 @@ type Answer = {
     history_requested: boolean
     assessment?: string
   }
+}
+type SearchStatus = {
+  state: string
+  checked_at?: string
+  index?: { ready: number; total: number }
+  activity?: { reason?: string; retry_at?: string; updated_at?: string }
+}
+type ProgressSource = { id: string; kind: string; label: string; source_url: string; pages: number }
+
+function ResearchDetails({ answer }: { answer: Answer }) {
+  const [health, setHealth] = useState<SearchStatus | null>(null)
+  const [checking, setChecking] = useState(false)
+  const checkHealth = () => {
+    if (checking) return
+    setChecking(true)
+    void api(`/companies/${answer.symbol}/search-status`)
+      .then(setHealth)
+      .catch(() => setHealth({ state: 'unavailable', checked_at: new Date().toISOString() }))
+      .finally(() => setChecking(false))
+  }
+  const messages: Record<string, string> = {
+    ready: 'The document index is ready for hybrid search.',
+    indexing:
+      'Document indexing is running. Research continues with keyword search until it is complete.',
+    paused_quota:
+      'Document indexing is paused at the free search allowance. Keyword research remains available.',
+    pending:
+      'The document index is incomplete; no active indexing worker is confirmed. Keyword research is available.',
+    failed:
+      'The last indexing attempt could not finish. Saved progress is retained and keyword research is available.',
+    unavailable:
+      'Live semantic-search status is unavailable. This does not affect the saved evidence below.',
+    disabled: 'Semantic search is switched off. Company research uses keyword search.',
+  }
+  return (
+    <details
+      className="coverage-notes research-details"
+      onToggle={(event) => {
+        if (event.currentTarget.open && answer.retrieval_mode !== 'validated_financial_cells')
+          checkHealth()
+      }}
+    >
+      <summary>Sources, coverage & search details</summary>
+      <ul>
+        {answer.limitations
+          .filter((note) => !note.startsWith('Additional document search is still being prepared'))
+          .map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+      </ul>
+      {answer.retrieval_mode !== 'validated_financial_cells' && (
+        <div className="search-status">
+          <strong>
+            Search used for this answer: {answer.retrieval_mode === 'hybrid' ? 'Hybrid' : 'Keyword'}
+          </strong>
+          {health ? (
+            <>
+              <p>{messages[health.state] || messages.pending}</p>
+              {health.index && (
+                <p>
+                  {health.index.ready.toLocaleString('en-IN')} of{' '}
+                  {health.index.total.toLocaleString('en-IN')} passages indexed.
+                </p>
+              )}
+              {health.activity?.retry_at && (
+                <p>
+                  Eligible to resume after {stamp(health.activity.retry_at)}. A later request or the
+                  daily maintenance run can resume it.
+                </p>
+              )}
+              {health.checked_at && (
+                <p className="fine-print">Status checked {stamp(health.checked_at)}.</p>
+              )}
+              <button type="button" className="text-chip" onClick={checkHealth} disabled={checking}>
+                {checking ? 'Checking search status…' : 'Refresh search status'}
+              </button>
+            </>
+          ) : (
+            <p>Checking current search availability…</p>
+          )}
+        </div>
+      )}
+      {answer.timings && (
+        <details className="timing-details">
+          <summary>Request timing</summary>
+          <p>
+            Queue {(answer.timings.queue_ms / 1000).toFixed(1)} s · Processing{' '}
+            {(answer.timings.processing_ms / 1000).toFixed(1)} s
+          </p>
+          <dl>
+            {Object.entries(answer.timings.span_ms).map(([name, ms]) => (
+              <div key={name}>
+                <dt>{name.replaceAll('_', ' ')}</dt>
+                <dd>{(ms / 1000).toFixed(2)} s</dd>
+              </div>
+            ))}
+          </dl>
+          <small>Nested operations overlap; their times do not add up to the total.</small>
+        </details>
+      )}
+    </details>
+  )
 }
 type Company = {
   symbol: string
@@ -103,7 +236,12 @@ function evidenceSelection(answer: Answer, claim: Claim): Selection {
     ...answer.claims,
     ...([answer.comparison?.earlier, answer.comparison?.later].filter(Boolean) as Claim[]),
   ]
-  return { answer, claim, claimIndex: claims.indexOf(claim) }
+  const index = claims.findIndex(
+    (item) =>
+      item === claim ||
+      (item.statement === claim.statement && item.citation.id === claim.citation.id),
+  )
+  return { answer, claim, claimIndex: index >= 0 ? index : undefined }
 }
 const DEFAULT_QUESTION = 'Explain the core business and its main services or products.'
 const COMPARISON_QUESTION =
@@ -164,16 +302,19 @@ function Evidence({
   onClose,
   onAsk,
   canFollow,
+  onSource,
 }: {
   selection: Selection
   onClose: () => void
   onAsk: (intent: Intent, citation: Citation) => void
   canFollow: boolean
+  onSource: (citation: Citation) => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [citation, setCitation] = useState(selection.claim.citation)
   const [verification, setVerification] = useState('Verifying source details…')
   const [unavailable, setUnavailable] = useState(false)
+  const [showImage, setShowImage] = useState(false)
   useEffect(() => {
     const panel = dialog.current
     const previousFocus = document.activeElement
@@ -266,12 +407,71 @@ function Evidence({
         )}
         <p className="eyebrow">THE CLAIM YOU OPENED</p>
         <p className="evidence-claim">{selection.claim.statement}</p>
-        <p className="eyebrow">EXACT SUPPORTING PASSAGE</p>
+        {selection.claim.citations && selection.claim.citations.length > 1 && (
+          <div className="evidence-source-switch" aria-label="Supporting sources">
+            {selection.claim.citations.map((source, index) => (
+              <button
+                type="button"
+                key={source.id}
+                aria-pressed={source.id === citation.id}
+                onClick={() => onSource(source)}
+              >
+                Source {index + 1} · p. {source.pdf_page}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="eyebrow">
+          {citation.financial_evidence?.image_verification?.method === 'two_image_reads'
+            ? 'VERIFIED PAGE-IMAGE TRANSCRIPTION'
+            : 'EXACT SUPPORTING PASSAGE'}
+        </p>
         <blockquote>{citation.quote}</blockquote>
+        {citation.financial_evidence && (
+          <div className="statement-preview">
+            {citation.financial_evidence.image_verification && (
+              <p>
+                {citation.financial_evidence.image_verification.method ===
+                'native_cells_verified_header'
+                  ? 'This figure comes from native PDF text; its reporting metadata was checked against two page-image reads.'
+                  : citation.financial_evidence.image_verification.method ===
+                      'native_prose_verified_image'
+                    ? 'The disclosed amount and reporting metadata agree between native PDF text and a separate image read.'
+                    : 'Two separate image reads agreed on this figure and its reporting metadata.'}{' '}
+                The original page is available below.
+              </p>
+            )}
+            <button type="button" className="text-chip" onClick={() => setShowImage(!showImage)}>
+              {showImage ? 'Hide statement page' : 'View original statement page'}
+            </button>
+            {showImage && (
+              <img
+                src={`${apiBase}/research/${selection.answer.id}/evidence/${citation.id}/image?symbol=${selection.answer.symbol}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`}
+                alt={`Original ${selection.answer.symbol} statement, PDF page ${citation.pdf_page}`}
+                onError={() =>
+                  setVerification(
+                    'The page preview is unavailable. Open the original PDF using the link below.',
+                  )
+                }
+              />
+            )}
+          </div>
+        )}
         <p className="fine-print" role="status">
           {verification}
         </p>
         <dl>
+          {citation.speaker && (
+            <div>
+              <dt>Management speaker</dt>
+              <dd>
+                {citation.speaker.name} · {citation.speaker.role}
+                <small>
+                  Role identified in the original introduction, PDF p. {citation.speaker.pdf_page}.
+                </small>
+              </dd>
+            </div>
+          )}
           {citation.document_date && (
             <div>
               <dt>
@@ -359,6 +559,8 @@ export default function ResearchApp() {
   const [stage, setStage] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
+  const [progressSources, setProgressSources] = useState<ProgressSource[]>([])
   const [loadingSaved, setLoadingSaved] = useState(true)
   const [selected, setSelected] = useState<Selection | null>(null)
   const [context, setContext] = useState<EvidenceContext | null>(null)
@@ -366,10 +568,22 @@ export default function ResearchApp() {
   const [trail, setTrail] = useState<Answer[]>([])
   const questionInput = useRef<HTMLTextAreaElement>(null)
   const composer = useRef<HTMLElement>(null)
+  const answerPanel = useRef<HTMLElement>(null)
   const [savedComparison, setSavedComparison] = useState<Answer | null>(null)
   const [savedResults, setSavedResults] = useState<Answer | null>(null)
   const generation = useRef(0)
   const mounted = useRef(true)
+
+  useEffect(() => {
+    if (!busy) return
+    const start = Date.now()
+    setElapsed(0)
+    const timer = window.setInterval(
+      () => setElapsed(Math.floor((Date.now() - start) / 1000)),
+      1000,
+    )
+    return () => window.clearInterval(timer)
+  }, [busy])
 
   useEffect(() => {
     mounted.current = true
@@ -460,6 +674,7 @@ export default function ResearchApp() {
     setLoadingSaved(false)
     setError('')
     setStage('Connecting to your research workspace…')
+    setProgressSources([])
     try {
       if (anchor && anchor.symbol !== symbol)
         throw new Error('Select evidence from this company before following it up.')
@@ -478,9 +693,14 @@ export default function ResearchApp() {
           : null,
       })
       for (let attempt = 0; attempt < 240; attempt++) {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        if (started.state !== 'completed' || attempt > 0)
+          await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 400 : 1800))
         if (!mounted.current || generation.current !== token) return
-        const job = await api(`/jobs/${started.job_id}`)
+        const job =
+          attempt === 0 && started.state === 'completed'
+            ? started
+            : await api(`/jobs/${started.job_id}`)
+        if (job.result?._progress?.sources) setProgressSources(job.result._progress.sources)
         if (job.state === 'failed')
           throw new Error(job.error || 'Research could not finish. Please retry.')
         if (job.state === 'completed') {
@@ -506,10 +726,19 @@ export default function ResearchApp() {
           setIncludeHistory(history)
           setNeedsRefresh(false)
           setStage('')
+          requestAnimationFrame(() =>
+            answerPanel.current?.scrollIntoView({
+              behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                ? 'auto'
+                : 'smooth',
+              block: 'start',
+            }),
+          )
           return
         }
         const stages: Record<string, string> = {
-          queued: 'Waiting for the current research to finish…',
+          queued: 'Waiting for a research worker…',
+          corpus_check: 'Checking the company’s saved documents…',
           discovery: 'Finding the company’s original documents…',
           retrieval: 'Finding relevant passages in the company’s documents…',
           analysis: 'Reading the evidence and checking citations…',
@@ -526,9 +755,11 @@ export default function ResearchApp() {
                   ? `Saving evidence for document ${document}…`
                   : `Collecting and reading document ${document}…`
         setStage(
-          job.stage.startsWith('extraction:')
-            ? extractionStage
-            : stages[job.stage] || 'Preparing your research…',
+          job.stage.startsWith('visual:')
+            ? `Reading and cross-checking the original statement image · PDF p. ${document}`
+            : job.stage.startsWith('extraction:')
+              ? extractionStage
+              : stages[job.stage] || 'Preparing your research…',
         )
       }
       throw new Error(
@@ -848,12 +1079,40 @@ export default function ResearchApp() {
           <span className="pulse-dot" />
           <div>
             <strong>{stage}</strong>
+            <span className="elapsed-time">
+              {elapsed < 60
+                ? `${elapsed}s elapsed`
+                : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s elapsed`}
+            </span>
             <p>
-              New companies take longer while their documents are collected. Saved research stays
-              available.
+              {current
+                ? 'You can continue reading the saved research below while this request runs.'
+                : 'First-time preparation takes longer. Original documents appear below as they are saved.'}
             </p>
           </div>
         </div>
+      )}
+      {(busy || error) && progressSources.length > 0 && (
+        <aside className="preparation-sources" aria-label="Documents saved during preparation">
+          <strong>
+            {progressSources.length} primary{' '}
+            {progressSources.length === 1 ? 'document' : 'documents'} saved
+          </strong>
+          <ul>
+            {progressSources.map((source) => (
+              <li key={source.id}>
+                <a href={source.source_url} target="_blank" rel="noopener noreferrer">
+                  {source.kind.replaceAll('_', ' ')} · {source.label} ↗
+                </a>
+                <span>{source.pages} PDF pages</span>
+              </li>
+            ))}
+          </ul>
+          <small>
+            These documents will be reused on retry. Saving a document does not yet establish an
+            answer.
+          </small>
+        </aside>
       )}
       {error && (
         <div className="research-error" role="alert">
@@ -885,7 +1144,7 @@ export default function ResearchApp() {
         </nav>
       )}
       {current && (
-        <section className="answer-panel" aria-labelledby="answer-heading">
+        <section className="answer-panel" aria-labelledby="answer-heading" ref={answerPanel}>
           <div className="answer-heading">
             <div>
               <p className="eyebrow">{current.symbol} · COMPANY RESEARCH</p>
@@ -916,8 +1175,8 @@ export default function ResearchApp() {
             {current.financial_results ? (
               <>
                 <span>{current.financial_results.sources.length} primary results filings</span>
-                <span>Validated source cells</span>
-                <span>Deterministic comparisons</span>
+                <span>Source-backed figures</span>
+                <span>Calculated QoQ / YoY</span>
               </>
             ) : (
               <>
@@ -926,9 +1185,6 @@ export default function ResearchApp() {
                   {current.coverage.annual_reports === 1 ? 'report' : 'reports'}
                 </span>
                 <span>{current.coverage.transcripts} call transcripts</span>
-                <span>
-                  {current.retrieval_mode === 'hybrid' ? 'Hybrid search' : 'Keyword search'}
-                </span>
               </>
             )}
           </div>
@@ -947,6 +1203,7 @@ export default function ResearchApp() {
                 <li key={`${claim.citation.id}-${index}`}>
                   <span className="claim-number">0{index + 1}</span>
                   <div>
+                    {claim.heading && <h3 className="analysis-heading">{claim.heading}</h3>}
                     {current.evidence_context && (
                       <span className="source-relation">
                         {claim.financial_context_timing ||
@@ -982,21 +1239,48 @@ export default function ResearchApp() {
                     >
                       {claim.statement}
                     </button>
-                    <button
-                      className="citation-button"
-                      onClick={() => setSelected(evidenceSelection(current, claim))}
-                    >
-                      {claim.citation.document_label} · PDF p. {claim.citation.pdf_page}
-                      <span aria-hidden="true"> ↗</span>
-                    </button>
+                    <div className="claim-sources">
+                      {(claim.citations || [claim.citation]).map((citation, sourceIndex) => (
+                        <button
+                          className="citation-button"
+                          key={`${citation.id}-${sourceIndex}`}
+                          onClick={() =>
+                            setSelected({
+                              ...evidenceSelection(current, claim),
+                              claim: { ...claim, citation },
+                            })
+                          }
+                        >
+                          {citation.document_label} · PDF p. {citation.pdf_page}
+                          <span aria-hidden="true"> ↗</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </li>
               ))}
             </ol>
           ) : (
-            <p className="empty-evidence">
-              The available documents don’t support a reliable answer to this question.
-            </p>
+            <div className="empty-evidence">
+              <p>
+                {current.assessment ||
+                  'The available passages do not yet support this question. Try an investigation below or check the latest company documents.'}
+              </p>
+              {current.investigation_suggestions && (
+                <div className="investigation-options">
+                  {current.investigation_suggestions.map((q) => (
+                    <button
+                      key={q}
+                      className="text-chip"
+                      disabled={busy}
+                      onClick={() => void ask(false, q, null, false)}
+                    >
+                      {q} ↗
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           <div className="answer-bottom">
             <p>
@@ -1019,27 +1303,27 @@ export default function ResearchApp() {
               Refresh sources ↻
             </button>
           </div>
-          <details className="coverage-notes">
-            <summary>Coverage & limitations</summary>
-            <ul>
-              {current.limitations.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </details>
+          <ResearchDetails key={current.id} answer={current} />
         </section>
       )}
       {savedComparison?.symbol === ticker && savedComparison.comparison && (
         <section className="comparison-panel" aria-labelledby="comparison-heading">
           <p className="eyebrow">NARRATIVE & EVIDENCE</p>
           <div className="comparison-title">
-            <h2 id="comparison-heading">Follow the statement.</h2>
+            <h2 id="comparison-heading">
+              {savedComparison.comparison.topic || 'Follow the statement.'}
+            </h2>
             <span className="saved-label">
               {(
                 {
                   supported: 'Later evidence supports it',
                   diverged: 'Evidence diverges',
                   not_assessable: 'Not yet assessable',
+                  not_yet_assessable: 'Not yet assessable',
+                  reaffirmed: 'Outlook reaffirmed',
+                  revised: 'Outlook revised',
+                  progress_reported: 'Progress reported',
+                  delivered: 'Milestone completed',
                 } as Record<string, string>
               )[savedComparison.comparison.verdict] || 'Review the evidence'}
             </span>
@@ -1069,7 +1353,76 @@ export default function ResearchApp() {
               )
             })}
           </div>
-          <p className="comparison-assessment">{savedComparison.comparison.assessment}</p>
+          {savedComparison.comparison.analysis_claims?.length ? (
+            <div className="comparison-analysis" aria-label="What the evidence indicates">
+              {savedComparison.comparison.analysis_claims.map((claim) => (
+                <div key={claim.citation.id + claim.statement}>
+                  <button
+                    className="claim-statement"
+                    onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
+                  >
+                    {claim.statement}
+                  </button>
+                  <div className="claim-sources">
+                    {(claim.citations || [claim.citation]).map((citation) => (
+                      <button
+                        className="citation-button"
+                        key={citation.id}
+                        onClick={() =>
+                          setSelected({
+                            ...evidenceSelection(savedComparison, claim),
+                            claim: { ...claim, citation },
+                          })
+                        }
+                      >
+                        {citation.document_label} · PDF p. {citation.pdf_page} ↗
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="comparison-assessment">{savedComparison.comparison.assessment}</p>
+          )}
+          {savedComparison.comparison.uncertainty && (
+            <p className="comparison-uncertainty">{savedComparison.comparison.uncertainty}</p>
+          )}
+          {savedComparison.financial_context && (
+            <aside className="comparison-context">
+              <p className="eyebrow">REPORTED QUARTER CONTEXT</p>
+              <button
+                className="claim-statement"
+                onClick={() => {
+                  const f = savedComparison.financial_context!
+                  setSelected({
+                    answer: { id: f.research_id, symbol: f.symbol, company_name: f.company_name },
+                    claim: f.claim,
+                    claimIndex: f.claim_index,
+                  })
+                }}
+              >
+                {savedComparison.financial_context.claim.statement}
+              </button>
+              <p className="fine-print">{savedComparison.financial_context.note}</p>
+            </aside>
+          )}
+          {savedComparison.comparison.additional_context?.map((claim) => (
+            <div className="comparison-context" key={claim.citation.id}>
+              <button
+                className="claim-statement"
+                onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
+              >
+                {claim.statement}
+              </button>
+              <button
+                className="citation-button"
+                onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
+              >
+                {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
+              </button>
+            </div>
+          ))}
           <p className="fine-print">
             Generated {stamp(savedComparison.generated_at)}. A statement-level comparison, not a
             verdict on the whole company.
@@ -1102,10 +1455,14 @@ export default function ResearchApp() {
       </footer>
       {selected && (
         <Evidence
+          key={selected.claim.citation.id}
           selection={selected}
           onClose={() => setSelected(null)}
           onAsk={followEvidence}
           canFollow={!busy}
+          onSource={(citation) =>
+            setSelected({ ...selected, claim: { ...selected.claim, citation } })
+          }
         />
       )}
       <Navigation active="research" />

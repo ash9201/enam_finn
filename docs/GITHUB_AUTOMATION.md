@@ -1,5 +1,13 @@
 # GitHub Actions recovery and scheduler switch
 
+The research-experience release adds **Resume document indexing**, daily 14:15 IST
+and manual dispatch on standard ubuntu-latest. The owner configured GEMINI_API_KEY
+and FINN_ENABLE_SEMANTIC_BACKFILL=true; existing Supabase secrets are reused. It resumes
+the same quota-bounded embedding pipeline and stops at the daily allowance. Its
+schedule is independent of portfolio sync, whose timing is unchanged. Disable the
+new variable to stop indexing maintenance; leave the tested Supabase source fallback
+inactive. [Operational details and current limits](RESEARCH_IMPROVEMENTS.md).
+
 On **31 October 2026 (IST)**, after the user resolved the account restriction, both
 workflows were dispatched on `main` and completed successfully using only standard
 `ubuntu-latest` runners:

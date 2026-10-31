@@ -42,6 +42,7 @@ export type FinancialEvidence = {
   currency: string
   accounting_basis: string
   definition: string
+  image_verification?: { method: string; model: string }
 }
 const number = (value: string) =>
   new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
@@ -122,10 +123,23 @@ export default function FinancialResults({
   const statement = data.bases[basis]
   if (!statement)
     return (
-      <p className="empty-evidence">
-        No statement passed the period, unit, basis and source-cell checks. Inspect the coverage
-        notes below.
-      </p>
+      <div className="empty-evidence">
+        <p>
+          This filing’s figures could not yet be verified. You can inspect the original document or
+          retry the remaining figures later.
+        </p>
+        {data.sources.map((source) => (
+          <p key={source.id}>
+            <a
+              href={source.final_url || source.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {source.discovery_label} · Original filing ↗
+            </a>
+          </p>
+        ))}
+      </div>
     )
   return (
     <div className="financial-results">
@@ -153,6 +167,16 @@ export default function FinancialResults({
         All figures in {statement.currency} {statement.unit}. Tap a figure to inspect its source
         cell.
       </p>
+      {statement.rows.some(
+        (row) =>
+          row.metric !== 'EBITDA' &&
+          ['latest', 'previous', 'year_ago'].some((period) => !row.figures[period]),
+      ) && (
+        <p className="financial-partial">
+          Some revenue or profit figures could not be verified. Available figures and valid
+          comparisons are shown; missing values are left blank.
+        </p>
+      )}
       <div className="financial-table-wrap">
         <table className="financial-table" aria-label={`${basis} quarterly figures`}>
           <caption>Reported figures · {basis}</caption>
@@ -180,7 +204,11 @@ export default function FinancialResults({
                   {row.metric}
                   <small>
                     {row.metric === 'Revenue'
-                      ? 'From operations'
+                      ? Object.values(row.figures).some(
+                          (figure) => figure.definition === 'bank_total_income',
+                        )
+                        ? 'Bank: total income'
+                        : 'From operations'
                       : row.metric === 'PAT'
                         ? basis === 'standalone'
                           ? 'Company PAT'
