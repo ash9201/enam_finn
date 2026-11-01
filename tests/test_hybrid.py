@@ -250,10 +250,13 @@ def test_embedding_failure_preserves_keyword_answer_path(monkeypatch):
     assert [r["chunk_id"] for r in result["evidence"]] == ["keyword", "both"]
 
 
-def test_empty_semantic_search_does_not_claim_hybrid(monkeypatch):
+@pytest.mark.parametrize("has_keyword,reason", [(True, "semantic_no_matches"), (False, None)])
+def test_empty_semantic_search_does_not_claim_hybrid(monkeypatch, has_keyword, reason):
     monkeypatch.setenv("FINN_ENABLE_SEMANTIC_SEARCH", "true")
     store = Store()
     store.semantic = []
+    if not has_keyword:
+        store.keyword = []
     with pytest.MonkeyPatch.context() as patcher:
 
         class QueryClient:
@@ -270,7 +273,7 @@ def test_empty_semantic_search_does_not_claim_hybrid(monkeypatch):
         result = retrieval.retrieve_with_diagnostics(store, "CCL", "coffee products")
     assert "finn_semantic_search" in [name for name, _ in store.calls]
     assert result["mode"] == "keyword"
-    assert result["fallback_reason"] == "semantic_no_matches"
+    assert result["fallback_reason"] == reason
     assert result["evidence"] == store.keyword
 
 

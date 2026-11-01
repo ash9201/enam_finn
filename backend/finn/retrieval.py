@@ -252,7 +252,7 @@ def retrieve_with_diagnostics(
             )
             if semantic:
                 mode = "hybrid"
-            else:
+            elif keyword:
                 reason = "semantic_no_matches"
         except embeddings.EmbeddingUnavailable as exc:
             reason, semantic_error = "semantic_unavailable", exc.reason
