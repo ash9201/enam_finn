@@ -14,6 +14,9 @@ export type FilingDetails = {
   event_kind: string
   event_key: string | null
   period_end: string | null
+  effective_date?: string | null
+  additional_details?: string[]
+  recording_reference?: { call_date: string; url: string; kind: string; event_key: string } | null
   actual_results: boolean
   interpretation: string | null
   evidence: FilingEvidence[]
@@ -174,6 +177,7 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
   )
   const lead =
     ordered.find((f) => presentation(f).actual_results && presentation(f).category === 'results') ||
+    ordered.find((f) => presentation(f).recording_reference && presentation(f).period_end) ||
     ordered[0]
   const detail = presentation(lead)
   return {
@@ -209,6 +213,95 @@ export function groupEvents(filings: Filing[]): FilingEvent[] {
     groups.set(key, [...(groups.get(key) || []), filing])
   }
   return [...groups].map(([key, items]) => makeEvent(items, key))
+}
+
+const normalized = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+
+export function eventExplanation(event: FilingEvent) {
+  const candidates = [
+    event.summary,
+    ...event.filings.flatMap((filing) => {
+      const detail = presentation(filing)
+      return [detail.summary, ...(detail.additional_details || [])]
+    }),
+  ]
+  const facts: string[] = []
+  for (const original of candidates) {
+    if (
+      !original ||
+      /^Supporting debt disclosure within|\b(?:attach|enclos)\w*.{0,35}(?:media|press) release/i.test(
+        original,
+      )
+    )
+      continue
+    // A narrow wording cleanup; the underlying exact source passages stay unchanged.
+    const text = original.replace(
+      /^Accordingly, (he|she|they) (?:has|have) also ceased to be a Director of (.+?), material unlisted subsidiary of the Company and member of (.+?) of the Company, effective from said date\.$/i,
+      (_, person: string, subsidiary: string, committee: string) =>
+        `${person.toLowerCase() === 'he' ? 'His' : person.toLowerCase() === 'she' ? 'Her' : 'Their'} directorship of ${subsidiary}, a material unlisted subsidiary, and membership of the ${committee} also ended on the same date.`,
+    )
+    const key = normalized(text)
+    if (facts.some((fact) => normalized(fact).includes(key))) continue
+    // Prefer a complete version of the same passage, retaining distinct additional facts.
+    const shorter = facts.findIndex((fact) => key.includes(normalized(fact)))
+    if (shorter >= 0) facts[shorter] = text
+    else facts.push(text)
+  }
+  return facts.join(' ')
+}
+
+export function companyPreview(events: FilingEvent[]) {
+  return [...new Set(events.map((event) => event.title))].slice(0, 2).join(' · ')
+}
+
+export function eventCategory(event: FilingEvent) {
+  return (
+    (
+      {
+        results: 'Financial results',
+        corporate_action: 'Corporate action',
+        earnings_call: 'Earnings call',
+        unclassified: 'Disclosure',
+        meeting_notice: 'Board meeting',
+        investor_meeting: 'Investor meeting',
+      } as Record<string, string>
+    )[event.category] ||
+    CATEGORIES[event.category] ||
+    'Disclosure'
+  )
+}
+
+export function sourceLabel(filing: Filing) {
+  const detail = presentation(filing)
+  const structured = /\.xml(?:$|\?)/i.test(filing.source_url)
+  let purpose = detail.headline
+  if (detail.recording_reference || /recording/i.test(purpose))
+    purpose = structured ? 'Structured recording disclosure' : 'Earnings-call recording notice'
+  else if (detail.event_kind === 'scheduled_tenure')
+    purpose = structured ? 'Structured leadership disclosure' : 'Director tenure notice'
+  else if (/board meeting/i.test(filing.title)) purpose = 'Board outcome'
+  else if (/financial results updates/i.test(filing.title)) purpose = 'Quarterly results filing'
+  else if (/record date/i.test(filing.title)) purpose = 'Dividend record-date notice'
+  else if (/dividend/i.test(filing.title)) purpose = 'Dividend declaration'
+  else if (/press release/i.test(filing.title)) purpose = 'Results press release'
+  return `${purpose}${structured || !/\.pdf(?:$|\?)/i.test(filing.source_url) ? '' : ' (PDF)'}`
+}
+
+export function eventSources(event: FilingEvent) {
+  const score = (filing: Filing) => {
+    const detail = presentation(filing)
+    return (
+      (detail.actual_results && detail.category === 'results' ? 10 : 0) +
+      (detail.source?.method === 'native_pdf_text' ? 1 : 0)
+    )
+  }
+  return [...event.filings].sort(
+    (a, b) => score(b) - score(a) || Date.parse(b.published_at) - Date.parse(a.published_at),
+  )
 }
 
 export function eventTone(event: FilingEvent) {

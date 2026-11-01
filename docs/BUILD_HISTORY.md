@@ -1,5 +1,22 @@
 # Build history summary
 
+### Expanded Briefing event refinement (1 November)
+
+- Kept the collapsed company list and page structure. Expanded events now show one
+  explanation, category/date, actions, compact official-source links and one optional
+  evidence inspector with a source selector. Removed the per-document cards, nested
+  disclosures, repeated summaries and investor-facing exchange metadata.
+- Verified the KPIT PDF's additional subsidiary/committee roles and effective date.
+  Refreshed only six recording/tenure documents across KPIT, NTPC and Reliance.
+  Recording pairs group by explicit call date, recording type and shared recording
+  URL; presentation and unrelated operational disclosures stay separate.
+- Original filing identities, URLs, timestamps, wording and review states are retained.
+  New ingestion extracts the same references generically; no financial/retrieval/model
+  changes, dependencies, migration or environment settings are needed.
+- Targeted verification: 21 filing-detail tests, 15 frontend model tests, four
+  desktop/mobile Light/Dark browser scenes, build and privileged-credential scan.
+  See [the refinement report](BRIEFING_REDESIGN.md#expanded-event-refinement).
+
 ### Briefing redesign (1 November)
 
 - Added compact company/event groups, chronological activity, combined filing filters

@@ -302,7 +302,7 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -355,7 +355,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -395,7 +395,7 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -590,12 +590,31 @@
         "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
         "last_seen_at": "2026-10-31T13:40:04.495681+00:00",
         "enrichment": {
-          "source": null,
-          "status": "headline_only",
-          "summary": null,
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/xbrl/SAIIM_2249_WebXMLFile_20261031_182253408.xml",
+            "method": "exchange_xml",
+            "sha256": "24135207a1c4adcc0bd3d22fa29fb40b0d5562dbd80caa27772f4a33c14b0489",
+            "fetched_at": "2026-11-01T11:57:48.543011+00:00",
+            "total_pages": null,
+            "pages_scanned": null
+          },
+          "status": "feed_details",
+          "summary": "An audio recording is available for the earnings call held on 31 Oct 2026.",
           "version": "official-filing-narrative-v1",
           "category": "earnings_call",
           "evidence": [
+            {
+              "kind": "official_document",
+              "field": "DateOfCallForAudioRecording",
+              "quote": "2026-10-31",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": "WeblinkOfAudioRecording",
+              "quote": "https://ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
+              "pdf_page": null
+            },
             {
               "kind": "exchange_feed",
               "field": null,
@@ -603,17 +622,26 @@
               "pdf_page": null
             }
           ],
-          "headline": "Earnings-call recording available",
+          "headline": "Earnings-call recording · 31 Oct 2026",
           "priority": 1,
-          "event_key": null,
-          "checked_at": "2026-11-01T09:07:19.804715+00:00",
+          "event_key": "recording:audio:2026-10-31:2b909d8e996d4c94da2d",
+          "checked_at": "2026-11-01T11:57:48.544022+00:00",
           "event_kind": "earnings_call",
           "input_hash": "7b2c4f679de96abe1ed5031e8625e3c50350b43e1e195c4dc3b68d78581868b9",
           "limitation": null,
           "period_end": null,
           "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [],
+          "recording_reference": {
+            "url": "https://ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
+            "kind": "audio",
+            "call_date": "2026-10-31",
+            "event_key": "recording:audio:2026-10-31:2b909d8e996d4c94da2d"
+          },
+          "event_evidence_version": 1
         }
       },
       {
@@ -630,12 +658,31 @@
         "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
         "last_seen_at": "2026-10-31T13:40:04.496049+00:00",
         "enrichment": {
-          "source": null,
-          "status": "headline_only",
-          "summary": null,
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/xbrl/SAIIM_242_WebXMLFile_20261031_174441351.xml",
+            "method": "exchange_xml",
+            "sha256": "a1359f725ba3a707fbfdf6487951574f7ed942d1eae856aae106cf4b1593de28",
+            "fetched_at": "2026-11-01T11:57:57.810219+00:00",
+            "total_pages": null,
+            "pages_scanned": null
+          },
+          "status": "feed_details",
+          "summary": "An audio recording is available for the earnings call held on 30 Oct 2026.",
           "version": "official-filing-narrative-v1",
           "category": "earnings_call",
           "evidence": [
+            {
+              "kind": "official_document",
+              "field": "DateOfCallForAudioRecording",
+              "quote": "2026-10-30",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": "WeblinkOfAudioRecording",
+              "quote": "https://www.ril.com/investors/events-presentations#webcast-sec",
+              "pdf_page": null
+            },
             {
               "kind": "exchange_feed",
               "field": null,
@@ -643,17 +690,26 @@
               "pdf_page": null
             }
           ],
-          "headline": "Earnings-call recording available",
+          "headline": "Earnings-call recording · 30 Oct 2026",
           "priority": 1,
-          "event_key": null,
-          "checked_at": "2026-11-01T09:23:29.184180+00:00",
+          "event_key": "recording:audio:2026-10-30:f6521f28fb06b226a2f2",
+          "checked_at": "2026-11-01T11:57:57.811222+00:00",
           "event_kind": "earnings_call",
           "input_hash": "cbd7c4802a7b996a400e2beedbb837d5445fc8a7c99977ff58c8fa90de97a1b2",
           "limitation": null,
           "period_end": null,
           "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [],
+          "recording_reference": {
+            "url": "https://www.ril.com/investors/events-presentations#webcast-sec",
+            "kind": "audio",
+            "call_date": "2026-10-30",
+            "event_key": "recording:audio:2026-10-30:f6521f28fb06b226a2f2"
+          },
+          "event_evidence_version": 1
         }
       },
       {
@@ -751,7 +807,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -816,7 +872,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -887,7 +943,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -952,7 +1008,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -999,7 +1055,7 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1070,7 +1126,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1135,7 +1191,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1206,7 +1262,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1259,7 +1315,7 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1306,7 +1362,7 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1533,12 +1589,12 @@
             "url": "https://nsearchives.nseindia.com/corporate/xbrl/CIM_17417_WebXMLFile_20261031_182636654.xml",
             "method": "exchange_xml",
             "sha256": "96025e2939eff4ae7a89a2397ab147236462bd138ae1ff47ca3e1e19543f837c",
-            "fetched_at": "2026-11-01T09:15:01.603886+00:00",
+            "fetched_at": "2026-11-01T11:57:39.986409+00:00",
             "total_pages": null,
             "pages_scanned": null
           },
           "status": "source_extracted",
-          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date.",
+          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, effective at the close of business.",
           "version": "official-filing-narrative-v1",
           "category": "management_change",
           "evidence": [
@@ -1547,19 +1603,31 @@
               "field": "RemarksForChangeInManagement",
               "quote": "Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date. Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the C",
               "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": "RemarksForChangeInManagement",
+              "quote": "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date.",
+              "pdf_page": null
             }
           ],
           "headline": "Independent director completes scheduled term",
           "priority": 1,
           "event_key": "tenure:09360601:2026-10-31",
-          "checked_at": "2026-11-01T09:15:01.605891+00:00",
+          "checked_at": "2026-11-01T11:57:40.006086+00:00",
           "event_kind": "scheduled_tenure",
           "input_hash": "62f8c0372d50f0f7b97c7d104b5159f13913389bf701f9a37511079b0c65adc9",
           "limitation": null,
           "period_end": null,
           "actual_results": false,
+          "effective_date": "2026-10-31",
           "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [
+            "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date."
+          ],
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1580,12 +1648,12 @@
             "url": "https://nsearchives.nseindia.com/corporate/KPITTECH_31102026182503_KPIT_Rajiv_Lal_Completion_of_Tenure-S.pdf",
             "method": "native_pdf_text",
             "sha256": "584c773ca2363a39531ed92b3842eb88e8865dfe98a816f5129d8d308aeb40b6",
-            "fetched_at": "2026-11-01T09:14:59.744350+00:00",
+            "fetched_at": "2026-11-01T11:57:40.748636+00:00",
             "total_pages": 2,
             "pages_scanned": 2
           },
           "status": "source_extracted",
-          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date.",
+          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, effective at the close of business.",
           "version": "official-filing-narrative-v1",
           "category": "management_change",
           "evidence": [
@@ -1606,19 +1674,31 @@
               "field": null,
               "quote": "appointment/re - appointment; October 31, 2026, after the end of business hours Brief profile (in case of appointment); Not Applicable Disclosure of relationships between directors (in case of appointment of a director). Not Applicable Information required purs",
               "pdf_page": 2
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date.",
+              "pdf_page": 1
             }
           ],
           "headline": "Independent director completes scheduled term",
           "priority": 1,
           "event_key": "tenure:09360601:2026-10-31",
-          "checked_at": "2026-11-01T09:15:01.104255+00:00",
+          "checked_at": "2026-11-01T11:57:43.419617+00:00",
           "event_kind": "scheduled_tenure",
           "input_hash": "bcb5465aaec7fd7a37c3651473f05c6675789c2ca9122e8394449f0248905e3d",
           "limitation": null,
           "period_end": null,
           "actual_results": false,
+          "effective_date": "2026-10-31",
           "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [
+            "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date."
+          ],
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1719,15 +1799,27 @@
             "url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026181950_5_Disclosure_for_recording_of_Earnings_Conference_Call_Q2_FY27_signed.pdf",
             "method": "native_pdf_text",
             "sha256": "0138eccde23db5909e1e0d06e83bd50238773183b242759ee330ed401ab375f8",
-            "fetched_at": "2026-11-01T09:07:17.604059+00:00",
+            "fetched_at": "2026-11-01T11:57:50.812127+00:00",
             "total_pages": 1,
             "pages_scanned": 1
           },
           "status": "source_extracted",
-          "summary": "Audio Recording of Earnings Conference Call for Quarter and Half Year ended 30 Sep 2026 In terms of Regulation 30 of the SEBI (Listing Obligations and Disclosure Requirements) Regulations, 2015, this is to inform that a conference…",
+          "summary": "An audio recording is available for the earnings call held on 31 Oct 2026, covering results for the period ended 30 Sep 2026.",
           "version": "official-filing-narrative-v1",
           "category": "earnings_call",
           "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "conference call was held on 31 October 2026",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Audio Recording of Earnings Conference Call for Quarter and Half Year ended 30 Sep 2026 In terms of Regulation 30 of the SEBI (Listing Obligations and Disclosure Requirements) Regulations, 2015, this is to inform that a conference call was held on 31 October 2026, wherein Management of NTPC ltd, discussed the company’s results for the quarter and half year ended 30 September 2026 with analysts and investors. Link for accessing Audio Recording of the conference call mentioned above is as under: https://www.ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
+              "pdf_page": 1
+            },
             {
               "kind": "exchange_feed",
               "field": null,
@@ -1741,17 +1833,26 @@
               "pdf_page": 1
             }
           ],
-          "headline": "Earnings-call recording available",
+          "headline": "Earnings-call recording · 31 Oct 2026",
           "priority": 1,
-          "event_key": null,
-          "checked_at": "2026-11-01T09:07:19.566486+00:00",
+          "event_key": "recording:audio:2026-10-31:2b909d8e996d4c94da2d",
+          "checked_at": "2026-11-01T11:57:54.670662+00:00",
           "event_kind": "earnings_call",
           "input_hash": "c838a4e5b01e186d2e9135bb3fc8da24c9297d651e25034960de673ad5cfbede",
           "limitation": null,
           "period_end": "2026-09-30",
           "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [],
+          "recording_reference": {
+            "url": "https://www.ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
+            "kind": "audio",
+            "call_date": "2026-10-31",
+            "event_key": "recording:audio:2026-10-31:2b909d8e996d4c94da2d"
+          },
+          "event_evidence_version": 1
         }
       },
       {
@@ -1804,7 +1905,7 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -1912,15 +2013,27 @@
             "url": "https://nsearchives.nseindia.com/corporate/kavinavora_31102026173331_SE_31102026_AR.pdf",
             "method": "native_pdf_text",
             "sha256": "20e733ddbe180dec8a580916839d719bf8bd2aecc7fd5635bedbd6c381f48f86",
-            "fetched_at": "2026-11-01T09:22:26.982229+00:00",
+            "fetched_at": "2026-11-01T11:57:58.675120+00:00",
             "total_pages": 1,
             "pages_scanned": 1
           },
           "status": "source_extracted",
-          "summary": "Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is available on the website of the Company.",
+          "summary": "An audio recording is available for the earnings call held on 30 Oct 2026, covering results for the period ended 30 Sep 2026.",
           "version": "official-filing-narrative-v1",
           "category": "earnings_call",
           "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "analyst meet held on October 30, 2026",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Audio recording Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is available on the website of the Company at https://www.ril.com/investors/events-presentations#webcast-sec.",
+              "pdf_page": 1
+            },
             {
               "kind": "exchange_feed",
               "field": null,
@@ -1934,17 +2047,26 @@
               "pdf_page": 1
             }
           ],
-          "headline": "Earnings-call recording available",
+          "headline": "Earnings-call recording · 30 Oct 2026",
           "priority": 1,
-          "event_key": null,
-          "checked_at": "2026-11-01T09:22:27.793262+00:00",
+          "event_key": "recording:audio:2026-10-30:f6521f28fb06b226a2f2",
+          "checked_at": "2026-11-01T11:58:00.000647+00:00",
           "event_kind": "earnings_call",
           "input_hash": "9840e55b68cab620e856b0bd2039a1968e6bbeae76406610a86e7de64fde78b3",
           "limitation": null,
           "period_end": "2026-09-30",
           "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4",
+          "additional_details": [],
+          "recording_reference": {
+            "url": "https://www.ril.com/investors/events-presentations#webcast-sec",
+            "kind": "audio",
+            "call_date": "2026-10-30",
+            "event_key": "recording:audio:2026-10-30:f6521f28fb06b226a2f2"
+          },
+          "event_evidence_version": 1
         }
       },
       {
@@ -2084,7 +2206,7 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       },
       {
@@ -2124,7 +2246,7 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v4"
         }
       }
     ],

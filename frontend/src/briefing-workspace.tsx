@@ -1,7 +1,13 @@
 import { useState, type ReactNode } from 'react'
 import './briefing-workspace.css'
+import BriefingEvidence from './briefing-evidence'
 import {
   CATEGORIES,
+  companyPreview,
+  eventCategory,
+  eventExplanation,
+  eventSources,
+  sourceLabel,
   dateBounds,
   eventTone,
   groupEvents,
@@ -105,88 +111,49 @@ export default function BriefingWorkspace({
   function sourceRow(filing: Filing, controls: boolean) {
     const detail = presentation(filing),
       isReviewed = reviewed.has(filing.id)
-    const url = filing.source_url.startsWith('https://') ? filing.source_url : null
+    const page = detail.evidence.find((e) => e.pdf_page)?.pdf_page
+    const label = sourceLabel(filing)
     return (
       <li
         className={`filing-source ${isReviewed ? 'is-reviewed' : ''}`}
         key={filing.id}
         data-filing-id={filing.id}
       >
-        <div className="filing-source-heading">
-          <strong>{filing.title}</strong>
-          <time dateTime={filing.published_at}>{stamp(filing.published_at)}</time>
+        <div className="filing-source-link">
+          {filing.source_url.startsWith('https://') ? (
+            <a
+              className="original-filing"
+              href={filing.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {label} <span aria-hidden="true">&#8599;</span>
+            </a>
+          ) : (
+            <span>{label}</span>
+          )}
+          <span className="source-reference">
+            <time dateTime={filing.published_at}>
+              {new Intl.DateTimeFormat('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                timeZone: 'Asia/Kolkata',
+              }).format(new Date(filing.published_at))}
+            </time>
+            {page ? ` · p. ${page}` : ''}
+          </span>
         </div>
         {controls && (
-          <div className="filing-source-actions">
-            {url && (
-              <a href={url} target="_blank" rel="noopener noreferrer" className="original-filing">
-                Original filing ↗
-              </a>
-            )}
-            <button
-              className="review-toggle"
-              aria-pressed={isReviewed}
-              onClick={() => changeReview([filing.id], !isReviewed)}
-            >
-              {isReviewed ? '✓ Reviewed · Undo' : 'Mark reviewed'}
-            </button>
-          </div>
+          <button
+            className="review-toggle"
+            aria-pressed={isReviewed}
+            aria-label={`${isReviewed ? 'Mark unreviewed' : 'Mark reviewed'}: ${label}`}
+            onClick={() => changeReview([filing.id], !isReviewed)}
+          >
+            {isReviewed ? '✓ Reviewed · Undo' : 'Mark reviewed'}
+          </button>
         )}
-        <details className="source-passages">
-          <summary>Filing details &amp; supporting text</summary>
-          <dl className="filing-source-meta">
-            <div>
-              <dt>Exchange title</dt>
-              <dd>{filing.title}</dd>
-            </div>
-            <div>
-              <dt>Category</dt>
-              <dd>{CATEGORIES[detail.category] || detail.category}</dd>
-            </div>
-          </dl>
-          {detail.interpretation && <p>{detail.interpretation}</p>}
-          {detail.evidence.length ? (
-            detail.evidence.map((e, index) => (
-              <div className="filing-excerpt" key={index}>
-                <span>
-                  {e.kind === 'exchange_feed'
-                    ? 'NSE announcement text'
-                    : e.pdf_page
-                      ? `Official filing · PDF page ${e.pdf_page}`
-                      : 'Official exchange structured disclosure'}
-                </span>
-                <blockquote>{e.quote}</blockquote>
-                {e.field && <small>Source field: {e.field}</small>}
-                {url && e.pdf_page && (
-                  <a
-                    href={`${(detail.source?.url || url).split('#')[0]}#page=${e.pdf_page}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open supporting PDF page ↗
-                  </a>
-                )}
-              </div>
-            ))
-          ) : (
-            <p>
-              Only the exchange headline is available. Detailed event facts have not been extracted.
-            </p>
-          )}
-          {detail.source && (
-            <p className="source-check-note">
-              Official source checked {stamp(detail.source.fetched_at)}.
-              {detail.source.total_pages
-                ? ` Native text inspected on ${detail.source.pages_scanned} of ${detail.source.total_pages} PDF pages; this is not a full-document analysis.`
-                : ''}
-            </p>
-          )}
-          {detail.limitation && <p className="source-check-note">{detail.limitation}</p>}
-          <details className="raw-announcement">
-            <summary>Original exchange wording &amp; identifiers</summary>
-            <p>{filing.description.split('|SUBJECT:')[0]}</p>
-          </details>
-        </details>
       </li>
     )
   }
@@ -195,19 +162,19 @@ export default function BriefingWorkspace({
     const outstanding = event.filings.filter((f) => !reviewed.has(f.id)).length
     const tone = eventTone(event),
       action = primaryAction(event)
-    const summaries = [
-      ...new Set(event.filings.map((f) => presentation(f).summary).filter(Boolean)),
-    ]
+    const explanation = eventExplanation(event)
+    const effective = event.filings.map((f) => presentation(f).effective_date).find(Boolean)
     return (
       <article
         className={`filing-event ${outstanding ? '' : 'is-reviewed'}`}
         data-event-key={event.key}
+        data-published-at={event.newest}
         key={event.key}
       >
         <details className="event-details">
           <summary className="event-summary">
             <span className="event-chevron" aria-hidden="true">
-              ›
+              &#8250;
             </span>
             <span className="event-summary-content">
               {withCompany && (
@@ -216,85 +183,75 @@ export default function BriefingWorkspace({
                 </span>
               )}
               <span className="event-title">{event.title}</span>
-              <span className="event-snippet">
-                {event.summary || 'Headline only · verified event details are not yet available.'}
-              </span>
               <span className="event-meta">
+                <span className="event-category">{eventCategory(event)}</span>
+                <time dateTime={effective || event.newest}>
+                  {effective
+                    ? `Effective ${new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(effective + 'T00:00:00+05:30'))}`
+                    : stamp(event.newest)}
+                </time>
                 <span className={`event-priority ${tone.key}`}>{tone.label}</span>
-                <time dateTime={event.newest}>{stamp(event.newest)}</time>
                 <span>
-                  {event.filings.length} {event.filings.length === 1 ? 'filing' : 'related filings'}
+                  {event.filings.length} {event.filings.length === 1 ? 'source' : 'sources'}
                 </span>
                 <span className="review-state">
-                  {outstanding ? `${outstanding} unreviewed` : '✓ Reviewed'}
+                  {outstanding ? `${outstanding} unreviewed` : '\u2713 Reviewed'}
                 </span>
+              </span>
+              <span className="event-snippet">
+                {explanation
+                  ? explanation.length > 170
+                    ? explanation.slice(0, 170).replace(/\s+\S*$/, '') + '…'
+                    : explanation
+                  : 'Headline only · verified event details are not yet available.'}
               </span>
             </span>
           </summary>
           <div className="event-body">
-            {event.summary && <p className="event-full-summary">{event.summary}</p>}
-            {event.filings.length > 1 && (
-              <p className="grouping-note">
-                Grouped by a source-backed event reference. Each announcement keeps its own source
-                and review state.
-              </p>
-            )}
-            {summaries.length > 1 && (
-              <ul className="event-additional-details">
-                {summaries
-                  .filter((s) => s !== event.summary)
-                  .slice(0, 3)
-                  .map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
+            <p className="event-full-summary">
+              {explanation ||
+                'Only the exchange headline is available. Detailed event facts have not been extracted.'}
+            </p>
+            <div className="event-actions">
+              {action && (
+                <a
+                  className="filing-primary-action"
+                  href={action.href}
+                  title={
+                    event.actualResults
+                      ? 'Open this company’s latest verified quarterly results; check the reporting period in Research.'
+                      : undefined
+                  }
+                >
+                  {action.label} &#8599;
+                </a>
+              )}
+              <button
+                className="review-toggle"
+                aria-pressed={!outstanding}
+                onClick={() =>
+                  changeReview(
+                    event.filings.map((f) => f.id),
+                    !!outstanding,
+                  )
+                }
+              >
+                {outstanding
+                  ? event.filings.length > 1
+                    ? 'Review all'
+                    : 'Mark reviewed'
+                  : '✓ Reviewed · Undo'}
+              </button>
+            </div>
+            <div className="official-sources">
+              <h4>Official sources</h4>
+              <ul className="event-sources" aria-label="Original announcements">
+                {eventSources(event).map((filing) => sourceRow(filing, event.filings.length > 1))}
               </ul>
-            )}
-            <ul className="event-sources" aria-label="Original announcements">
-              {event.filings.map((filing) => sourceRow(filing, event.filings.length > 1))}
-            </ul>
+            </div>
+            <BriefingEvidence event={event} />
           </div>
         </details>
-        <div className="event-actions">
-          {action && (
-            <a
-              className="filing-primary-action"
-              href={action.href}
-              title={
-                event.actualResults
-                  ? 'Open this company’s latest verified quarterly results; check the reporting period in Research.'
-                  : undefined
-              }
-            >
-              {action.label} ↗
-            </a>
-          )}
-          {event.filings.length === 1 && event.filings[0].source_url.startsWith('https://') && (
-            <a
-              className="filing-secondary-action"
-              href={event.filings[0].source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Original filing ↗
-            </a>
-          )}
-          <button
-            className="review-toggle"
-            aria-pressed={!outstanding}
-            onClick={() =>
-              changeReview(
-                event.filings.map((f) => f.id),
-                !!outstanding,
-              )
-            }
-          >
-            {outstanding
-              ? event.filings.length > 1
-                ? 'Review all'
-                : 'Mark reviewed'
-              : '✓ Reviewed · Undo'}
-          </button>
-        </div>
       </article>
     )
   }
@@ -347,10 +304,7 @@ export default function BriefingWorkspace({
                 <span className="company-name">{companyName(symbol)}</span>
                 <span className="company-ticker">{symbol}</span>
                 <span className="company-preview">
-                  {ordered
-                    .slice(0, 2)
-                    .map((e) => e.title)
-                    .join(' · ')}
+                  {companyPreview(ordered)}
                   {ordered.length > 2 ? ` · +${ordered.length - 2} more` : ''}
                 </span>
               </span>

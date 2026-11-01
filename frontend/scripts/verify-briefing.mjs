@@ -63,7 +63,6 @@ try {
     expect(new Set(symbols).size).toBe(symbols.length)
     await expect(page.locator('.filing-count')).toContainText(`${count} matching filings`)
     await expect(page.locator('.filing-count')).toContainText(`${count} unreviewed`)
-    await page.screenshot({ path: `${out}/${viewport.width}-${theme}-overview.png` })
 
     await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('NTPC')
     const ntpc = actualFilings.filter((f) => f.symbol === 'NTPC'),
@@ -83,15 +82,52 @@ try {
       .evaluateAll((nodes) => nodes.map((n) => n.dataset.filingId))
     expect(displayedIds.sort()).toEqual(expectedResultIds.sort())
     expect(displayedIds.length).toBeGreaterThan(3)
-    await expect(results.locator('.event-snippet')).toContainText('Standalone and Consolidated')
+    await expect(results.locator('.event-snippet')).not.toBeVisible()
+    await expect(results.locator('.event-full-summary')).toContainText(
+      'Standalone and Consolidated',
+    )
+    await expect(results.locator('.event-category')).toHaveText('Financial results')
+    expect(await results.locator('.event-body').innerText()).not.toMatch(
+      /Grouped by|Source field:|Original title/,
+    )
+    await expect(results.locator('.event-sources details')).toHaveCount(0)
+    await expect(results.locator('.event-evidence')).not.toHaveAttribute('open', '')
     for (const record of ntpc.filter((f) => expectedResultIds.includes(f.id))) {
       await expect(
         results.locator(`[data-filing-id="${record.id}"] a.original-filing`),
       ).toHaveAttribute('href', record.source_url)
     }
     const source = results.locator('.filing-source').first()
-    await source.locator('.source-passages > summary').click()
-    await expect(source.locator('.filing-excerpt').first()).toBeVisible()
+    await source.getByRole('button', { name: /^Mark reviewed:/ }).click()
+    await expect(source.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
+    await expect(results).not.toHaveClass(/is-reviewed/)
+    await page.getByRole('button', { name: 'Undo last change' }).click()
+    await expect(source.getByRole('button')).toHaveAttribute('aria-pressed', 'false')
+    await results.locator('.event-evidence > summary').focus()
+    await page.keyboard.press('Enter')
+    await expect(results.locator('.filing-excerpt').first()).toBeVisible()
+    const inspected = expectedResultIds.find((id) =>
+      ntpc.find((f) => f.id === id).source_url.endsWith('.pdf'),
+    )
+    await results.getByRole('combobox', { name: 'Source to inspect' }).selectOption(inspected)
+    await expect(results.locator('.filing-source-meta')).toContainText(inspected)
+    await expect(
+      results.getByRole('link', { name: 'Open supporting PDF page ↗' }).first(),
+    ).toHaveAttribute('href', /#page=\d+/)
+    await results.locator('.event-evidence > summary').click()
+    const ntpcRecording = company.locator('.filing-event[data-event-key*="recording:audio:"]')
+    await expect(ntpcRecording).toHaveCount(1)
+    await ntpcRecording.locator('.event-summary').click()
+    await expect(ntpcRecording.locator('.filing-source')).toHaveCount(2)
+    await expect(ntpcRecording.locator('.event-full-summary')).toContainText('31 Oct 2026')
+    if (viewport.width === 1440 && theme === 'light') {
+      await company.locator('.event-details').evaluateAll((nodes) =>
+        nodes.forEach((node) => {
+          node.open = true
+        }),
+      )
+      await results.screenshot({ path: `${out}/1440-light-ntpc-results.png` })
+    }
     await results.getByRole('button', { name: 'Review all', exact: true }).click()
     await expect(results).toHaveClass(/is-reviewed/)
     await expect(company.locator('.company-counts')).toContainText(
@@ -125,11 +161,59 @@ try {
       /09360601|concerning|execution and oversight/,
     )
     await kpit.locator('.event-summary').click()
-    await kpit.locator('.filing-source').first().locator('.source-passages > summary').click()
-    await expect(kpit.locator('.source-passages[open]')).toContainText(
+    await expect(kpit.locator('.event-category')).toHaveText('Leadership')
+    await expect(kpit.locator('.event-meta time')).toHaveText('Effective 31 Oct 2026')
+    const explanation = await kpit.locator('.event-full-summary').innerText()
+    expect(explanation.match(/completed his/g)).toHaveLength(1)
+    expect(explanation.match(/Nomination & Remuneration/g)).toHaveLength(1)
+    await expect(kpit.locator('.filing-source')).toHaveCount(2)
+    await expect(kpit.locator('.filing-excerpt').first()).not.toBeVisible()
+    if (
+      (viewport.width === 1440 && theme === 'light') ||
+      (viewport.width === 390 && theme === 'dark')
+    )
+      await kpit.screenshot({ path: `${out}/${viewport.width}-${theme}-leadership.png` })
+    await kpit.locator('.event-evidence > summary').click()
+    await expect(kpit.locator('.event-evidence[open]')).toContainText(
       'completion of a scheduled term',
     )
-    await page.screenshot({ path: `${out}/${viewport.width}-${theme}-leadership.png` })
+    const kpitPdf = actualFilings.find(
+      (f) => f.symbol === 'KPITTECH' && f.source_url.endsWith('.pdf'),
+    )
+    await kpit.getByRole('combobox', { name: 'Source to inspect' }).selectOption(kpitPdf.id)
+    if (viewport.width < 600) {
+      await expect(kpit.getByRole('combobox', { name: 'Source to inspect' })).toHaveCSS(
+        'font-size',
+        '16px',
+      )
+      await page.setViewportSize({ width: 320, height: 740 })
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(
+        false,
+      )
+      await page.setViewportSize(viewport)
+    }
+    await expect(
+      kpit.getByRole('link', { name: 'Open supporting PDF page ↗' }).first(),
+    ).toHaveAttribute('href', /#page=1$/)
+
+    await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('')
+    await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('RELIANCE')
+    const reliance = page.locator('.company-group[data-symbol="RELIANCE"]')
+    const preview = await reliance.locator('.company-preview').innerText()
+    const titles = preview.split(' · ')
+    expect(new Set(titles).size).toBe(titles.length)
+    await reliance.locator(':scope > summary').click()
+    const recording = reliance.locator('.filing-event[data-event-key*="recording:audio:"]')
+    await expect(recording).toHaveCount(1)
+    await recording.locator('.event-summary').click()
+    await expect(recording.locator('.event-category')).toHaveText('Earnings call')
+    await expect(recording.locator('.event-full-summary')).toContainText('30 Oct 2026')
+    await expect(recording.locator('.filing-source')).toHaveCount(2)
+    await expect(
+      reliance.locator('.event-title').filter({ hasText: 'Investor presentation' }),
+    ).toHaveCount(1)
+    if (viewport.width === 390 && theme === 'dark')
+      await recording.screenshot({ path: `${out}/390-dark-reliance-recording.png` })
 
     await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('')
     await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('')
@@ -138,8 +222,8 @@ try {
     if (await include.count()) await include.check()
     await expect(page.locator('.announcement-list > .filing-event')).toHaveCount(count)
     const times = await page
-      .locator('.announcement-list > .filing-event .event-meta time')
-      .evaluateAll((nodes) => nodes.map((n) => Date.parse(n.dateTime)))
+      .locator('.announcement-list > .filing-event')
+      .evaluateAll((nodes) => nodes.map((n) => Date.parse(n.dataset.publishedAt)))
     expect(times).toEqual([...times].sort((a, b) => b - a))
     await expect(page.locator('.activity-company').first()).toContainText(/Limited|Ltd/i)
     await page.getByRole('button', { name: 'By company', exact: true }).focus()

@@ -13,8 +13,70 @@ from finn.filing_details import (
     needs_extraction,
     official_pages,
     present,
+    recording_reference,
     reporting_period,
 )
+
+
+def test_recordings_group_only_with_explicit_call_date_and_shared_recording_link():
+    # Manually checked against NTPC's original 31 October XML/PDF pair.
+    fields = [
+        {"field": "DateOfCallForAudioRecording", "text": "2026-10-31"},
+        {
+            "field": "WeblinkOfAudioRecording",
+            "text": "https://ntpc.co.in/investors/conference-call",
+        },
+    ]
+    pages = [
+        {
+            "pdf_page": 1,
+            "text": "Audio Recording of Earnings Conference Call. A conference call was held on 31 October 2026. Link for accessing Audio Recording: https://www.ntpc.co.in/investors/conference-call",
+        }
+    ]
+    structured, evidence = recording_reference(fields)
+    document, quotes = recording_reference(pages)
+    assert structured["event_key"] == document["event_key"]
+    assert all(q["quote"] in pages[0]["text"] for q in quotes)
+    assert evidence[0]["field"] == "DateOfCallForAudioRecording"
+    assert (
+        recording_reference([{**fields[0], "text": "2026-10-30"}, fields[1]])[0]["event_key"]
+        != document["event_key"]
+    )
+    assert recording_reference([fields[1]])[0] is None
+    assert recording_reference([*fields, {**fields[0], "text": "2026-10-30"}])[0] is None
+    assert (
+        recording_reference(
+            [
+                {
+                    "pdf_page": 1,
+                    "text": pages[0]["text"]
+                    + " Another conference call was held on 30 October 2026.",
+                }
+            ]
+        )[0]
+        is None
+    )
+    assert recording_reference([{**fields[0], "field": "DateOfReport"}, fields[1]])[0] is None
+    assert recording_reference([fields[0], {**fields[1], "text": "javascript:alert(1)"}])[0] is None
+
+
+def test_tenure_additional_roles_have_exact_support_and_do_not_repeat_cessation():
+    text = "Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date. Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date."
+    row = filing(text, title="Cessation")
+    result = format_details(row, present(row, pages=[{"pdf_page": 1, "text": text}]))
+    assert result["effective_date"] == "2026-10-31"
+    assert len(result["additional_details"]) == 1
+    assert "Nomination & Remuneration" in result["additional_details"][0]
+    assert any(
+        e["quote"] == result["additional_details"][0] and e["pdf_page"] == 1
+        for e in result["evidence"]
+    )
+    assert "consequently" not in result["summary"]
+    assert "close of business" in result["summary"]
+    ambiguous = present(
+        row, pages=[{"pdf_page": 1, "text": text + " Other director DIN: 12345678."}]
+    )
+    assert ambiguous["additional_details"] == [] and ambiguous["effective_date"] is None
 
 
 def filing(description="Financial Results Updates", **values):

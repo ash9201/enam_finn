@@ -9,8 +9,9 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
+import httpx
 from pypdf import PdfReader
 
 from finn.config import load_local_env
@@ -19,7 +20,7 @@ from finn.sources import fetch_pdf, public_client, validate_source_url
 from finn.store import open_store
 
 VERSION = "official-filing-narrative-v1"
-DISPLAY_VERSION = "filing-display-v3"
+DISPLAY_VERSION = "filing-display-v4"
 MAX_PAGES = 8
 
 
@@ -76,6 +77,13 @@ def format_details(row, detail):
     body, raw = feed_text(row), row["title"].lower()
     if result.get("summary"):
         result["summary"] = concise(result["summary"])
+        if result.get("event_kind") == "scheduled_tenure":
+            result["summary"] = re.sub(
+                r",?\s+and consequently (?:he|she|they).{0,150}end of business hours of said date\.",
+                ", effective at the close of business.",
+                result["summary"],
+                flags=re.I,
+            )
     result["evidence"] = [
         e
         for e in result.get("evidence", [])
@@ -95,7 +103,7 @@ def format_details(row, detail):
             category="earnings_call",
             priority=1,
             event_kind="earnings_call",
-            event_key=None,
+            event_key=(result.get("recording_reference") or {}).get("event_key"),
             actual_results=False,
         )
         result["headline"] = (
@@ -105,12 +113,24 @@ def format_details(row, detail):
             if "transcript" in body.lower()
             else "Earnings-call recording available"
         )
+        reference = result.get("recording_reference")
+        if reference:
+            day = datetime.fromisoformat(reference["call_date"]).strftime("%d %b %Y")
+            result["headline"] = "Earnings-call recording · " + day
+            result["summary"] = (
+                f"An {reference['kind']} recording is available for the earnings call held on {day}."
+            )
+            if result.get("period_end"):
+                period = datetime.fromisoformat(result["period_end"]).strftime("%d %b %Y")
+                result["summary"] = (
+                    result["summary"][:-1] + f", covering results for the period ended {period}."
+                )
         weak = clean_display(body).strip(" .").lower() in {
             "audio recording/video recording",
             "link of recording",
             "investor presentation",
         }
-        if weak:
+        if weak and not reference:
             passage = next(
                 (
                     e["quote"]
@@ -191,6 +211,96 @@ def reporting_period(text):
         re.I,
     )
     return source_date(match[1]) if match else None
+
+
+def recording_reference(pages):
+    """Require both an explicit call date and recording link, never a filing date/title."""
+    fields = {}
+    for page in pages:
+        field = page.get("field")
+        if field:
+            if field in fields and fields[field] != page["text"]:
+                return None, []
+            fields[field] = page["text"]
+    date_fields = [
+        (key, value)
+        for key, value in fields.items()
+        if re.fullmatch(r"DateOfCallFor(?:Audio|Video)Recording", key)
+    ]
+    if date_fields:
+        dates = {source_date(value) for _, value in date_fields}
+        links = [
+            (key, value)
+            for key, value in fields.items()
+            if re.fullmatch(r"WeblinkOf(?:Audio|Video)Recording", key)
+        ]
+        if len(dates) != 1 or None in dates or len(links) != 1:
+            return None, []
+        day, link = dates.pop(), links[0][1]
+        kind = "video" if "Video" in links[0][0] else "audio"
+        evidence = [
+            {"quote": value, "field": key, "pdf_page": None, "kind": "official_document"}
+            for key, value in [*date_fields, links[0]]
+        ]
+    else:
+        matches = []
+        for page in pages:
+            text = compact(page["text"])
+            calls = list(
+                re.finditer(
+                    r"(?:conference call|analyst meet).{0,30}?(?:held on|on)\s*(" + DATE + ")",
+                    text,
+                    re.I,
+                )
+            )
+            if len({source_date(call[1]) for call in calls}) > 1:
+                return None, []
+            call = calls[0] if calls else None
+            recording = re.search(
+                r"(?:audio|video) recording.{0,500}?(https?://[^\s<>]+)", text, re.I
+            )
+            if call and recording and source_date(call[1]):
+                matches.append((page, call, recording))
+        if len(matches) != 1:
+            return None, []
+        page, call, recording = matches[0]
+        day, link = source_date(call[1]), recording[1].rstrip(".,;")
+        kind = "video" if recording[0].lower().startswith("video") else "audio"
+        evidence = [
+            {
+                "quote": match[0],
+                "field": None,
+                "pdf_page": page.get("pdf_page"),
+                "kind": "official_document",
+            }
+            for match in [call, recording]
+        ]
+    parsed = urlparse(link)
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+    ):
+        return None, []
+    # www variants are the same company URL; retain path/query/anchor distinctions.
+    canonical = urlunparse(
+        (
+            "https",
+            parsed.netloc.lower().removeprefix("www."),
+            parsed.path.rstrip("/"),
+            "",
+            parsed.query,
+            parsed.fragment,
+        )
+    )
+    digest = hashlib.sha256(canonical.encode()).hexdigest()[:20]
+    return {
+        "call_date": day,
+        "url": link,
+        "kind": kind,
+        "event_key": f"recording:{kind}:{day}:{digest}",
+    }, evidence
 
 
 def narrative_excerpts(pages):
@@ -330,6 +440,31 @@ def present(row, *, pages=(), source=None, limitation=None):
         event_key = "results:" + period
     elif scheduled and entity and effective_date and single_person:
         event_key = f"tenure:{entity[1]}:{effective_date}"
+    additional = []
+    if scheduled and single_person:
+        for page in context_pages:
+            text = compact(page["text"])
+            roles = re.search(
+                r"Accordingly,? (?:he|she|they) (?:has|have) also ceased.{0,650}?effective from said date\.",
+                text,
+                re.I,
+            )
+            if roles:
+                additional.append(clean_display(roles[0]))
+                evidence.append(
+                    {
+                        "quote": roles[0],
+                        "pdf_page": page.get("pdf_page"),
+                        "field": page.get("field"),
+                        "kind": "official_document",
+                    }
+                )
+    reference, reference_evidence = (None, [])
+    if re.search(
+        r"audio recording|video recording|link of recording", body, re.I
+    ) and not re.search(r"transcript|investor presentation", feed, re.I):
+        reference, reference_evidence = recording_reference(context_pages)
+        evidence = [*reference_evidence, *evidence]
     return {
         "version": VERSION,
         "input_hash": input_hash(row),
@@ -346,6 +481,10 @@ def present(row, *, pages=(), source=None, limitation=None):
         "event_kind": event_kind,
         "event_key": event_key,
         "period_end": period,
+        "effective_date": effective_date if scheduled and single_person else None,
+        "additional_details": list(dict.fromkeys(additional)),
+        "recording_reference": reference,
+        "event_evidence_version": 1,
         "actual_results": actual_results,
         "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation."
         if scheduled
@@ -357,6 +496,20 @@ def present(row, *, pages=(), source=None, limitation=None):
 
 
 def official_pages(client, url, content_cache=None):
+    try:
+        return _official_pages(client, url, content_cache)
+    except httpx.ConnectError:
+        if urlparse(url).hostname != "nsearchives.nseindia.com":
+            raise
+        # The exchange's alternate archive host; keep the original filing URL on the row.
+        return _official_pages(
+            client,
+            url.replace("https://nsearchives.nseindia.com/", "https://archives.nseindia.com/", 1),
+            content_cache,
+        )
+
+
+def _official_pages(client, url, content_cache=None):
     parsed = urlparse(url)
     if parsed.hostname not in {
         "nsearchives.nseindia.com",
@@ -381,7 +534,7 @@ def official_pages(client, url, content_cache=None):
             field = element.tag.rsplit("}", 1)[-1]
             value = compact(" ".join(element.itertext())) if not len(element) else ""
             if value and re.search(
-                r"Remarks|Details|TextBlock|Reason|NameOfDesignatedPerson|DesignationOfDesignatedPerson|EffectiveDate",
+                r"Remarks|Details|TextBlock|Reason|NameOfDesignatedPerson|DesignationOfDesignatedPerson|EffectiveDate|DateOfCallFor(?:Audio|Video)Recording|WeblinkOf(?:Audio|Video)Recording",
                 field,
             ):
                 pages.append({"field": field, "text": value[:8000]})
@@ -429,7 +582,9 @@ def needs_extraction(row):
     return False
 
 
-def enrich_filings(store, *, limit=6, symbol=None, retry_unavailable=False):
+def enrich_filings(
+    store, *, limit=6, symbol=None, retry_unavailable=False, refresh_event_evidence=False
+):
     filters = {"order": "published_at.desc", "limit": 1000}
     if symbol:
         filters["symbol"] = "eq." + symbol
@@ -460,9 +615,18 @@ def enrich_filings(store, *, limit=6, symbol=None, retry_unavailable=False):
     pending = [
         row
         for row in rows
-        if needs_extraction(row)
-        or retry_unavailable
-        and (row.get("enrichment") or {}).get("limitation")
+        if not refresh_event_evidence
+        and (
+            needs_extraction(row)
+            or retry_unavailable
+            and (row.get("enrichment") or {}).get("limitation")
+        )
+        or refresh_event_evidence
+        and not (row.get("enrichment") or {}).get("event_evidence_version")
+        and (
+            (row.get("enrichment") or {}).get("event_kind") == "scheduled_tenure"
+            or "recording" in (row.get("enrichment") or {}).get("headline", "").lower()
+        )
     ]
     # Material/uncertain items before routine work; time breaks priority ties.
     pending.sort(key=lambda row: -row["priority"])
@@ -522,6 +686,11 @@ def main():
     parser.add_argument("--limit", type=int, default=30)
     parser.add_argument("--symbol")
     parser.add_argument("--retry-unavailable", action="store_true")
+    parser.add_argument(
+        "--refresh-event-evidence",
+        action="store_true",
+        help="Bounded refresh of cached recording/tenure source references only.",
+    )
     args = parser.parse_args()
     load_local_env()
     with open_store() as store:
@@ -532,6 +701,7 @@ def main():
                     limit=args.limit,
                     symbol=args.symbol,
                     retry_unavailable=args.retry_unavailable,
+                    refresh_event_evidence=args.refresh_event_evidence,
                 )
             )
         )

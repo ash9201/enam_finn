@@ -247,7 +247,7 @@
 }
 .event-snippet {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-top: 4px;
@@ -283,8 +283,7 @@
   flex-wrap: wrap;
   gap: 4px 16px;
   align-items: center;
-  padding-left: 20px;
-  margin-top: 6px;
+  margin: 2px 0 8px;
 }
 .filing-primary-action {
   color: var(--accent-strong);
@@ -295,7 +294,6 @@
   align-items: center;
   text-decoration: none;
 }
-.filing-secondary-action,
 .original-filing {
   font-size: 11px;
   color: var(--text-secondary);
@@ -331,30 +329,25 @@
   margin: var(--space-3) 0 var(--space-2) 20px;
 }
 .event-full-summary {
-  margin: 0 0 var(--space-3);
+  margin: 0;
   color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.65;
   overflow-wrap: anywhere;
 }
-.filing-source.is-reviewed {
-  background: var(--surface-read);
+.event-details[open] > .event-summary .event-snippet,
+.company-group[open] > .company-summary .company-preview {
+  display: none;
 }
-.filing-source.is-reviewed .filing-source-heading strong {
-  color: var(--text-muted);
-  font-weight: 400;
-}
-.grouping-note {
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--text-muted);
-  margin: 0 0 var(--space-2);
-}
-.event-additional-details {
-  padding-left: 18px;
-  font-size: 12px;
+.event-category {
   color: var(--text-secondary);
-  line-height: 1.6;
+  font-weight: 600;
+}
+.official-sources h4 {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-muted);
 }
 .event-sources {
   list-style: none;
@@ -362,54 +355,86 @@
   margin: 0;
 }
 .filing-source {
-  padding: var(--space-3);
-  margin-top: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface-input);
-}
-.filing-source-heading {
   display: flex;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 2px 0;
+  min-width: 0;
+}
+.filing-source-link {
+  display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  gap: 0 10px;
+  min-width: 0;
+}
+.filing-source .original-filing {
   font-size: 12px;
+  line-height: 1.5;
+  min-height: 0;
+  display: inline;
+  color: var(--accent-strong);
+  overflow-wrap: anywhere;
 }
-.filing-source-heading strong {
-  font-weight: 550;
-}
-.filing-source-heading time {
-  font-size: 11px;
+.source-reference {
+  font-size: 10px;
   color: var(--text-muted);
-  margin-left: auto;
 }
-.filing-source-actions {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: space-between;
-  flex-wrap: wrap;
+.filing-source > .review-toggle {
+  flex-shrink: 0;
+  font-size: 11px;
+  min-height: 28px;
+  text-align: right;
 }
-.source-passages {
-  margin-top: var(--space-2);
+.filing-source.is-reviewed .original-filing {
+  color: var(--text-secondary);
+}
+.event-evidence {
+  margin-top: 6px;
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.6;
 }
-.source-passages summary {
+.event-evidence > summary {
   cursor: pointer;
-  min-height: 32px;
+  min-height: 36px;
+  align-content: center;
+  text-underline-offset: 3px;
+}
+.evidence-inspection {
+  border-left: 2px solid var(--border);
+  padding: 0 0 2px 12px;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.evidence-inspection > a {
+  color: var(--accent-strong);
+}
+.evidence-source-picker label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.evidence-source-picker select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  min-height: 40px;
 }
 .filing-source-meta {
-  margin: 8px 0;
+  margin: 10px 0;
   font-size: 11px;
 }
 .filing-source-meta > div {
-  display: flex;
-  gap: 12px;
-  margin: 6px 0;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+  margin: 4px 0;
 }
 .filing-source-meta dt {
-  min-width: 84px;
   color: var(--text-muted);
 }
 .filing-source-meta dd {
@@ -417,10 +442,7 @@
   overflow-wrap: anywhere;
 }
 .filing-excerpt {
-  padding: var(--space-3);
-  margin: var(--space-2) 0;
-  border-left: 2px solid var(--accent-border);
-  background: var(--surface);
+  margin: 12px 0;
 }
 .filing-excerpt > span {
   font-size: 11px;
@@ -428,8 +450,8 @@
 }
 .filing-excerpt blockquote {
   font-size: 12px;
-  line-height: 1.7;
-  margin: 8px 0;
+  line-height: 1.65;
+  margin: 4px 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -445,14 +467,6 @@
 .source-check-note {
   color: var(--text-muted);
   font-size: 11px;
-}
-.raw-announcement {
-  margin-top: var(--space-2);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-.raw-announcement p {
-  overflow-wrap: anywhere;
 }
 .activity-company {
   display: block;
@@ -618,7 +632,7 @@
 .company-summary:focus-visible,
 .event-summary:focus-visible,
 .routine-toggle:focus-visible,
-.source-passages summary:focus-visible {
+.event-evidence > summary:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -3px;
   border-radius: 4px;
@@ -739,8 +753,12 @@
   .event-body {
     margin-left: 0;
   }
-  .filing-source-heading time {
-    margin-left: 0;
+  .filing-source > .review-toggle {
+    min-height: 36px;
+  }
+  .evidence-source-picker select {
+    font-size: 16px;
+    min-height: 44px;
   }
   .company-counts > span {
     white-space: normal;

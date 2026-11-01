@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import {
   dateBounds,
   groupEvents,
@@ -8,6 +9,8 @@ import {
   primaryAction,
   selectFilings,
   eventTone,
+  eventExplanation,
+  companyPreview,
 } from '../src/briefing-model.ts'
 
 const defaults = { company: '', category: '', review: 'all', window: '7d', start: '', end: '' }
@@ -153,4 +156,54 @@ test('every original filing appears once across grouped events', () => {
   const flattened = groupEvents(rows).flatMap((e) => e.filings)
   assert.equal(flattened.length, rows.length)
   assert.equal(new Set(flattened.map((f) => f.id)).size, rows.length)
+})
+
+test('company previews deduplicate titles without merging unrelated disclosures', () => {
+  const records = [row('a'), row('b')]
+  const events = groupEvents(records)
+  assert.equal(events.length, 2)
+  assert.equal(companyPreview(events), events[0].title)
+})
+
+test('an explanation keeps distinct numeric facts and removes repeated/supporting boilerplate', () => {
+  const records = [
+    row('a', { enrichment: detail('same', { summary: 'Dividend of Rs. 3 per share declared.' }) }),
+    row('b', { enrichment: detail('same', { summary: 'Dividend of Rs. 3 per share declared.' }) }),
+    row('c', { enrichment: detail('same', { summary: 'Record date is 6 November 2026.' }) }),
+    row('d', {
+      enrichment: detail('same', {
+        summary: 'Supporting debt disclosure within the filed financial-results package.',
+      }),
+    }),
+  ]
+  const explanation = eventExplanation(groupEvents(records)[0])
+  assert.equal((explanation.match(/Rs\. 3/g) || []).length, 1)
+  assert.match(explanation, /6 November 2026/)
+  assert.doesNotMatch(explanation, /Supporting debt/)
+})
+
+test('reviewed real NTPC/Reliance recording pairs retain every source; KPIT roles appear once', () => {
+  const records = JSON.parse(
+    readFileSync(new URL('../public/recorded-snapshot.json', import.meta.url)),
+  ).tables.finn_filings
+  for (const symbol of ['NTPC', 'RELIANCE']) {
+    const originals = records.filter(
+      (f) => f.symbol === symbol && f.enrichment?.recording_reference,
+    )
+    assert.equal(originals.length, 2)
+    const events = groupEvents(originals)
+    assert.equal(events.length, 1)
+    assert.deepEqual(
+      new Set(events[0].filings.map((f) => f.id)),
+      new Set(originals.map((f) => f.id)),
+    )
+    assert.equal((eventExplanation(events[0]).match(/recording is available/g) || []).length, 1)
+    assert.match(eventExplanation(events[0]), /period ended 30 Sep 2026/)
+  }
+  const kpit = groupEvents(records.filter((f) => f.symbol === 'KPITTECH'))[0]
+  assert.equal(kpit.filings.length, 2)
+  const explanation = eventExplanation(kpit)
+  assert.equal((explanation.match(/completed his/g) || []).length, 1)
+  assert.equal((explanation.match(/Nomination & Remuneration/g) || []).length, 1)
+  assert.match(explanation, /effective at the close of business/)
 })

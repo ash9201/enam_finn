@@ -128,3 +128,62 @@ The browser check defaults to the local preview on port 4173 and uses a frozen c
 of actual anonymous GET responses for repeatability. Use `FINN_BROWSER_URL` for
 another target. Source/inspection and before/after artifacts remain ignored under
 `artifacts/briefing-redesign`. No new dependencies were installed.
+
+## Expanded event refinement
+
+The subsequent refinement keeps the default company list, filters, chronology,
+sidebar and navigation. Company previews deduplicate titles and disappear when
+the company is opened. Event headers show category and date before expansion;
+scheduled tenure events explicitly label their effective date. Their short preview
+disappears on expansion, leaving one explanation with distinct verified facts.
+Generic support-document/media-release boilerplate does not add a second paragraph.
+
+Expanded order is explanation, research/review actions, **Official sources**, then
+**View evidence/details**. The sources are plain links with dates and useful page
+references, prioritising actual results PDFs and readable notices. Every original
+filing ID/URL remains intact. Multiple sources retain individual review toggles,
+with Review all and undo above. Single-source events use their event review control.
+One optional inspector shows a chosen document's exact excerpts, pages/fields,
+original title, publication time, identifier, extraction scope and limitations.
+There are no per-source cards or nested evidence disclosures.
+
+The six original documents were rechecked, with source SHA-256 and page/field
+references retained:
+
+- KPIT's two disclosures confirm Prof. Rajiv Lal's second-term completion effective
+  at close of business on 31 October 2026. The PDF page 1 and XML remarks additionally
+  confirm cessation of his KPIT Technologies Inc. directorship and Nomination &
+  Remuneration (HR) Committee membership that day. These facts appear once; the
+  original wording remains in evidence.
+- NTPC's PDF and XML both identify the **31 October 2026** audio call and the same
+  company recording link (with/without `www`). They form one event with two sources.
+- Reliance's PDF and XML both identify the **30 October 2026** audio call and the same
+  company webcast link. They form one event with two sources. Its investor presentation
+  stays separate. The period of results discussed comes from the PDF, not the XML's
+  publication date.
+
+Recording grouping requires explicit call date **and** recording URL/type; shared
+headings, publication dates, company names or mutable IR landing links alone do not
+group records. Conflicting/missing dates, conflicting XML fields and unsafe URLs
+abstain. New ingestion uses the same parser. An optional bounded upgrade command
+refreshes only previously cached recording/tenure evidence lacking the new reference:
+
+```powershell
+python -m finn.filing_details --symbol NTPC --refresh-event-evidence --limit 2
+```
+
+The local NSE `nsearchives` hostname failed to resolve during verification. Its
+official `archives.nseindia.com` counterpart served the same dated paths. The bounded
+extractor now tries that host on connection failure only, records the actual fetched
+URL and keeps the original announcement link unchanged. Six targeted document
+refreshes succeeded; no unrelated research or financial pipeline was rerun. Existing
+successful references remain cached. The labelled bundled snapshot retains its
+original rows/order, prices/research captures and capture metadata; only the three
+companies' event evidence was updated.
+
+Validation: **21** targeted filing-detail tests and **15** frontend model tests pass.
+Four real-data browser scenes cover desktop/mobile in both themes, plus 320px
+overflow, source selection/PDF-page links, per-filing review, Review all/undo, unchanged
+filters/chronology and keyboard expansion. Rendered KPIT, NTPC and Reliance events
+were inspected, including mobile source wrapping. Build and credential-asset scan
+pass. No model jobs, migrations, environment changes or new dependencies are required.
