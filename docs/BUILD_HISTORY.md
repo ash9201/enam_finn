@@ -1,5 +1,24 @@
 # Build history summary
 
+### Event review, complete descriptions and narrower topics (1 November)
+
+- Replaced source-level review buttons with one event control operating on the
+  existing filing IDs. Immediate undo restores a legacy mixed review state;
+  saved reviews survive reload. Chronological activity uses the same grouped
+  events and sorts by their latest publication, avoiding per-source review controls.
+- Found the formatter was dropping the last word of unpunctuated text and adding
+  ellipses after 450 characters. Full saved feed statements now recover the missing
+  Dividend/year words without downloads. Native excerpts contribute a complete
+  sentence; incomplete source text is labelled and never completed speculatively.
+- Split NTPC's shared results package into results (two sources), dividend/record
+  date (three), and three distinct debt subjects. A dividend requires a verified
+  type/record date; debt duplicates require the same subject and document hash.
+  Reprocessed eight NTPC filings using one cached PDF and one XML fetch. No model,
+  research, financial-calculation or schema changes were needed.
+- Targeted checks: 27 filing-detail cases, 16 frontend model cases, and four
+  desktop/mobile Light/Dark browser scenes, including legacy review undo/reload,
+  full descriptions and the regrouped sources. Build and asset credential scan pass.
+
 ### Expanded Briefing event refinement (1 November)
 
 - Kept the collapsed company list and page structure. Expanded events now show one

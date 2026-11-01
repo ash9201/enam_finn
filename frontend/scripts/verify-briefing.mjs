@@ -2,6 +2,7 @@
 import { chromium, expect } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { groupEvents } from '../src/briefing-model.ts'
 
 const base = process.env.FINN_BROWSER_URL || 'http://127.0.0.1:4173'
 const out = fileURLToPath(new URL('../../artifacts/briefing-redesign/browser/', import.meta.url))
@@ -81,7 +82,7 @@ try {
       .locator('.filing-source')
       .evaluateAll((nodes) => nodes.map((n) => n.dataset.filingId))
     expect(displayedIds.sort()).toEqual(expectedResultIds.sort())
-    expect(displayedIds.length).toBeGreaterThan(3)
+    expect(displayedIds.length).toBe(2)
     await expect(results.locator('.event-snippet')).not.toBeVisible()
     await expect(results.locator('.event-full-summary')).toContainText(
       'Standalone and Consolidated',
@@ -97,12 +98,29 @@ try {
         results.locator(`[data-filing-id="${record.id}"] a.original-filing`),
       ).toHaveAttribute('href', record.source_url)
     }
-    const source = results.locator('.filing-source').first()
-    await source.getByRole('button', { name: /^Mark reviewed:/ }).click()
-    await expect(source.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
-    await expect(results).not.toHaveClass(/is-reviewed/)
-    await page.getByRole('button', { name: 'Undo last change' }).click()
-    await expect(source.getByRole('button')).toHaveAttribute('aria-pressed', 'false')
+    await expect(company.locator('.filing-source button')).toHaveCount(0)
+    await expect(results.locator('.event-actions button')).toHaveCount(1)
+    const dividend = company.locator('.filing-event[data-event-key*="dividend:"]')
+    await expect(dividend).toHaveCount(1)
+    await dividend.locator('.event-summary').click()
+    await expect(dividend.locator('.filing-source')).toHaveCount(3)
+    await expect(dividend.locator('.event-full-summary')).toContainText('Rs. 3 per equity share')
+    await expect(dividend.locator('.event-full-summary')).toContainText('record date is 6 Nov 2026')
+    const snapshot = company.locator('.filing-event').filter({
+      has: page.locator('.event-title', {
+        hasText: 'Quarterly operational and financial snapshot',
+      }),
+    })
+    await snapshot.locator('.event-summary').click()
+    await expect(snapshot.locator('.event-full-summary')).toContainText('30 September 2026')
+    expect(await snapshot.locator('.event-full-summary').innerText()).not.toMatch(/\.{3}|\u2026/)
+    if (viewport.width === 390 && theme === 'dark') {
+      await dividend.screenshot({ path: `${out}/390-dark-ntpc-dividend.png` })
+      await snapshot.screenshot({ path: `${out}/390-dark-ntpc-snapshot.png` })
+    }
+    await expect(
+      company.locator('.event-category').filter({ hasText: 'Funding & debt' }),
+    ).toHaveCount(3)
     await results.locator('.event-evidence > summary').focus()
     await page.keyboard.press('Enter')
     await expect(results.locator('.filing-excerpt').first()).toBeVisible()
@@ -128,7 +146,7 @@ try {
       )
       await results.screenshot({ path: `${out}/1440-light-ntpc-results.png` })
     }
-    await results.getByRole('button', { name: 'Review all', exact: true }).click()
+    await results.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
     await expect(results).toHaveClass(/is-reviewed/)
     await expect(company.locator('.company-counts')).toContainText(
       `${ntpc.length - expectedResultIds.length} unreviewed`,
@@ -220,7 +238,10 @@ try {
     await page.getByRole('button', { name: 'Latest activity', exact: true }).click()
     const include = page.getByRole('checkbox', { name: /Include .* routine filings/ })
     if (await include.count()) await include.check()
-    await expect(page.locator('.announcement-list > .filing-event')).toHaveCount(count)
+    await expect(page.locator('.announcement-list > .filing-event')).toHaveCount(
+      groupEvents(actualFilings).length,
+    )
+    await expect(page.locator('.announcement-list .filing-source button')).toHaveCount(0)
     const times = await page
       .locator('.announcement-list > .filing-event')
       .evaluateAll((nodes) => nodes.map((n) => Date.parse(n.dataset.publishedAt)))
@@ -269,6 +290,48 @@ try {
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect(errors).toEqual([])
+    if (viewport.width === 1440 && theme === 'light') {
+      // Real legacy per-filing state: event undo must restore a previously mixed group.
+      const legacy = expectedResultIds[0]
+      await page.evaluate(
+        (id) => localStorage.setItem('finn-read-v1', JSON.stringify([id])),
+        legacy,
+      )
+      await page.reload()
+      await page.getByRole('button', { name: '7 days', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('NTPC')
+      await company.locator(':scope > summary').click()
+      await results.locator('.event-summary').click()
+      await expect(results.locator('.review-state')).toHaveText('1 unreviewed')
+      await results.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
+      expect(
+        await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1'))),
+      ).toHaveLength(2)
+      await dividend.locator('.event-summary').click()
+      await dividend.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
+      await results.locator('.event-actions button').click()
+      expect(
+        await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1'))),
+      ).toHaveLength(4)
+      await expect(results.locator('.review-state')).toHaveText('1 unreviewed')
+      await expect(dividend).toHaveClass(/is-reviewed/)
+      await dividend.locator('.event-actions button').click()
+      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1')))).toEqual([
+        legacy,
+      ])
+      await expect(results.locator('.review-state')).toHaveText('1 unreviewed')
+      await results.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
+      await page.reload()
+      await page.getByRole('button', { name: '7 days', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('NTPC')
+      await company.locator(':scope > summary').click()
+      await expect(results).toHaveClass(/is-reviewed/)
+      expect(
+        await page
+          .evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1')))
+          .then((ids) => ids.sort()),
+      ).toEqual([...expectedResultIds].sort())
+    }
     checks.push({
       viewport,
       theme,

@@ -302,7 +302,8 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -355,7 +356,8 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -381,21 +383,22 @@
             "pages_scanned": 6
           },
           "status": "headline_only",
-          "summary": null,
+          "summary": "A security-cover certificate was filed.",
           "version": "official-filing-narrative-v1",
           "category": "capital",
           "evidence": [],
           "headline": "Debt security cover certificate",
           "priority": 1,
-          "event_key": null,
+          "event_key": "security_cover:e928d05e2d3ec633038c6d8ca0443bd2e174b1ec354cef3b0940a7e162477a59",
           "checked_at": "2026-11-01T09:23:15.894030+00:00",
-          "event_kind": "capital",
+          "event_kind": "security_cover",
           "input_hash": "3f24adbaaf02b67f68346a1b079d565d22993992de21d85bea0dfc9f735c3db0",
           "limitation": null,
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -414,7 +417,7 @@
         "enrichment": {
           "source": null,
           "status": "feed_details",
-          "summary": "Schedule of Analysts or Institutional Investors…",
+          "summary": "Schedule of Analysts or Institutional Investors Meet",
           "version": "official-filing-narrative-v1",
           "category": "investor_meeting",
           "evidence": [
@@ -435,7 +438,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -468,7 +472,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -533,7 +538,8 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -573,7 +579,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -633,8 +640,9 @@
           "actual_results": false,
           "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [],
+          "summary_incomplete": false,
           "recording_reference": {
             "url": "https://ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
             "kind": "audio",
@@ -701,8 +709,9 @@
           "actual_results": false,
           "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [],
+          "summary_incomplete": false,
           "recording_reference": {
             "url": "https://www.ril.com/investors/events-presentations#webcast-sec",
             "kind": "audio",
@@ -742,7 +751,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -768,46 +778,35 @@
             "pages_scanned": 8
           },
           "status": "source_extracted",
-          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "summary": "A statement on utilisation of issue proceeds was filed.",
           "version": "official-filing-narrative-v1",
           "category": "capital",
           "evidence": [
             {
               "kind": "official_document",
               "field": null,
-              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "quote": "Statement of Utilisation of Issue Proceeds/Statement of Deviation or Variation under Regulations 52(7) and 52(7 A) of Listing Regulations , as applicab le, for the quarter ended 30 September 2026",
               "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
-              "pdf_page": 7
             }
           ],
           "headline": "Use of debt-issue proceeds",
           "priority": 1,
-          "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:48.459688+00:00",
-          "event_kind": "results",
+          "event_key": "issue_proceeds:f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+          "checked_at": "2026-11-01T13:25:55.881070+00:00",
+          "event_kind": "issue_proceeds",
           "input_hash": "c2cde503abb50ff697ad5b6bf90ee5e6346627f2fbc697f7d20c176e20c215cd",
           "limitation": null,
           "period_end": "2026-09-30",
-          "actual_results": true,
+          "topic_version": 1,
+          "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": null,
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -833,46 +832,35 @@
             "pages_scanned": 8
           },
           "status": "source_extracted",
-          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "summary": "A security-cover certificate was filed.",
           "version": "official-filing-narrative-v1",
           "category": "capital",
           "evidence": [
             {
               "kind": "official_document",
               "field": null,
-              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "quote": "Security Cover Certificate and related certificates /disclosures duly signed by the Statutory Auditor, as applicable , pursuant to Regulation 54 read with Regulation 56(1 )(d) of Listing Regulations .",
               "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
-              "pdf_page": 7
             }
           ],
           "headline": "Debt security cover certificate",
           "priority": 1,
-          "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:54.345772+00:00",
-          "event_kind": "results",
+          "event_key": "security_cover:f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+          "checked_at": "2026-11-01T13:25:56.736322+00:00",
+          "event_kind": "security_cover",
           "input_hash": "74b3674d488f7fb9d0b293b0f52eb34070f922984daeec37a20ccbe91a6ddd3e",
           "limitation": null,
           "period_end": "2026-09-30",
-          "actual_results": true,
+          "topic_version": 1,
+          "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": null,
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -903,6 +891,18 @@
           "category": "corporate_action",
           "evidence": [
             {
+              "kind": "official_document",
+              "field": null,
+              "quote": "interim dividend",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "fixed 6 November 2026 as the \"record date",
+              "pdf_page": 1
+            },
+            {
               "kind": "exchange_feed",
               "field": null,
               "quote": "NTPC Limited has informed the Exchange that Record date for the purpose of Dividend is 06-Nov-2026.",
@@ -919,31 +919,30 @@
               "field": null,
               "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
               "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
-              "pdf_page": 7
             }
           ],
-          "headline": "Dividend record date",
+          "headline": "Interim dividend & record date",
           "priority": 2,
-          "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:43.695091+00:00",
-          "event_kind": "results",
+          "event_key": "dividend:interim:2026-11-06",
+          "checked_at": "2026-11-01T13:25:55.125678+00:00",
+          "event_kind": "dividend",
           "input_hash": "0fc0aeb7f88fb9e8a78291f7cb77f539502d5b91742780209d9f7685c539bc72",
           "limitation": null,
           "period_end": "2026-09-30",
-          "actual_results": true,
+          "topic_version": 1,
+          "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": {
+            "type": "interim",
+            "event_key": "dividend:interim:2026-11-06",
+            "record_date": "2026-11-06"
+          },
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -969,46 +968,35 @@
             "pages_scanned": 8
           },
           "status": "source_extracted",
-          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "summary": "Debt-related financial disclosures were filed.",
           "version": "official-filing-narrative-v1",
           "category": "capital",
           "evidence": [
             {
               "kind": "official_document",
               "field": null,
-              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "quote": "disclosures under Regulation 52, including the Statement of Utilisation of Issue Proceeds/Statement of Deviation or Variation under Regulations 52(7) and 52(7 A) of Listing Regulations , as applicab le, for the quarter ended 30 September 2026",
               "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
-              "pdf_page": 7
             }
           ],
           "headline": "Debt-related financial disclosures",
           "priority": 1,
-          "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:50.790407+00:00",
-          "event_kind": "results",
+          "event_key": "debt_disclosures:f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+          "checked_at": "2026-11-01T13:25:56.304754+00:00",
+          "event_kind": "debt_disclosures",
           "input_hash": "7694c62798c4f86d9bb6524674dbc72171b7303300e93bfde38181dc6dc5ed21",
           "limitation": null,
           "period_end": "2026-09-30",
-          "actual_results": true,
+          "topic_version": 1,
+          "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": null,
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1034,7 +1022,7 @@
             "pages_scanned": 1
           },
           "status": "feed_details",
-          "summary": "General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September…",
+          "summary": "General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September 2026",
           "version": "official-filing-narrative-v1",
           "category": "business_update",
           "evidence": [
@@ -1055,7 +1043,8 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1119,14 +1108,21 @@
           "headline": "Financial results for 30 Sep 2026",
           "priority": 3,
           "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:37.507611+00:00",
+          "checked_at": "2026-11-01T13:25:54.057791+00:00",
           "event_kind": "results",
           "input_hash": "1d58fc538a6d9e8def13d484f7820a626f4a4a91ec0b8a90c7ab6736acfcc7bb",
           "limitation": null,
           "period_end": "2026-09-30",
+          "topic_version": 1,
           "actual_results": true,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": null,
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1184,14 +1180,21 @@
           "headline": "Financial results for 30 Sep 2026",
           "priority": 3,
           "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:24.087660+00:00",
+          "checked_at": "2026-11-01T13:25:53.664353+00:00",
           "event_kind": "results",
           "input_hash": "9e6597e96c7815599552b4238c2b50eea4d95e2e2f70dca1ebecc34dbe216b8c",
           "limitation": null,
           "period_end": "2026-09-30",
+          "topic_version": 1,
           "actual_results": true,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": null,
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1222,6 +1225,18 @@
           "category": "corporate_action",
           "evidence": [
             {
+              "kind": "official_document",
+              "field": null,
+              "quote": "interim dividend",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "fixed 6 November 2026 as the \"record date",
+              "pdf_page": 1
+            },
+            {
               "kind": "exchange_feed",
               "field": null,
               "quote": "NTPC Limited has informed the Exchange that Board of Directors at its meeting held on October 31, 2026, declared Interim Dividend of Rs. 3 per equity share.",
@@ -1238,31 +1253,30 @@
               "field": null,
               "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
               "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
-              "pdf_page": 1
-            },
-            {
-              "kind": "official_document",
-              "field": null,
-              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
-              "pdf_page": 7
             }
           ],
-          "headline": "Dividend declared",
+          "headline": "Interim dividend & record date",
           "priority": 2,
-          "event_key": "results:2026-09-30",
-          "checked_at": "2026-11-01T09:14:45.940280+00:00",
-          "event_kind": "results",
+          "event_key": "dividend:interim:2026-11-06",
+          "checked_at": "2026-11-01T13:25:55.484647+00:00",
+          "event_kind": "dividend",
           "input_hash": "1258f35b44160a48244d017c92dc5a3b18fd2c0a47c0b13e4577d1b0c361ab7e",
           "limitation": null,
           "period_end": "2026-09-30",
-          "actual_results": true,
+          "topic_version": 1,
+          "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": {
+            "type": "interim",
+            "event_key": "dividend:interim:2026-11-06",
+            "record_date": "2026-11-06"
+          },
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1315,7 +1329,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1336,15 +1351,27 @@
             "url": "https://nsearchives.nseindia.com/corporate/xbrl/OUTCOME_2249_WebXMLFile_20261031_151619656.xml",
             "method": "exchange_xml",
             "sha256": "87f326a3363883801ccf668547db6f6053c7ad89011d0590ea1ec720e25144a7",
-            "fetched_at": "2026-11-01T09:14:38.828526+00:00",
+            "fetched_at": "2026-11-01T13:25:54.820211+00:00",
             "total_pages": null,
             "pages_scanned": null
           },
           "status": "feed_details",
-          "summary": "Outcome of Board Meeting held on 31-Oct-2026 for…",
+          "summary": "Outcome of Board Meeting held on 31-Oct-2026 for Dividend",
           "version": "official-filing-narrative-v1",
           "category": "corporate_action",
           "evidence": [
+            {
+              "kind": "official_document",
+              "field": "FirstTypeOfDividend",
+              "quote": "Interim",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": "RecordDateOfInterimDividend",
+              "quote": "2026-11-06",
+              "pdf_page": null
+            },
             {
               "kind": "exchange_feed",
               "field": null,
@@ -1352,17 +1379,28 @@
               "pdf_page": null
             }
           ],
-          "headline": "Dividend-related board outcome",
+          "headline": "Interim dividend & record date",
           "priority": 2,
-          "event_key": null,
-          "checked_at": "2026-11-01T09:14:38.830036+00:00",
-          "event_kind": "corporate_action",
+          "event_key": "dividend:interim:2026-11-06",
+          "checked_at": "2026-11-01T13:25:54.824218+00:00",
+          "event_kind": "dividend",
           "input_hash": "473cba7ae40207e1c16dd32b18f825e0404cae9e75e294bb899fe892b9a89fab",
-          "limitation": "No usable native text was extracted; no OCR or inferred details were substituted.",
+          "limitation": null,
           "period_end": null,
+          "topic_version": 1,
           "actual_results": false,
+          "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "additional_details": [],
+          "dividend_reference": {
+            "type": "interim",
+            "event_key": "dividend:interim:2026-11-06",
+            "record_date": "2026-11-06"
+          },
+          "summary_incomplete": false,
+          "recording_reference": null,
+          "event_evidence_version": 1
         }
       },
       {
@@ -1388,7 +1426,7 @@
             "pages_scanned": 8
           },
           "status": "feed_details",
-          "summary": "The order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07,…",
+          "summary": "The order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07, 2026",
           "version": "official-filing-narrative-v1",
           "category": "litigation",
           "evidence": [
@@ -1409,7 +1447,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1474,7 +1513,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1500,7 +1540,7 @@
             "pages_scanned": null
           },
           "status": "feed_details",
-          "summary": "Allotment of…",
+          "summary": "Allotment of Securities",
           "version": "official-filing-narrative-v1",
           "category": "routine",
           "evidence": [
@@ -1521,7 +1561,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1547,7 +1588,7 @@
             "pages_scanned": 7
           },
           "status": "feed_details",
-          "summary": "Monthly Business Updates for the month of October…",
+          "summary": "Monthly Business Updates for the month of October 2026",
           "version": "official-filing-narrative-v1",
           "category": "routine",
           "evidence": [
@@ -1568,7 +1609,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1622,10 +1664,11 @@
           "actual_results": false,
           "effective_date": "2026-10-31",
           "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [
             "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date."
           ],
+          "summary_incomplete": false,
           "recording_reference": null,
           "event_evidence_version": 1
         }
@@ -1693,10 +1736,11 @@
           "actual_results": false,
           "effective_date": "2026-10-31",
           "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [
             "Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the Company and member of Nomination & Remuneration (HR) Committee of the Company, effective from said date."
           ],
+          "summary_incomplete": false,
           "recording_reference": null,
           "event_evidence_version": 1
         }
@@ -1717,7 +1761,7 @@
         "enrichment": {
           "source": null,
           "status": "feed_details",
-          "summary": "Schedule of meet for 2QFY27 Earnings…",
+          "summary": "Schedule of meet for 2QFY27 Earnings Discussion",
           "version": "official-filing-narrative-v1",
           "category": "investor_meeting",
           "evidence": [
@@ -1738,7 +1782,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1757,7 +1802,7 @@
         "enrichment": {
           "source": null,
           "status": "feed_details",
-          "summary": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor…",
+          "summary": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor Rotation",
           "version": "official-filing-narrative-v1",
           "category": "routine",
           "evidence": [
@@ -1778,7 +1823,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1844,8 +1890,9 @@
           "actual_results": false,
           "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [],
+          "summary_incomplete": false,
           "recording_reference": {
             "url": "https://www.ntpc.co.in/investors/confrence-call-analyst-meet-investors/conference-call-analysts-investors",
             "kind": "audio",
@@ -1905,7 +1952,8 @@
           "period_end": "2026-09-30",
           "actual_results": true,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1945,7 +1993,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -1992,7 +2041,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -2058,8 +2108,9 @@
           "actual_results": false,
           "effective_date": null,
           "interpretation": null,
-          "display_version": "filing-display-v4",
+          "display_version": "filing-display-v5",
           "additional_details": [],
+          "summary_incomplete": false,
           "recording_reference": {
             "url": "https://www.ril.com/investors/events-presentations#webcast-sec",
             "kind": "audio",
@@ -2091,8 +2142,8 @@
             "total_pages": 1,
             "pages_scanned": 1
           },
-          "status": "source_extracted",
-          "summary": "Audio recording Pursuant to Regulation 30 of the Securities and Exchange Board of India (Listing Obligations and Disclosure Requirements) Regulations, 2015, further to our intimation dated 15th October 2026 regarding earnings call,…",
+          "status": "headline_only",
+          "summary": null,
           "version": "official-filing-narrative-v1",
           "category": "earnings_call",
           "evidence": [
@@ -2119,7 +2170,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -2145,7 +2197,7 @@
             "pages_scanned": 1
           },
           "status": "feed_details",
-          "summary": "Updates on the Business Transfer Agreement with Vyoma.AI Limited (Vyoma), Wholly owned Subsidiary of the Company and Share Purchase Agreement towards sale of entire stake held in L&T Network Services Private Limited to Vyoma Extension of timeline of…",
+          "summary": "Updates on the Business Transfer Agreement with Vyoma.AI Limited (Vyoma), Wholly owned Subsidiary of the Company and Share Purchase Agreement towards sale of entire stake held in L&T Network Services Private Limited to Vyoma Extension of timeline of completion",
           "version": "official-filing-narrative-v1",
           "category": "unclassified",
           "evidence": [
@@ -2166,7 +2218,8 @@
           "period_end": null,
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v3"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -2192,21 +2245,22 @@
             "pages_scanned": 3
           },
           "status": "source_extracted",
-          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "summary": "A statement on utilisation of issue proceeds was filed.",
           "version": "official-filing-narrative-v1",
           "category": "capital",
           "evidence": [],
           "headline": "Use of debt-issue proceeds",
           "priority": 1,
-          "event_key": "results:2026-09-30",
+          "event_key": "issue_proceeds:f5d163eec57905079d555f5f8e0f5aacc28da5c4ed9a9a24e0a5d810c6dab50f",
           "checked_at": "2026-11-01T09:23:11.848202+00:00",
-          "event_kind": "results",
+          "event_kind": "issue_proceeds",
           "input_hash": "c609ecc1e8df2173eb99b041f342b8506fb0785b51d172543d754d3157ccf45f",
           "limitation": null,
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       },
       {
@@ -2246,7 +2300,8 @@
           "period_end": "2026-09-30",
           "actual_results": false,
           "interpretation": null,
-          "display_version": "filing-display-v4"
+          "display_version": "filing-display-v5",
+          "summary_incomplete": false
         }
       }
     ],

@@ -207,3 +207,31 @@ test('reviewed real NTPC/Reliance recording pairs retain every source; KPIT role
   assert.equal((explanation.match(/Nomination & Remuneration/g) || []).length, 1)
   assert.match(explanation, /effective at the close of business/)
 })
+
+test('real NTPC results, dividend and different debt subjects remain separate developments', () => {
+  const records = JSON.parse(
+    readFileSync(new URL('../public/recorded-snapshot.json', import.meta.url)),
+  ).tables.finn_filings.filter((f) => f.symbol === 'NTPC')
+  const events = groupEvents(records)
+  assert.equal(events.length, 8)
+  const results = events.filter((event) => event.actualResults)
+  assert.equal(results.length, 1)
+  assert.equal(results[0].filings.length, 2)
+  assert.equal(results[0].category, 'results')
+  const dividend = events.find((event) => event.key.includes(':dividend:'))
+  assert.equal(dividend.filings.length, 3)
+  const explanation = eventExplanation(dividend)
+  assert.match(explanation, /Rs\. 3 per equity share/)
+  assert.match(explanation, /record date is 6 Nov 2026/)
+  assert.equal((explanation.match(/record date/gi) || []).length, 1)
+  assert.equal(events.filter((event) => event.category === 'capital').length, 3)
+  assert.ok(
+    events
+      .filter((event) => event.category === 'capital')
+      .every((event) => event.filings.length === 1 && !event.actualResults),
+  )
+  assert.deepEqual(
+    new Set(events.flatMap((e) => e.filings.map((f) => f.id))),
+    new Set(records.map((f) => f.id)),
+  )
+})

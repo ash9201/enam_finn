@@ -361,6 +361,7 @@
   gap: 4px 12px;
   padding: 2px 0;
   min-width: 0;
+  min-height: 28px;
 }
 .filing-source-link {
   display: flex;
@@ -380,12 +381,6 @@
 .source-reference {
   font-size: 10px;
   color: var(--text-muted);
-}
-.filing-source > .review-toggle {
-  flex-shrink: 0;
-  font-size: 11px;
-  min-height: 28px;
-  text-align: right;
 }
 .filing-source.is-reviewed .original-filing {
   color: var(--text-secondary);
@@ -753,7 +748,7 @@
   .event-body {
     margin-left: 0;
   }
-  .filing-source > .review-toggle {
+  .filing-source {
     min-height: 36px;
   }
   .evidence-source-picker select {

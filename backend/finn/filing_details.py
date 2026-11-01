@@ -20,7 +20,7 @@ from finn.sources import fetch_pdf, public_client, validate_source_url
 from finn.store import open_store
 
 VERSION = "official-filing-narrative-v1"
-DISPLAY_VERSION = "filing-display-v4"
+DISPLAY_VERSION = "filing-display-v5"
 MAX_PAGES = 8
 
 
@@ -54,14 +54,20 @@ def clean_display(text):
 
 
 def concise(text):
-    text = re.sub(r"\s+([,.;])", r"\1", clean_display(text))
-    for match in re.finditer(r"[.!?]\s+(?=[A-Z])", text):
-        prefix = text[: match.start() + 1]
-        if match.start() > 65 and not re.search(r"\b(?:Prof|Mr|Ms|Dr|Rs|[A-Za-z])\.$", prefix):
-            return prefix
-    if len(text) > 450:
-        return text[:450].rsplit(" ", 1)[0] + "…"
-    return text if text.endswith((".", "!", "?", "\u2026")) else text.rsplit(" ", 1)[0] + "\u2026"
+    """Clean source wording without dropping words, sentences or imposing display limits."""
+    return re.sub(r"\s+([,.;])", r"\1", clean_display(text))
+
+
+def complete_passage(text):
+    """A bounded extraction may end mid-sentence; never promote that tail to a claim."""
+    text = concise(text)
+    end = 0
+    for match in re.finditer(r"[.!?](?=\s|$)", text):
+        prefix = text[: match.end()]
+        if not re.search(r"\b(?:Prof|Mr|Ms|Dr|Rs|Ltd|Inc|[A-Za-z])\.$|\bw\.e\.f\.$", prefix, re.I):
+            end = match.end()
+            break
+    return text[:end] if end else None
 
 
 def table_like(text):
@@ -75,6 +81,32 @@ def format_details(row, detail):
     """Presentation-only update from cached, already extracted evidence."""
     result = {**detail, "display_version": DISPLAY_VERSION}
     body, raw = feed_text(row), row["title"].lower()
+    cleaned_feed = clean_display(body)
+    informative_feed = (
+        bool(cleaned_feed)
+        and cleaned_feed.casefold().strip(" .") != raw.strip(" .")
+        and not re.fullmatch(
+            r"Change in Directors/KMP/SMP/Auditor/RTA|General Updates|Financial Results Updates|Audio Recording/Video Recording|Link of Recording|Investor Presentation",
+            cleaned_feed,
+            re.I,
+        )
+    )
+    if informative_feed:
+        # Recover previously clipped summaries from their preserved primary source.
+        result["summary"] = concise(body)
+    elif result.get("summary") and re.search(r"(?:\.{3}|\u2026)$", result["summary"]):
+        # A legacy clipped native excerpt has no safe missing tail to reconstruct.
+        old_prefix = result["summary"].rstrip(".\u2026 ").lower()
+        saved = next(
+            (
+                e["quote"]
+                for e in result.get("evidence", [])
+                if e["kind"] == "official_document"
+                and clean_display(e["quote"]).lower().startswith(old_prefix)
+            ),
+            None,
+        )
+        result["summary"] = complete_passage(saved) if saved else None
     if result.get("summary"):
         result["summary"] = concise(result["summary"])
         if result.get("event_kind") == "scheduled_tenure":
@@ -139,7 +171,7 @@ def format_details(row, detail):
                 ),
                 None,
             )
-            result["summary"] = concise(passage) if passage else None
+            result["summary"] = complete_passage(passage) if passage else None
     if result.get("category") == "results":
         narrative = next(
             (
@@ -150,7 +182,7 @@ def format_details(row, detail):
             None,
         )
         if narrative:
-            result["summary"] = concise(narrative)
+            result["summary"] = complete_passage(narrative)
         if re.search(r"passed an enabling resolution|authoris\w* the issuance", body, re.I):
             result["summary"] = concise(body)
             result["headline"] = "Financial results & debt-issue authorisation"
@@ -163,11 +195,52 @@ def format_details(row, detail):
         result["headline"] = "Use of debt-issue proceeds"
     elif "regulation 52" in raw:
         result["headline"] = "Debt-related financial disclosures"
-    if re.search(r"security cover|regulation 52|utili[sz]ation of issue", raw) and result.get(
-        "event_key"
+    topic = (
+        "security_cover"
+        if "security cover" in raw
+        else "issue_proceeds"
+        if re.search(r"utili[sz]ation of issue", raw)
+        else "debt_disclosures"
+        if "regulation 52" in raw
+        else None
+    )
+    if topic:
+        result.update(event_kind=topic, actual_results=False, category="capital")
+        # A shared attachment/quarter does not make these the same investor development.
+        digest = (result.get("source") or {}).get("sha256")
+        result["event_key"] = f"{topic}:{digest}" if digest else None
+        purpose = {
+            "security_cover": "A security-cover certificate",
+            "issue_proceeds": "A statement on utilisation of issue proceeds",
+            "debt_disclosures": "Debt-related financial disclosures",
+        }[topic]
+        result["summary"] = purpose + (
+            " were filed." if topic == "debt_disclosures" else " was filed."
+        )
+    if result.get("category") == "corporate_action" and str(
+        result.get("event_key") or ""
+    ).startswith("results:"):
+        result.update(event_kind="corporate_action", event_key=None, actual_results=False)
+    if result.get("dividend_reference") and result.get("category") == "corporate_action":
+        result.update(
+            event_kind="dividend",
+            event_key=result["dividend_reference"]["event_key"],
+            actual_results=False,
+        )
+        result["headline"] = (
+            "Interim dividend & record date"
+            if result["dividend_reference"]["type"] == "interim"
+            else "Dividend & record date"
+        )
+        if (result.get("source") or {}).get("method") == "exchange_xml" and str(
+            result.get("limitation") or ""
+        ).startswith("No usable native text"):
+            result["limitation"] = None
+    if (
+        "board meeting" in raw
+        and result.get("category") == "corporate_action"
+        and not result.get("dividend_reference")
     ):
-        result["summary"] = "Supporting debt disclosure within the filed financial-results package."
-    if "board meeting" in raw and result.get("category") == "corporate_action":
         result["headline"] = (
             "Dividend-related board outcome"
             if "dividend" in body.lower()
@@ -179,6 +252,9 @@ def format_details(row, detail):
         result["headline"] = "Debt redemption or payment disclosure"
     if not result.get("summary"):
         result["status"] = "headline_only"
+    result["summary_incomplete"] = bool(
+        result.get("summary") and re.search(r"(?:\.{3}|\u2026)$", result["summary"])
+    )
     return result
 
 
@@ -192,6 +268,8 @@ def source_date(text):
         "%b %d, %Y",
         "%d.%m.%Y",
         "%d/%m/%Y",
+        "%d-%b-%Y",
+        "%d-%B-%Y",
         "%Y-%m-%d",
     ]:
         try:
@@ -201,7 +279,7 @@ def source_date(text):
     return None
 
 
-DATE = r"(?:\d{1,2}\s+[A-Za-z]+\s+\d{4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4}|\d{2}[./]\d{2}[./]\d{4}|\d{4}-\d{2}-\d{2})"
+DATE = r"(?:\d{1,2}\s+[A-Za-z]+\s+\d{4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4}|\d{1,2}-[A-Za-z]+-\d{4}|\d{2}[./]\d{2}[./]\d{4}|\d{4}-\d{2}-\d{2})"
 
 
 def reporting_period(text):
@@ -211,6 +289,69 @@ def reporting_period(text):
         re.I,
     )
     return source_date(match[1]) if match else None
+
+
+def dividend_reference(pages):
+    """Use an explicit dividend type and record date, not a shared results period."""
+    dates, kinds, evidence = set(), set(), []
+    fields = {p.get("field"): p["text"] for p in pages if p.get("field")}
+    if fields:
+        approved = (
+            fields.get(
+                "WhetherDeclarationOfInterimDividendOrRecommendationOfFinalDividendApprovedByTheBoard",
+                "",
+            ).lower()
+            == "yes"
+        )
+        if not approved:
+            return None, []
+        for page in pages:
+            field = page.get("field", "")
+            if re.fullmatch(r"RecordDateOf(?:Interim|Final)Dividend", field):
+                dates.add(source_date(page["text"]))
+            elif field == "FirstTypeOfDividend":
+                kinds.add(page["text"].lower())
+            else:
+                continue
+            evidence.append(
+                {
+                    "quote": page["text"],
+                    "field": field,
+                    "pdf_page": None,
+                    "kind": "official_document",
+                }
+            )
+    else:
+        for page in pages:
+            text = compact(page["text"])
+            types = list(re.finditer(r"\b(interim|final|special)\s+dividend\b", text, re.I))
+            records = list(
+                re.finditer(
+                    r"fixed\s+(" + DATE + r")\s+as\s+(?:the\s+)?[\"“]?record date", text, re.I
+                )
+            )
+            if not types or not records:
+                continue
+            kinds.update(match[1].lower() for match in types)
+            dates.update(source_date(match[1]) for match in records)
+            evidence.extend(
+                {
+                    "quote": match[0],
+                    "field": None,
+                    "pdf_page": page.get("pdf_page"),
+                    "kind": "official_document",
+                }
+                for match in [types[0], *records]
+            )
+    if (
+        len(dates) != 1
+        or None in dates
+        or len(kinds) != 1
+        or not kinds.issubset({"interim", "final", "special"})
+    ):
+        return None, []
+    day, kind = dates.pop(), kinds.pop()
+    return {"record_date": day, "type": kind, "event_key": f"dividend:{kind}:{day}"}, evidence
 
 
 def recording_reference(pages):
@@ -419,7 +560,7 @@ def present(row, *, pages=(), source=None, limitation=None):
         )
     )
     summary = (
-        cleaned if not generic else clean_display(extracted[0]["quote"]) if extracted else None
+        cleaned if not generic else complete_passage(extracted[0]["quote"]) if extracted else None
     )
     if not generic:
         evidence = [
@@ -428,6 +569,31 @@ def present(row, *, pages=(), source=None, limitation=None):
         ]
     else:
         evidence = [{**e, "kind": "official_document"} for e in extracted]
+    topic_pattern = (
+        r"Security Cover Certificate[^.]+\."
+        if "security cover" in raw
+        else r"Statement of Utili[sz]ation of Issue Proceeds.*?for the quarter ended\s*" + DATE
+        if re.search(r"utili[sz]ation of issue", raw)
+        else r"disclosures under Regulation 52.*?for the quarter ended\s*" + DATE
+        if "regulation 52" in raw
+        else None
+    )
+    if topic_pattern:
+        evidence = []
+        for page in context_pages:
+            match = re.search(topic_pattern, compact(page["text"]), re.I)
+            if match:
+                evidence.append(
+                    {
+                        "quote": match[0],
+                        "pdf_page": page.get("pdf_page"),
+                        "field": page.get("field"),
+                        "kind": "official_document",
+                    }
+                )
+                break
+        if not evidence:
+            evidence = [{"quote": feed, "pdf_page": None, "field": None, "kind": "exchange_feed"}]
     entity = re.search(r"\bDIN\s*[:\-]?\s*(\d{8})", body, re.I)
     effective = re.search(
         r"(?:Company on|effective (?:from|on)|cessation.{0,15})\s*(" + DATE + ")", body, re.I
@@ -465,6 +631,10 @@ def present(row, *, pages=(), source=None, limitation=None):
     ) and not re.search(r"transcript|investor presentation", feed, re.I):
         reference, reference_evidence = recording_reference(context_pages)
         evidence = [*reference_evidence, *evidence]
+    dividend, dividend_evidence = (
+        dividend_reference(context_pages) if category == "corporate_action" else (None, [])
+    )
+    evidence = [*dividend_evidence, *evidence]
     return {
         "version": VERSION,
         "input_hash": input_hash(row),
@@ -475,7 +645,7 @@ def present(row, *, pages=(), source=None, limitation=None):
         if summary
         else "headline_only",
         "headline": title,
-        "summary": summary[:750] if summary else None,
+        "summary": summary,
         "category": category,
         "priority": priority,
         "event_kind": event_kind,
@@ -484,6 +654,8 @@ def present(row, *, pages=(), source=None, limitation=None):
         "effective_date": effective_date if scheduled and single_person else None,
         "additional_details": list(dict.fromkeys(additional)),
         "recording_reference": reference,
+        "dividend_reference": dividend,
+        "topic_version": 1,
         "event_evidence_version": 1,
         "actual_results": actual_results,
         "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation."
@@ -534,7 +706,7 @@ def _official_pages(client, url, content_cache=None):
             field = element.tag.rsplit("}", 1)[-1]
             value = compact(" ".join(element.itertext())) if not len(element) else ""
             if value and re.search(
-                r"Remarks|Details|TextBlock|Reason|NameOfDesignatedPerson|DesignationOfDesignatedPerson|EffectiveDate|DateOfCallFor(?:Audio|Video)Recording|WeblinkOf(?:Audio|Video)Recording",
+                r"Remarks|Details|TextBlock|Reason|NameOfDesignatedPerson|DesignationOfDesignatedPerson|EffectiveDate|DateOfCallFor(?:Audio|Video)Recording|WeblinkOf(?:Audio|Video)Recording|Dividend",
                 field,
             ):
                 pages.append({"field": field, "text": value[:8000]})
@@ -583,7 +755,13 @@ def needs_extraction(row):
 
 
 def enrich_filings(
-    store, *, limit=6, symbol=None, retry_unavailable=False, refresh_event_evidence=False
+    store,
+    *,
+    limit=6,
+    symbol=None,
+    retry_unavailable=False,
+    refresh_event_evidence=False,
+    refresh_topics=False,
 ):
     filters = {"order": "published_at.desc", "limit": 1000}
     if symbol:
@@ -615,12 +793,15 @@ def enrich_filings(
     pending = [
         row
         for row in rows
-        if not refresh_event_evidence
+        if not (refresh_event_evidence or refresh_topics)
         and (
             needs_extraction(row)
             or retry_unavailable
             and (row.get("enrichment") or {}).get("limitation")
         )
+        or refresh_topics
+        and not (row.get("enrichment") or {}).get("topic_version")
+        and row["category"] in {"results", "capital", "corporate_action"}
         or refresh_event_evidence
         and not (row.get("enrichment") or {}).get("event_evidence_version")
         and (
@@ -630,31 +811,57 @@ def enrich_filings(
     ]
     # Material/uncertain items before routine work; time breaks priority ties.
     pending.sort(key=lambda row: -row["priority"])
-    updated, unavailable, downloads = 0, 0, 0
+    updated, unavailable, downloads, reused = 0, 0, 0, 0
     download_cache, content_cache, stored_hashes = {}, {}, set()
     with public_client() as client:
         for row in pending[: max(0, min(limit, 100))]:
             source, pages, limitation = None, [], None
             if row["priority"] > 0:
                 try:
-                    if row["source_url"] not in download_cache:
+                    previous = (row.get("enrichment") or {}).get("source") or {}
+                    cached = (
+                        refresh_topics
+                        and previous.get("method") == "native_pdf_text"
+                        and previous.get("sha256")
+                    )
+                    if cached:
+                        digest = previous["sha256"]
+                        if digest not in content_cache:
+                            data = store.get_pdf(f"filings/{row['symbol']}/{digest}.pdf", digest)
+                            reader = PdfReader(io.BytesIO(data))
+                            pages = [
+                                {"pdf_page": i + 1, "text": reader.pages[i].extract_text() or ""}
+                                for i in range(min(MAX_PAGES, len(reader.pages)))
+                            ]
+                            content_cache[digest] = (data, pages, previous)
+                        data, pages, _ = content_cache[digest]
+                        source = previous  # Extraction time changes; original fetch time does not.
+                        reused += 1
+                    elif row["source_url"] not in download_cache:
                         download_cache[row["source_url"]] = official_pages(
                             client, row["source_url"], content_cache
                         )
                         downloads += 1
-                    data, pages, source = download_cache[row["source_url"]]
-                    source = {
-                        **source,
-                        "sha256": hashlib.sha256(data).hexdigest(),
-                        "fetched_at": now(),
-                    }
+                    if not cached:
+                        data, pages, source = download_cache[row["source_url"]]
+                        source = {
+                            **source,
+                            "sha256": hashlib.sha256(data).hexdigest(),
+                            "fetched_at": now(),
+                        }
                     if (
-                        source["method"] == "native_pdf_text"
+                        not cached
+                        and source["method"] == "native_pdf_text"
                         and source["sha256"] not in stored_hashes
                     ):
                         store.put_pdf(f"filings/{row['symbol']}/{source['sha256']}.pdf", data)
                         stored_hashes.add(source["sha256"])
-                    if not any(len(compact(p["text"])) > 50 for p in pages):
+                    usable = (
+                        bool(pages)
+                        if source["method"] == "exchange_xml"
+                        else any(len(compact(p["text"])) > 50 for p in pages)
+                    )
+                    if not usable:
                         limitation = "No usable native text was extracted; no OCR or inferred details were substituted."
                 except Exception:
                     unavailable += 1
@@ -676,6 +883,7 @@ def enrich_filings(
         "updated": updated,
         "unavailable": unavailable,
         "downloads": downloads,
+        "reused_documents": reused,
         "presentation_refreshed": refreshed,
         "pending": max(0, len(pending) - updated),
     }
@@ -686,6 +894,11 @@ def main():
     parser.add_argument("--limit", type=int, default=30)
     parser.add_argument("--symbol")
     parser.add_argument("--retry-unavailable", action="store_true")
+    parser.add_argument(
+        "--refresh-topics",
+        action="store_true",
+        help="Reprocess cached results/dividend/debt evidence without re-downloading saved PDFs.",
+    )
     parser.add_argument(
         "--refresh-event-evidence",
         action="store_true",
@@ -702,6 +915,7 @@ def main():
                     symbol=args.symbol,
                     retry_unavailable=args.retry_unavailable,
                     refresh_event_evidence=args.refresh_event_evidence,
+                    refresh_topics=args.refresh_topics,
                 )
             )
         )

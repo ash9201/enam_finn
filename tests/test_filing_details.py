@@ -6,7 +6,9 @@ from finn.briefing import classify_filing
 from finn.filing_details import (
     DISPLAY_VERSION,
     VERSION,
+    complete_passage,
     concise,
+    dividend_reference,
     enrich_filings,
     format_details,
     input_hash,
@@ -204,10 +206,105 @@ def test_presentation_update_reuses_cited_text_and_preserves_source_check_time()
     assert refreshed["display_version"] == DISPLAY_VERSION
 
 
-def test_concise_summary_preserves_names_and_uses_visible_truncation():
+def test_summary_cleaning_preserves_complete_text_without_display_limits():
     text = "Prof. Rajiv Lal completed a scheduled term as Independent Director on October 31, 2026. Accordingly, another role ended."
-    assert concise(text).startswith("Prof. Rajiv Lal") and "Accordingly" not in concise(text)
-    assert concise("A " * 350).endswith("…")
+    assert concise(text) == text
+    assert concise("A " * 350) == ("A " * 350).strip()
+    assert concise("Outcome of Board Meeting held on 31-Oct-2026 for Dividend").endswith(
+        "for Dividend"
+    )
+    assert "Accordingly" not in complete_passage(text)
+    assert (
+        complete_passage("Approved the financial results. Further attachments are encl")
+        == "Approved the financial results."
+    )
+    assert complete_passage("Only a partial phrase without a sentence") is None
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "Outcome of Board Meeting held on 31-Oct-2026 for Dividend",
+        "General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September 2026",
+    ],
+)
+def test_clipped_legacy_summary_recovers_from_preserved_feed_without_fetching(source):
+    row = filing(source, title="General Updates")
+    original = present(row)
+    original["summary"] = source.rsplit(" ", 1)[0] + "\u2026"
+    updated = format_details(row, original)
+    assert updated["summary"] == source
+    assert not updated["summary_incomplete"]
+    incomplete = format_details({**row, "description": source + "..."}, original)
+    assert incomplete["summary"].endswith("...") and incomplete["summary_incomplete"]
+
+
+def test_debt_topics_are_distinct_from_results_and_each_other():
+    keys = []
+    for title in [
+        "Security Cover",
+        "Statement of utilization of issue proceeds",
+        "Disclosure under Regulation 52(4)",
+    ]:
+        row = filing(title)
+        original = {
+            **present(row),
+            "period_end": "2026-09-30",
+            "event_key": "results:2026-09-30",
+            "actual_results": True,
+            "source": {"sha256": "a" * 64},
+        }
+        result = format_details(row, original)
+        assert not result["actual_results"] and result["category"] == "capital"
+        assert "results:" not in result["event_key"]
+        assert "Supporting debt disclosure within" not in result["summary"]
+        keys.append(result["event_key"])
+    assert len(set(keys)) == 3
+
+
+def test_dividend_link_requires_type_and_record_date_and_keeps_exact_support():
+    text = 'The Board declared the First Interim Dividend. The Company has fixed 6 November 2026 as the "record date".'
+    reference, quotes = dividend_reference([{"pdf_page": 1, "text": text}])
+    assert reference["event_key"] == "dividend:interim:2026-11-06"
+    assert all(q["quote"] in text and q["pdf_page"] == 1 for q in quotes)
+    fields = [
+        {
+            "field": "WhetherDeclarationOfInterimDividendOrRecommendationOfFinalDividendApprovedByTheBoard",
+            "text": "Yes",
+        },
+        {"field": "FirstTypeOfDividend", "text": "Interim"},
+        {"field": "RecordDateOfInterimDividend", "text": "2026-11-06"},
+    ]
+    assert dividend_reference(fields)[0] == reference
+    assert dividend_reference(fields[:-1])[0] is None
+    assert dividend_reference([*fields, {**fields[-1], "text": "2026-12-06"}])[0] is None
+    assert dividend_reference([{**fields[0], "text": "No"}, *fields[1:]])[0] is None
+
+
+def test_short_structured_fields_are_usable_source_data(monkeypatch):
+    row = filing(
+        "Outcome of Board Meeting held on 31-Oct-2026 for Dividend",
+        title="Outcome of Board Meeting-XBRL",
+        source_url="https://nsearchives.nseindia.com/test.xml",
+    )
+    fields = [
+        {
+            "field": "WhetherDeclarationOfInterimDividendOrRecommendationOfFinalDividendApprovedByTheBoard",
+            "text": "Yes",
+        },
+        {"field": "FirstTypeOfDividend", "text": "Interim"},
+        {"field": "RecordDateOfInterimDividend", "text": "2026-11-06"},
+    ]
+    monkeypatch.setattr(
+        "finn.filing_details.official_pages",
+        lambda *args: (b"<xml/>", fields, {"url": row["source_url"], "method": "exchange_xml"}),
+    )
+    store = Store([row])
+    assert enrich_filings(store)["unavailable"] == 0
+    detail = store.patches[-1]["enrichment"]
+    assert detail["dividend_reference"]["record_date"] == "2026-11-06"
+    assert detail["limitation"] is None
+    assert not needs_extraction({**row, "enrichment": detail})
 
 
 @pytest.mark.parametrize(
@@ -246,6 +343,49 @@ def test_unchanged_cached_filings_do_not_download_or_repeat_extraction(monkeypat
         lambda *args: pytest.fail("Repeated unchanged document extraction"),
     )
     assert enrich_filings(store)["downloads"] == 0 and store.patches == []
+
+
+def test_topic_refresh_reuses_shared_private_pdf_and_original_fetch_time(monkeypatch):
+    import hashlib
+    import io
+
+    from pypdf import PdfWriter
+
+    writer = PdfWriter()
+    writer.add_blank_page(width=100, height=100)
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    data = buffer.getvalue()
+    digest = hashlib.sha256(data).hexdigest()
+    source = {
+        "method": "native_pdf_text",
+        "sha256": digest,
+        "url": "https://nsearchives.nseindia.com/test.pdf",
+        "fetched_at": "2026-10-31T10:00:00+00:00",
+        "pages_scanned": 1,
+        "total_pages": 1,
+    }
+    rows = [
+        filing(title, id=str(i))
+        for i, title in enumerate(["Security Cover", "Statement of utilization of issue proceeds"])
+    ]
+    for row in rows:
+        row["enrichment"] = format_details(row, present(row, source=source))
+        row["enrichment"].pop("topic_version")
+    store, reads = Store(rows), []
+    store.get_pdf = lambda *args: reads.append(args) or data
+    store.put_pdf = lambda *args: pytest.fail("Cached PDFs must not be uploaded again")
+    monkeypatch.setattr(
+        "finn.filing_details.official_pages",
+        lambda *args: pytest.fail("Unnecessary source download"),
+    )
+    result = enrich_filings(store, refresh_topics=True)
+    assert result["updated"] == 2 and result["downloads"] == 0 and result["reused_documents"] == 2
+    assert len(reads) == 1
+    assert all(
+        update["enrichment"]["source"]["fetched_at"] == source["fetched_at"]
+        for update in store.patches
+    )
 
 
 def test_download_failure_keeps_original_and_honest_headline_fallback(monkeypatch):

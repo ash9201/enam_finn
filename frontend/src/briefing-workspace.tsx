@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import './briefing-workspace.css'
 import BriefingEvidence from './briefing-evidence'
 import {
@@ -11,7 +11,6 @@ import {
   dateBounds,
   eventTone,
   groupEvents,
-  makeEvent,
   presentation,
   primaryAction,
   selectFilings,
@@ -76,8 +75,8 @@ export default function BriefingWorkspace({
   const [undo, setUndo] = useState<{
     ids: string[]
     previous: Set<string>
-    reviewed: boolean
   } | null>(null)
+  const eventReviews = useRef(new Map<string, { ids: string[]; previous: Set<string> }>())
   const reviewed = new Set(read)
   const matching = selectFilings(filings, filters, reviewed)
   const events = groupEvents(matching)
@@ -92,7 +91,7 @@ export default function BriefingWorkspace({
   const updateFilter = (key: keyof FilingFilters, value: string) =>
     setFilters((previous) => ({ ...previous, [key]: value }))
   function changeReview(ids: string[], value: boolean) {
-    setUndo({ ids, previous: new Set(read), reviewed: value })
+    setUndo({ ids, previous: new Set(read) })
     onReview(ids, value)
   }
   function undoReview() {
@@ -108,7 +107,33 @@ export default function BriefingWorkspace({
     setUndo(null)
   }
 
-  function sourceRow(filing: Filing, controls: boolean) {
+  function reviewEvent(event: FilingEvent, outstanding: number) {
+    const ids = event.filings.map((filing) => filing.id)
+    if (outstanding) {
+      eventReviews.current.set(event.key, { ids, previous: new Set(read) })
+      changeReview(ids, true)
+      return
+    }
+    const saved = eventReviews.current.get(event.key)
+    if (!saved) {
+      changeReview(ids, false)
+      return
+    }
+    // Restore this event's last action, even after another event was reviewed.
+    // Retain its original scope if review filters previously hid some sources.
+    const scope = saved.ids.filter((id) => ids.includes(id))
+    setUndo({ ids: scope, previous: new Set(read) })
+    onReview(
+      scope.filter((id) => saved.previous.has(id)),
+      true,
+    )
+    onReview(
+      scope.filter((id) => !saved.previous.has(id)),
+      false,
+    )
+  }
+
+  function sourceRow(filing: Filing) {
     const detail = presentation(filing),
       isReviewed = reviewed.has(filing.id)
     const page = detail.evidence.find((e) => e.pdf_page)?.pdf_page
@@ -144,16 +169,6 @@ export default function BriefingWorkspace({
             {page ? ` · p. ${page}` : ''}
           </span>
         </div>
-        {controls && (
-          <button
-            className="review-toggle"
-            aria-pressed={isReviewed}
-            aria-label={`${isReviewed ? 'Mark unreviewed' : 'Mark reviewed'}: ${label}`}
-            onClick={() => changeReview([filing.id], !isReviewed)}
-          >
-            {isReviewed ? '✓ Reviewed · Undo' : 'Mark reviewed'}
-          </button>
-        )}
       </li>
     )
   }
@@ -199,11 +214,7 @@ export default function BriefingWorkspace({
                 </span>
               </span>
               <span className="event-snippet">
-                {explanation
-                  ? explanation.length > 170
-                    ? explanation.slice(0, 170).replace(/\s+\S*$/, '') + '…'
-                    : explanation
-                  : 'Headline only · verified event details are not yet available.'}
+                {explanation || 'Headline only · verified event details are not yet available.'}
               </span>
             </span>
           </summary>
@@ -212,6 +223,12 @@ export default function BriefingWorkspace({
               {explanation ||
                 'Only the exchange headline is available. Detailed event facts have not been extracted.'}
             </p>
+            {event.filings.some((filing) => presentation(filing).summary_incomplete) && (
+              <p className="source-check-note">
+                The available source excerpt is incomplete. Open the original filing for full
+                context.
+              </p>
+            )}
             <div className="event-actions">
               {action && (
                 <a
@@ -229,24 +246,15 @@ export default function BriefingWorkspace({
               <button
                 className="review-toggle"
                 aria-pressed={!outstanding}
-                onClick={() =>
-                  changeReview(
-                    event.filings.map((f) => f.id),
-                    !!outstanding,
-                  )
-                }
+                onClick={() => reviewEvent(event, outstanding)}
               >
-                {outstanding
-                  ? event.filings.length > 1
-                    ? 'Review all'
-                    : 'Mark reviewed'
-                  : '✓ Reviewed · Undo'}
+                {outstanding ? 'Mark reviewed' : '✓ Reviewed · Undo'}
               </button>
             </div>
             <div className="official-sources">
               <h4>Official sources</h4>
               <ul className="event-sources" aria-label="Original announcements">
-                {eventSources(event).map((filing) => sourceRow(filing, event.filings.length > 1))}
+                {eventSources(event).map(sourceRow)}
               </ul>
             </div>
             <BriefingEvidence event={event} />
@@ -471,8 +479,8 @@ export default function BriefingWorkspace({
       {undo && (
         <div className="review-feedback" role="status">
           <span>
-            {undo.ids.length} {undo.ids.length === 1 ? 'filing' : 'filings'} marked{' '}
-            {undo.reviewed ? 'reviewed' : 'unreviewed'}.
+            Review state updated for {undo.ids.length}{' '}
+            {undo.ids.length === 1 ? 'filing' : 'filings'}.
           </span>
           <button className="text-button" onClick={undoReview}>
             Undo last change
@@ -523,9 +531,10 @@ export default function BriefingWorkspace({
           </div>
           {view === 'company'
             ? companyGroups(events, 'main')
-            : matching
-                .filter((f) => includeRoutine || presentation(f).priority > 0)
-                .map((f) => eventRow(makeEvent([f], f.id), true))}
+            : [...events]
+                .filter((event) => includeRoutine || event.priority > 0)
+                .sort((a, b) => Date.parse(b.newest) - Date.parse(a.newest))
+                .map((event) => eventRow(event, true))}
           {bounds.valid &&
             (view === 'company'
               ? !events.length

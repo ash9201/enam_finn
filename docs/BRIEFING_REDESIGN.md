@@ -187,3 +187,71 @@ overflow, source selection/PDF-page links, per-filing review, Review all/undo, u
 filters/chronology and keyboard expansion. Rendered KPIT, NTPC and Reliance events
 were inspected, including mobile source wrapping. Build and credential-asset scan
 pass. No model jobs, migrations, environment changes or new dependencies are required.
+
+## Event review and topic corrections
+
+The next focused change keeps the visual layout. Every event now has a single
+**Mark reviewed / Reviewed · Undo** control; source rows contain links only. Review
+still persists the original filing IDs in `finn-read-v1`. Immediate event undo
+restores the previous mixed state, including filings already reviewed before the
+action. The existing last-action undo remains available. After reload the saved
+review state remains; a reviewed event can be marked unreviewed. Company counts
+and filters continue to count underlying filings. Chronological activity reuses
+the same event groups, sorted by newest publication, so it also reviews an event
+as a whole rather than offering different per-source review semantics.
+
+The short NTPC descriptions were not incomplete at source. The formatter removed
+the last word of unpunctuated text and capped descriptions at 450 characters.
+It also inherited a 750-character initial-summary cap. These display limits are
+removed. Formatting reuses the complete preserved exchange feed, recovering
+**for Dividend** and **30 September 2026** without inventing words or fetching
+new documents. Collapsed previews use the existing CSS line clamp; expanded
+paragraphs have no character truncation. A bounded native excerpt contributes
+its first complete sentence, avoiding a cropped trailing phrase. If the primary
+source itself ends in ellipsis, it stays incomplete and carries an explicit note.
+Extraction download/page limits remain in place; this is not a full-document or
+financial-table interpretation change.
+
+NTPC's shared 30-page attachment really includes several developments. Its cover
+letter separately lists results, interim dividend/record date, debt disclosures,
+issue-proceeds statements and security-cover certificates. Sharing that packet
+does not make them one reviewable investor event. The 12 original filings now
+form eight events:
+
+| Development | Sources | Relationship |
+|---|---:|---|
+| Financial results | 2 | Actual results filings for the same reported period |
+| Interim dividend and record date | 3 | PDF declaration, record-date PDF and approved XML dividend share the explicit interim type and 6 November 2026 record date |
+| Issue-proceeds statement | 1 | Separate subject, not a claim of new funds raised |
+| Security-cover certificate | 1 | Separate subject, with no inferred coverage ratio |
+| Debt-related financial disclosures | 1 | Separate subject, no extracted debt-performance conclusion |
+| Operational/financial snapshot | 1 | Remains a separate business update |
+| Solar commercial operation | 1 | Remains separate |
+| Earnings-call recording | 2 | Existing verified call-date/recording-link match |
+
+Debt-topic duplicate grouping additionally requires an identical document hash;
+the same quarter/subject alone cannot merge different certificates or revisions.
+Dividend grouping does not use board/publication date or a shared results period.
+It abstains on missing/conflicting types or record dates, and requires the XML's
+explicit approval. The dividend amount comes from its substantive declaration;
+record date comes from the primary references. No payment-date promise or table
+conclusion is inferred. The original filing IDs, descriptions, links, timestamps,
+source hashes and original PDF fetch times were preserved.
+
+The existing generic ingestion pipeline extracts these references for new filings.
+For the cached NTPC records a bounded upgrade processed eight sources, reusing
+the stored PDF's native extraction across seven rows and fetching one XML. It
+did not rerun price, research, model or financial-result pipelines. Cached summary
+formatting required no source downloads. Operators can repeat the idempotent upgrade:
+
+```powershell
+python -m finn.filing_details --symbol NTPC --refresh-topics --limit 8
+```
+
+Validation covers 27 targeted filing-detail cases and 16 frontend model cases,
+including full-word restoration, original incomplete text, safe native fragments,
+distinct topics, reference conflicts and shared PDF reuse. Four browser scenes
+cover desktop/mobile in both themes, the affected full descriptions, event-only
+review, counts, original links, evidence inspection, chronological grouping and
+legacy mixed-state undo/reload. No new migration, deployment setting or dependency
+is required. Existing research/retrieval and financial calculations are unchanged.

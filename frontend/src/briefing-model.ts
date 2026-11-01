@@ -17,6 +17,8 @@ export type FilingDetails = {
   effective_date?: string | null
   additional_details?: string[]
   recording_reference?: { call_date: string; url: string; kind: string; event_key: string } | null
+  dividend_reference?: { record_date: string; type: string; event_key: string } | null
+  summary_incomplete?: boolean
   actual_results: boolean
   interpretation: string | null
   evidence: FilingEvidence[]
@@ -177,6 +179,7 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
   )
   const lead =
     ordered.find((f) => presentation(f).actual_results && presentation(f).category === 'results') ||
+    ordered.find((f) => presentation(f).event_kind === 'dividend' && /^dividend$/i.test(f.title)) ||
     ordered.find((f) => presentation(f).recording_reference && presentation(f).period_end) ||
     ordered[0]
   const detail = presentation(lead)
@@ -184,10 +187,7 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
     key,
     symbol: lead.symbol,
     filings: [...filings].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)),
-    title:
-      filings.length > 1 && detail.event_kind === 'results'
-        ? detail.headline + ' & related disclosures'
-        : detail.headline,
+    title: detail.headline,
     summary: detail.summary,
     priority: Math.max(...filings.map((f) => presentation(f).priority)),
     category:
@@ -222,6 +222,19 @@ const normalized = (text: string) =>
     .trim()
 
 export function eventExplanation(event: FilingEvent) {
+  const dividend = event.filings.map((f) => presentation(f).dividend_reference).find(Boolean)
+  if (dividend) {
+    if (/record date/i.test(event.summary || '')) return event.summary!
+    const date = new Intl.DateTimeFormat('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(dividend.record_date + 'T00:00:00Z'))
+    return event.summary
+      ? `${event.summary} The record date is ${date}.`
+      : `The dividend record date is ${date}.`
+  }
   const candidates = [
     event.summary,
     ...event.filings.flatMap((filing) => {
