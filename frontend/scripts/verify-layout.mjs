@@ -146,7 +146,9 @@ try {
         'true',
       )
       await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
-      await expect(page.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue('3')
+      await expect(page.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue(
+        '3',
+      )
       await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
       await activeView().evaluate((el) => (el.scrollTop = 0))
       await page.screenshot({ path: `${output}/${viewport.width}-${theme}-briefing.png` })
