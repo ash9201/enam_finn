@@ -39,7 +39,7 @@ def with_performance(result):
                 continue
             period = "Year on year" if kind == "yoy" else "Quarter on quarter"
             statement = period + ", " + "; ".join(parts) + "."
-            if directions.get("Revenue") == 1 and any(
+            if directions.get("Revenue") == 1 and all(
                 directions.get(m) == -1 for m in ["PBT", "PAT"]
             ):
                 statement += " Higher revenue did not translate into higher reported profits."
