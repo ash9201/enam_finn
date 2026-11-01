@@ -3,6 +3,7 @@
   color-scheme: light;
   --canvas: #f6f5f0;
   --surface: #fffefa;
+  --surface-elevated: var(--surface);
   --surface-input: #f8f8f2;
   --surface-soft: #f0f2e9;
   --surface-tint: #edf1e6;
@@ -38,37 +39,40 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --canvas: #1c211c;
-  --surface: #252b24;
-  --surface-input: #20261f;
-  --surface-soft: #2c3428;
-  --surface-tint: #2b3527;
-  --surface-read: #222820;
-  --text: #e7eadd;
-  --text-secondary: #c5cfba;
-  --text-muted: #adb6a4;
-  --border: #46513e;
-  --divider: #3d4737;
-  --control-border: #849477;
-  --accent: #b1cc9c;
-  --accent-strong: #bed5b0;
-  --accent-fill: #3a4932;
-  --accent-border: #829d70;
-  --gold: #d2b57d;
-  --brand-mark: #d2b57d;
-  --focus: #d2b57d;
-  --button-bg: #b1c79c;
-  --button-text: #182319;
-  --positive: #a3ce8b;
-  --negative: #efa88e;
-  --warning-bg: #382f21;
-  --warning-text: #e0c289;
-  --warning-border: #987b4f;
-  --success-bg: #253c30;
-  --success-text: #a9d2b6;
-  --nav-bg: #252b24f5;
-  --shadow: #00000040;
-  --backdrop: #080c0ac4;
+  /* Neutral surface hierarchy; blue fills are reserved for active interactions. */
+  --canvas: #080c12;
+  --surface: #131a24;
+  --surface-elevated: #1b2635;
+  --surface-input: #0f1722;
+  --surface-soft: var(--surface-elevated);
+  --surface-tint: #172333;
+  --surface-read: #101721;
+  --text: #e8eef7;
+  --text-secondary: #b0bdd0;
+  --text-muted: #92a2b9;
+  --border: #293446;
+  --divider: #222d3d;
+  --control-border: #60728c;
+  --accent: #719eff;
+  --accent-strong: #99baff;
+  --accent-fill: #1b2b45;
+  --accent-border: #6287c7;
+  /* Legacy editorial/brand tokens remain neutral or blue, never status green. */
+  --gold: #b2c3df;
+  --brand-mark: #719eff;
+  --focus: #91b3ff;
+  --button-bg: #719eff;
+  --button-text: #0b1424;
+  --positive: #79c9a1;
+  --negative: #f19a9e;
+  --warning-bg: #30271b;
+  --warning-text: #e7c38c;
+  --warning-border: #947b50;
+  --success-bg: #182d29;
+  --success-text: #91cfb2;
+  --nav-bg: #131a24f5;
+  --shadow: #00000050;
+  --backdrop: #03070dc9;
 }
 
 body {

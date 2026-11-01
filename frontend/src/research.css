@@ -66,7 +66,7 @@
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--surface);
+  background: var(--surface-elevated);
 }
 .company-suggestions li {
   display: flex;
@@ -664,7 +664,7 @@
 .evidence-dialog {
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--surface);
+  background: var(--surface-elevated);
   color: var(--text);
   max-width: 550px;
   width: min(550px, 100%);
@@ -710,7 +710,7 @@
 .evidence-bottom {
   padding: 16px 28px max(18px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--divider);
-  background: var(--surface);
+  background: var(--surface-elevated);
   flex-shrink: 0;
 }
 .evidence-ask {

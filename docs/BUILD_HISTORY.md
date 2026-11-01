@@ -1,5 +1,19 @@
 # Build history summary
 
+### Charcoal / blue dark palette (2 November)
+
+- Refreshed shared dark tokens with near-black canvas, charcoal/slate surfaces,
+  soft off-white text, muted blue interactions and subtle dividers. Green/red
+  remain financial/status colours; warning states retain restrained amber.
+- Added a shared elevated-surface token for evidence panels and company options;
+  its light value aliases the original surface. All existing light token values
+  are unchanged. No application behaviour, layout, backend or AI changes.
+- Updated the theme checks for the current Research/Portfolio UI and added real
+  published NTPC tables, figure evidence and company-option states. All 56 scenes
+  pass across desktop/mobile, both themes, contrast, focus, persistence, OS/cross-tab
+  changes and startup before React. Financial cache reads are frozen across scenes;
+  simulated progress/errors do not send research/model requests.
+
 ### Portfolio watchlist redesign (2 November)
 
 - Replaced oversized cards with a sortable desktop table and mobile rows using

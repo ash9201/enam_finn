@@ -5,13 +5,22 @@ import { fileURLToPath } from 'node:url'
 const base = process.env.FINN_BROWSER_URL || 'http://127.0.0.1:4173'
 const output = fileURLToPath(new URL('../../artifacts/theme-browser/', import.meta.url))
 await mkdir(output, { recursive: true })
-for (const name of ['style.css', 'briefing.css', 'research.css', 'layout.css']) {
+for (const name of [
+  'style.css',
+  'briefing.css',
+  'research.css',
+  'layout.css',
+  'briefing-workspace.css',
+  'portfolio-workspace.css',
+  'financial-results.css',
+]) {
   const css = await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8')
   if (/#[\da-f]{3,8}\b|\brgba?\(/i.test(css))
     throw new Error(`${name} has a colour outside shared tokens.`)
 }
 const browser = await chromium.launch({ headless: true })
 const checks = []
+const financialCache = new Map()
 
 async function theme(page, value) {
   await expect(page.locator('html')).toHaveAttribute('data-theme', value)
@@ -71,11 +80,18 @@ async function audit(page, scene) {
     return {
       text_nodes: count,
       failures,
-      overflow: document.documentElement.scrollWidth > innerWidth,
+      // Financial figures deliberately scroll inside their own region; audit the
+      // outer page containers rather than the table's scrollable descendants.
+      overflow: [document.body, ...document.querySelectorAll('.app-view:not([hidden])')].some(
+        (element) => element.scrollWidth > element.clientWidth + 1,
+      ),
     }
   })
-  if (result.overflow || result.failures.length)
+  if (result.overflow || result.failures.length) {
+    await page.screenshot({ path: `${output}/failure.png` })
+
     throw new Error(`${scene}: ${JSON.stringify(result)}`)
+  }
   checks.push({ scene, ...result })
 }
 
@@ -104,6 +120,7 @@ try {
       await theme(page, choice)
       await audit(page, `${size}-${choice}-loading`)
       releaseData()
+      await page.getByRole('button', { name: '7 days', exact: true }).click()
       await page.locator('.company-group').first().waitFor()
       await page.getByRole('button', { name: /Alert settings/ }).click()
       await page.getByLabel('Daily price move threshold').fill('3')
@@ -121,11 +138,10 @@ try {
       }
       await audit(page, `${size}-${choice}-routine`)
       await page.evaluate(() => window.scrollTo(0, 0))
-      await page.screenshot({ path: `${output}/${size}-${choice}-top.png` })
-      await page.screenshot({ path: `${output}/${size}-${choice}-briefing.png`, fullPage: true })
 
       await page
         .getByRole('navigation', { name: 'Main navigation' })
+        .filter({ visible: true })
         .getByRole('link', { name: 'Portfolio' })
         .click()
       await theme(page, choice)
@@ -141,7 +157,8 @@ try {
           throw new Error('Financial indicators lost their distinct colours.')
       }
       await audit(page, `${size}-${choice}-portfolio`)
-      await page.screenshot({ path: `${output}/${size}-${choice}-portfolio.png`, fullPage: true })
+      if (choice === 'dark')
+        await page.screenshot({ path: `${output}/${size}-${choice}-portfolio.png` })
 
       await page.goto(`${base}/?view=research&symbol=INFY`, { waitUntil: 'networkidle' })
       await page.locator('.answer-panel').waitFor()
@@ -149,9 +166,40 @@ try {
       await page.locator('.citation-button').first().click()
       await page.getByRole('dialog').waitFor()
       await audit(page, `${size}-${choice}-evidence`)
-      await page.screenshot({ path: `${output}/${size}-${choice}-evidence.png` })
+      if (choice === 'dark')
+        await page.screenshot({ path: `${output}/${size}-${choice}-evidence.png` })
       await page.getByRole('button', { name: 'Close evidence' }).click()
-      await page.screenshot({ path: `${output}/${size}-${choice}-research.png`, fullPage: true })
+      // Read-only, real published quarterly figures, frozen once across themes.
+      await context.route('**/rest/v1/finn_research_cache?**', async (route) => {
+        const request = route.request()
+        if (!financialCache.has(request.url())) {
+          const response = await fetch(request.url(), { headers: request.headers() })
+          if (!response.ok)
+            throw new Error('Published financial cache unavailable for theme review.')
+          financialCache.set(request.url(), await response.json())
+        }
+        return route.fulfill({
+          json: financialCache.get(request.url()),
+          headers: { 'Access-Control-Allow-Origin': '*' },
+        })
+      })
+      await page.goto(`${base}/?view=research&symbol=NTPC&analysis=results`)
+      await expect(page.locator('.financial-results')).toHaveCount(1)
+      await audit(page, `${size}-${choice}-financial-table`)
+      await page.locator('.financial-number').first().click()
+      await expect(page.getByRole('dialog')).toBeVisible()
+      await audit(page, `${size}-${choice}-financial-evidence`)
+      if (size === 'desktop')
+        await page.screenshot({ path: `${output}/${choice}-financial-evidence.png` })
+      await page.getByRole('button', { name: 'Close evidence' }).click()
+      if (size === 'desktop')
+        await page.screenshot({ path: `${output}/${choice}-financial-table.png` })
+      await page.getByRole('button', { name: 'Change company', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Find a company' }).fill('NTPC')
+      await page.locator('.company-suggestions [role="option"]').first().waitFor()
+      await page.getByRole('combobox', { name: 'Find a company' }).press('ArrowDown')
+      await audit(page, `${size}-${choice}-company-options`)
+      await page.getByRole('combobox', { name: 'Find a company' }).press('Escape')
       // Simulated transport states only; no model/backend request is sent.
       let fail = false
       const cors = {
@@ -183,13 +231,15 @@ try {
           ),
         }),
       )
+      await page
+        .getByRole('textbox', { name: 'Your question' })
+        .fill('How is management describing current demand?')
       await page.getByRole('button', { name: 'Investigate', exact: true }).click()
       await page.locator('.research-progress').waitFor()
       await audit(page, `${size}-${choice}-research-progress`)
       fail = true
       await page.getByRole('alert').waitFor({ timeout: 15000 })
       await audit(page, `${size}-${choice}-research-error`)
-      await page.screenshot({ path: `${output}/${size}-${choice}-error.png`, fullPage: true })
 
       await page.route('**/health/live', (route) =>
         route.fulfill({ status: 503, headers: cors, body: 'Simulated failure' }),
