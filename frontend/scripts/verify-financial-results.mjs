@@ -155,7 +155,7 @@ try {
           .getByRole('button', { name: 'Inspect consolidated Revenue for 2026-09-30' })
           .click()
         await dialog.getByRole('button', { name: /Ask about this evidence/ }).click()
-        await expect(page.getByLabel('NSE ticker')).toHaveValue('POLYCAB')
+        await expect(page.getByLabel('Selected company')).toContainText('POLYCAB')
         await expect(page.locator('.active-evidence')).toContainText('98989.01')
         await page.getByLabel('Your question').fill(followup.question)
         await page.getByRole('button', { name: 'Investigate', exact: true }).click()

@@ -1,3 +1,4 @@
+import { chooseResearchCompany } from './research-ui-helpers.mjs'
 // Shared-shell acceptance against saved real company data; no generation requests.
 import { chromium, expect } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
@@ -154,13 +155,13 @@ try {
       await page.screenshot({ path: `${output}/${viewport.width}-${theme}-briefing.png` })
       await nav('Portfolio').click()
       await page.locator('.portfolio-card a[href*="symbol=INFY"]').click()
-      await expect(page.getByLabel('NSE ticker')).toHaveValue('INFY')
-      await expect(question).not.toHaveValue(draft)
+      await expect(page.getByLabel('Selected company')).toContainText('INFY')
+      await expect(question).toHaveValue(draft)
       // A deliberate company link must work even when its URL matches the old entry URL.
-      await page.getByLabel('NSE ticker').fill('NTPC')
+      await chooseResearchCompany(page, 'NTPC')
       await nav('Portfolio').click()
       await page.locator('.portfolio-card a[href*="symbol=INFY"]').click()
-      await expect(page.getByLabel('NSE ticker')).toHaveValue('INFY')
+      await expect(page.getByLabel('Selected company')).toContainText('INFY')
 
       await page.goto(base + '/?view=research&analysis=results&symbol=NTPC')
       await expect(page.locator('.financial-results')).toHaveCount(1, { timeout: 25000 })

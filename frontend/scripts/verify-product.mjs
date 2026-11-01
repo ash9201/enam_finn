@@ -1,3 +1,4 @@
+import { chooseResearchCompany } from './research-ui-helpers.mjs'
 import { chromium } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -73,10 +74,10 @@ try {
     await page.screenshot({ path: `${output}/${name}-portfolio.png`, fullPage: true })
     await page.goto(`${base}/?view=research&symbol=INFY`, { waitUntil: 'networkidle' })
     await page.getByRole('heading', { name: 'Infosys Limited' }).waitFor({ timeout: 20000 })
-    await page.getByRole('heading', { name: 'Follow the statement.' }).waitFor({ timeout: 20000 })
-    if (!(await page.locator('.comparison-panel').innerText()).includes('Not yet assessable'))
-      throw new Error('Comparison verdict is missing or overconfident.')
-    if ((await page.locator('.comparison-panel .citation-button').count()) !== 2)
+    await chooseResearchCompany(page, 'CCL')
+    await page.locator('[data-research-action="comparison"]').click()
+    await page.locator('.comparison-content').waitFor({ timeout: 30000 })
+    if ((await page.locator('.comparison-content .citation-button').count()) < 2)
       throw new Error('Both comparison sources must be accessible.')
     await page.locator('.citation-button').first().click()
     await page.getByRole('dialog').waitFor()
@@ -100,13 +101,11 @@ try {
         .waitFor({ state: 'detached', timeout: 120000 })
       if (await page.getByRole('alert').count())
         throw new Error(await page.getByRole('alert').innerText())
-      await page.getByLabel('NSE ticker').fill('ZZZFINN42')
-      await page.getByRole('button', { name: 'Investigate', exact: true }).click()
-      await page.getByRole('alert').waitFor({ timeout: 60000 })
-      if (!(await page.getByRole('alert').innerText()).includes('not found'))
-        throw new Error('Unknown ticker did not fail honestly.')
-      if (await page.locator('.answer-panel').count())
-        throw new Error('Unknown ticker was given another company’s answer.')
+      await page.getByRole('button', { name: 'Change company', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Find a company' }).fill('ZZZFINN42')
+      await page.getByText('No matching listing found.', { exact: false }).waitFor()
+      if (!(await page.getByRole('button', { name: 'Investigate', exact: true }).isDisabled()))
+        throw new Error('An unknown company must not submit a guessed ticker.')
     }
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,

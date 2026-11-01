@@ -50,7 +50,17 @@ function Application() {
   useEffect(() => {
     const onPop = () => navigate(window.location.pathname + window.location.search, false)
     window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
+    const onResearchLocation = (event: Event) => {
+      const location = (event as CustomEvent<string>).detail
+      if (viewOf(location) !== 'research') return
+      locations.current.research = location
+      setUrl(location)
+    }
+    window.addEventListener('finn:research-location', onResearchLocation)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      window.removeEventListener('finn:research-location', onResearchLocation)
+    }
   }, [])
 
   useLayoutEffect(() => {

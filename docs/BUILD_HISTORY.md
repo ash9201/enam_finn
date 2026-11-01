@@ -1,5 +1,23 @@
 # Build history summary
 
+### Research workspace redesign (1 November)
+
+- Added a dated official 2,620-company NSE directory with name/symbol histories,
+  local autocomplete, aliases/acronyms and typo fallback. Ambiguous names require
+  selection; the backend still receives the canonical NSE symbol.
+- Replaced the ticker strip with a full-name selected company and collapsed
+  watchlist. Company workspaces, drafts and navigation locations are preserved.
+- Grouped four one-click workflows above the result. Specialized saved reads are
+  reused, late overviews cannot overwrite chosen results, and repeated quarterly
+  actions preserve the accounting basis. Removed the detached comparison control.
+- Compacted reading/evidence spacing and moved technical coverage into details.
+  Financial tables retain readable figures; single-basis answers have an explicit
+  unavailable-basis message without ineffective tabs. Financial/retrieval logic
+  and the backend architecture are unchanged.
+- Verified real NTPC/SUNPHARMA basis values and one financial section, all four
+  live CCL actions, source evidence, four theme/viewport scenes and focused
+  latency/failure/archived-basis cases. See [the implementation report](RESEARCH_REDESIGN.md).
+
 ### Event review, complete descriptions and narrower topics (1 November)
 
 - Replaced source-level review buttons with one event control operating on the

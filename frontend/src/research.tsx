@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AppFooter, PageHeading } from './layout'
 import { publicRead } from './data'
+import CompanyPicker from './company-picker'
 import FinancialResults, {
   RESULTS_QUESTION,
   type ResultsData,
@@ -166,6 +167,11 @@ function ResearchDetails({ answer }: { answer: Answer }) {
       }}
     >
       <summary>Sources, coverage & search details</summary>
+      <p>
+        {answer.financial_results
+          ? `${answer.financial_results.sources.length} original results filings. Figures retain their reporting period, unit and accounting basis.`
+          : `${answer.coverage.annual_reports} annual reports · ${answer.coverage.transcripts} earnings-call transcripts.`}
+      </p>
       <ul>
         {answer.limitations
           .filter((note) => !note.startsWith('Additional document search is still being prepared'))
@@ -231,6 +237,40 @@ type Company = {
   name: string
   sector: string | null
   source_checked_at: string | null
+}
+type Workspace = {
+  question: string
+  answer: Answer | null
+  savedComparison: Answer | null
+  savedResults: Answer | null
+  context: EvidenceContext | null
+  trail: Answer[]
+  includeHistory: boolean
+  needsRefresh: boolean
+}
+const workspaces = new Map<string, Workspace>()
+function savedSymbol() {
+  try {
+    const value = localStorage.getItem('finn-research-company') || 'INFY'
+    return /^[A-Z0-9&-]{1,30}$/.test(value) ? value : 'INFY'
+  } catch {
+    return 'INFY'
+  }
+}
+function savedDraft(symbol: string) {
+  try {
+    const value = JSON.parse(localStorage.getItem('finn-research-drafts') || '{}')[symbol]
+    return typeof value === 'string' ? value.slice(0, 600) : undefined
+  } catch {
+    return undefined
+  }
+}
+function savedMode(symbol: string) {
+  try {
+    return JSON.parse(localStorage.getItem('finn-research-modes') || '{}')[symbol]
+  } catch {
+    return undefined
+  }
 }
 function answerIdentity(answer: Answer) {
   return [
@@ -561,13 +601,19 @@ function Evidence({
 export default function ResearchApp({ active = true }: { active?: boolean }) {
   const [companies, setCompanies] = useState<Company[]>([])
   const initial = new URLSearchParams(window.location.search)
-  const [ticker, setTicker] = useState(initial.get('symbol') || 'INFY')
+  const initialSymbol = (initial.get('symbol') || savedSymbol()).toUpperCase().replace(/\.NS$/, '')
+  const session = workspaces.get(initialSymbol)
+  const [ticker, setTicker] = useState(initialSymbol)
   const [question, setQuestion] = useState(
     initial.get('question')?.slice(0, 600) ||
-      (initial.get('analysis') === 'results' ? RESULTS_QUESTION : DEFAULT_QUESTION),
+      (initial.get('analysis') === 'results'
+        ? RESULTS_QUESTION
+        : (session?.question ?? savedDraft(initialSymbol) ?? DEFAULT_QUESTION)),
   )
   const [needsRefresh, setNeedsRefresh] = useState(initial.get('refresh') === '1')
-  const [answer, setAnswer] = useState<Answer | null>(null)
+  const [answer, setAnswer] = useState<Answer | null>(
+    initial.get('analysis') === 'results' ? session?.savedResults || null : session?.answer || null,
+  )
   const [stage, setStage] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -575,16 +621,67 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
   const [progressSources, setProgressSources] = useState<ProgressSource[]>([])
   const [loadingSaved, setLoadingSaved] = useState(true)
   const [selected, setSelected] = useState<Selection | null>(null)
-  const [context, setContext] = useState<EvidenceContext | null>(null)
-  const [includeHistory, setIncludeHistory] = useState(false)
-  const [trail, setTrail] = useState<Answer[]>([])
+  const [context, setContext] = useState<EvidenceContext | null>(
+    initial.get('analysis') === 'results' ? null : session?.context || null,
+  )
+  const [includeHistory, setIncludeHistory] = useState(session?.includeHistory || false)
+  const [trail, setTrail] = useState<Answer[]>(session?.trail || [])
+  const [pickingCompany, setPickingCompany] = useState(false)
   const questionInput = useRef<HTMLTextAreaElement>(null)
   const composer = useRef<HTMLElement>(null)
   const answerPanel = useRef<HTMLElement>(null)
-  const [savedComparison, setSavedComparison] = useState<Answer | null>(null)
-  const [savedResults, setSavedResults] = useState<Answer | null>(null)
+  const [savedComparison, setSavedComparison] = useState<Answer | null>(
+    session?.savedComparison || null,
+  )
+  const [savedResults, setSavedResults] = useState<Answer | null>(session?.savedResults || null)
   const generation = useRef(0)
+  const savedGeneration = useRef(0)
+  const savedReads = useRef(new Map<string, Promise<Answer | null>>())
   const mounted = useRef(true)
+  const latestWorkspace = useRef<Workspace>(null!)
+  latestWorkspace.current = {
+    question,
+    answer,
+    savedComparison,
+    savedResults,
+    context,
+    trail,
+    includeHistory,
+    needsRefresh,
+  }
+  useEffect(() => {
+    workspaces.set(ticker, latestWorkspace.current)
+    try {
+      localStorage.setItem('finn-research-company', ticker)
+      const drafts = JSON.parse(localStorage.getItem('finn-research-drafts') || '{}')
+      drafts[ticker] = question
+      localStorage.setItem(
+        'finn-research-drafts',
+        JSON.stringify(Object.fromEntries(Object.entries(drafts).slice(-20))),
+      )
+      if (answer?.symbol === ticker && !answer.evidence_context) {
+        const modes = JSON.parse(localStorage.getItem('finn-research-modes') || '{}')
+        modes[ticker] = answer.financial_results
+          ? 'results'
+          : answer.comparison
+            ? 'comparison'
+            : 'overview'
+        localStorage.setItem('finn-research-modes', JSON.stringify(modes))
+      }
+    } catch {
+      /* In-memory workspace remains usable. */
+    }
+  }, [
+    ticker,
+    question,
+    answer,
+    savedComparison,
+    savedResults,
+    context,
+    trail,
+    includeHistory,
+    needsRefresh,
+  ])
 
   useEffect(() => {
     if (!active) setSelected(null)
@@ -613,23 +710,54 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
     return () => {
       mounted.current = false
       generation.current += 1
+      savedGeneration.current += 1
     }
   }, [])
 
   useEffect(() => {
     if (busy) return
     const token = ++generation.current
-    setLoadingSaved(true)
+    const savedToken = ++savedGeneration.current
+    const restored = workspaces.get(ticker)?.answer
+    setLoadingSaved(!restored)
+    const comparisonRead = publicRead('finn_research_cache', {
+      select: 'result',
+      symbol: `eq.${ticker}`,
+      question: `eq.${COMPARISON_QUESTION}`,
+      is_public: 'eq.true',
+      order: 'created_at.desc',
+      limit: '1',
+    })
+    const resultsRead = publicRead('finn_research_cache', {
+      select: 'result',
+      symbol: `eq.${ticker}`,
+      question: `eq.${RESULTS_QUESTION}`,
+      is_public: 'eq.true',
+      order: 'created_at.desc',
+      limit: '1',
+    })
+    savedReads.current.set(
+      `${ticker}:${COMPARISON_QUESTION}`,
+      comparisonRead
+        .then((rows) => (rows[0] ? { ...rows[0].result, cached: true } : null))
+        .catch(() => null),
+    )
+    savedReads.current.set(
+      `${ticker}:${RESULTS_QUESTION}`,
+      resultsRead
+        .then((rows) => (rows[0] ? { ...rows[0].result, cached: true } : null))
+        .catch(() => null),
+    )
     publicRead('finn_research_cache', {
       select: 'result,created_at',
       symbol: `eq.${ticker}`,
-      question: `eq.${initial.get('analysis') === 'results' ? RESULTS_QUESTION : DEFAULT_QUESTION}`,
+      question: `eq.${[RESULTS_QUESTION, COMPARISON_QUESTION].includes(question) ? question : savedMode(ticker) === 'results' ? RESULTS_QUESTION : savedMode(ticker) === 'comparison' ? COMPARISON_QUESTION : DEFAULT_QUESTION}`,
       is_public: 'eq.true',
       order: 'created_at.desc',
       limit: '1',
     })
       .then((rows) => {
-        if (generation.current === token)
+        if (generation.current === token && !restored)
           setAnswer(rows[0] ? { ...rows[0].result, cached: true } : null)
       })
       .catch(() => {
@@ -639,31 +767,25 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
       .finally(() => {
         if (generation.current === token) setLoadingSaved(false)
       })
-    publicRead('finn_research_cache', {
-      select: 'result',
-      symbol: `eq.${ticker}`,
-      question: `eq.${COMPARISON_QUESTION}`,
-      is_public: 'eq.true',
-      order: 'created_at.desc',
-      limit: '1',
-    })
+    comparisonRead
       .then((rows) => {
-        if (generation.current === token)
-          setSavedComparison(rows[0] ? { ...rows[0].result, cached: true } : null)
+        if (savedGeneration.current === savedToken && rows[0])
+          setSavedComparison((previous) =>
+            previous && Date.parse(previous.generated_at) > Date.parse(rows[0].result.generated_at)
+              ? previous
+              : { ...rows[0].result, cached: true },
+          )
       })
       .catch(() => {})
     // A completed job should remain visible; switching companies triggers this read.
-    publicRead('finn_research_cache', {
-      select: 'result',
-      symbol: `eq.${ticker}`,
-      question: `eq.${RESULTS_QUESTION}`,
-      is_public: 'eq.true',
-      order: 'created_at.desc',
-      limit: '1',
-    })
+    resultsRead
       .then((rows) => {
-        if (generation.current === token)
-          setSavedResults(rows[0] ? { ...rows[0].result, cached: true } : null)
+        if (savedGeneration.current === savedToken && rows[0])
+          setSavedResults((previous) =>
+            previous && Date.parse(previous.generated_at) > Date.parse(rows[0].result.generated_at)
+              ? previous
+              : { ...rows[0].result, cached: true },
+          )
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -678,7 +800,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
     if (busy) return
     const symbol = ticker.trim().toUpperCase().replace(/\.NS$/, '')
     if (!/^[A-Z0-9&-]{1,30}$/.test(symbol)) {
-      setError('Enter an NSE ticker, such as INFY or POLYCAB.')
+      setError('Choose a listed company using the company search.')
       return
     }
     if (query.trim().length < 8) {
@@ -798,16 +920,70 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
 
   function choose(symbol: string) {
     if (busy) return
+    if (symbol === ticker) return
+    workspaces.set(ticker, latestWorkspace.current)
+    const previous = workspaces.get(symbol)
+    generation.current += 1
+    savedGeneration.current += 1
     setTicker(symbol)
+    setContext(previous?.context || null)
+    setIncludeHistory(previous?.includeHistory || false)
+    setTrail(previous?.trail || [])
+    setSelected(null)
+    setSavedComparison(previous?.savedComparison || null)
+    setSavedResults(previous?.savedResults || null)
+    setQuestion(previous?.question ?? savedDraft(symbol) ?? (context ? DEFAULT_QUESTION : question))
+    setNeedsRefresh(previous?.needsRefresh || false)
+    setError('')
+    setAnswer(previous?.answer || null)
+    if (active) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('symbol', symbol)
+      for (const key of ['analysis', 'question', 'refresh']) url.searchParams.delete(key)
+      window.history.replaceState(null, '', url.pathname + url.search)
+      window.dispatchEvent(
+        new CustomEvent('finn:research-location', { detail: url.pathname + url.search }),
+      )
+    }
+  }
+  async function explore(query: string) {
+    if (busy || pickingCompany) return
+    const token = ++generation.current
+    setQuestion(query)
     setContext(null)
     setIncludeHistory(false)
-    setTrail([])
-    setSelected(null)
-    setSavedComparison(null)
-    setSavedResults(null)
-    setQuestion(DEFAULT_QUESTION)
+    setNeedsRefresh(false)
     setError('')
-    setAnswer(null)
+    let saved =
+      query === RESULTS_QUESTION
+        ? savedResults
+        : query === COMPARISON_QUESTION
+          ? savedComparison
+          : null
+    if (!saved)
+      saved = await (savedReads.current.get(`${ticker}:${query}`) || Promise.resolve(null))
+    if (!mounted.current || generation.current !== token) return
+    if (saved?.symbol === ticker) {
+      setLoadingSaved(false)
+      if (answer && answer.id !== saved.id)
+        setTrail((items) => [...items.filter((item) => item.id !== answer.id), answer].slice(-6))
+      setAnswer((previous) =>
+        previous && answerIdentity(previous) === answerIdentity(saved) ? previous : saved,
+      )
+      requestAnimationFrame(() =>
+        answerPanel.current?.scrollIntoView({
+          block: 'start',
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth',
+        }),
+      )
+    } else {
+      void ask(false, query, null, false)
+      requestAnimationFrame(() =>
+        document.querySelector('.research-progress')?.scrollIntoView({ block: 'nearest' }),
+      )
+    }
   }
   function focusComposer() {
     requestAnimationFrame(() => {
@@ -867,14 +1043,22 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
   }
   const current =
     answer?.symbol === ticker.trim().toUpperCase().replace(/\.NS$/, '') ? answer : null
+  const comparisonAnswer = current?.comparison ? current : null
   const visibleTrail = trail.filter((item) => item.id !== current?.id)
   const researchContent = (
     <main className="research-app" id="research-content" tabIndex={-1}>
       <PageHeading title="Company Research" />
       <section className="research-form" aria-labelledby="research-heading" ref={composer}>
-        <h2 id="research-heading">
-          {context ? 'Follow this evidence.' : 'What are you looking into?'}
+        <h2 id="research-heading" className="sr-only">
+          {context ? 'Follow selected evidence' : 'Research workspace'}
         </h2>
+        <CompanyPicker
+          symbol={ticker}
+          watchlist={companies}
+          disabled={busy}
+          onSelect={choose}
+          onEditing={setPickingCompany}
+        />
         {context && (
           <aside className="active-evidence" aria-label="Active evidence context">
             <div className="context-heading">
@@ -923,30 +1107,10 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
         <form
           onSubmit={(event) => {
             event.preventDefault()
-            void ask()
+            if (!pickingCompany) void ask()
           }}
         >
           <div className="form-row">
-            <label className="ticker-label">
-              NSE ticker
-              <input
-                aria-label="NSE ticker"
-                value={ticker}
-                maxLength={30}
-                disabled={busy}
-                autoCapitalize="characters"
-                autoComplete="off"
-                spellCheck={false}
-                onChange={(event) => {
-                  setTicker(event.target.value.toUpperCase())
-                  setContext(null)
-                  setIncludeHistory(false)
-                  setTrail([])
-                  setSavedComparison(null)
-                  setError('')
-                }}
-              />
-            </label>
             <label className="question-label">
               Your question
               <textarea
@@ -971,7 +1135,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                 ? `Searching ${context.symbol} across company documents.`
                 : 'Any NSE company with accessible primary documents.'}
             </p>
-            <button type="submit" disabled={busy}>
+            <button type="submit" disabled={busy || pickingCompany}>
               {busy ? 'Investigating…' : 'Investigate'}
               <span aria-hidden="true">↗</span>
             </button>
@@ -1002,39 +1166,55 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
             </label>
           </div>
         )}
-        <div className="question-options" aria-label="Suggested questions">
-          {!context && (
-            <button
-              className="text-chip"
-              disabled={busy}
-              onClick={() => {
-                setQuestion(RESULTS_QUESTION)
-                if (savedResults?.symbol === ticker) {
-                  if (answer && answerIdentity(answer) === answerIdentity(savedResults)) return
-                  if (answer && answer.id !== savedResults.id)
-                    setTrail((items) =>
-                      [...items.filter((item) => item.id !== answer.id), answer].slice(-6),
-                    )
-                  setAnswer(savedResults)
-                } else void ask(false, RESULTS_QUESTION, null, false)
-              }}
-            >
-              Quarterly results ↗
-            </button>
-          )}
-          {!context &&
-            QUESTIONS.slice(1).map((prompt) => (
+        <section className="explore-company" aria-labelledby="explore-heading">
+          <h3 id="explore-heading">Explore this company</h3>
+          <div className="explore-actions">
+            {[
+              {
+                id: 'results',
+                label: 'Quarterly results',
+                detail: 'Revenue, profit and quarterly changes',
+                query: RESULTS_QUESTION,
+              },
+              {
+                id: 'outlook',
+                label: 'Management outlook',
+                detail: 'Demand and growth',
+                query: QUESTIONS[1],
+              },
+              {
+                id: 'risks',
+                label: 'Business risks',
+                detail: 'Risks in company disclosures',
+                query: QUESTIONS[2],
+              },
+              {
+                id: 'comparison',
+                label: 'Track management statements',
+                detail: 'Earlier statements and later evidence',
+                query: COMPARISON_QUESTION,
+              },
+            ].map((action) => (
               <button
-                className="text-chip"
-                key={prompt}
-                disabled={busy}
-                onClick={() => setQuestion(prompt)}
+                type="button"
+                data-research-action={action.id}
+                aria-pressed={!context && (busy ? question : current?.question) === action.query}
+                key={action.id}
+                disabled={busy || pickingCompany}
+                title={action.detail}
+                onClick={() => explore(action.query)}
               >
-                {prompt}
+                <strong>
+                  {action.label} <span aria-hidden="true">&#8599;</span>
+                </strong>
+                <small>{action.detail}</small>
               </button>
             ))}
-          {context &&
-            PATHS.map((path) => (
+          </div>
+        </section>
+        {context && (
+          <div className="question-options" aria-label="Evidence investigation paths">
+            {PATHS.map((path) => (
               <button
                 type="button"
                 className="text-chip"
@@ -1051,27 +1231,9 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                 {path.label}
               </button>
             ))}
-        </div>
-      </section>
-      {companies.length > 0 && (
-        <section className="company-strip" aria-label="Portfolio companies">
-          <p className="eyebrow">YOUR WATCHLIST · {companies.length} COMPANIES</p>
-          <div>
-            {companies.map((company) => (
-              <button
-                className={`company-chip ${ticker === company.symbol ? 'chosen' : ''}`}
-                key={company.symbol}
-                onClick={() => choose(company.symbol)}
-                disabled={busy}
-                title={company.name}
-              >
-                {company.symbol}
-                <span>{company.source_checked_at ? '◦' : '+'}</span>
-              </button>
-            ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
       {busy && (
         <div className="research-progress" role="status" aria-live="polite">
           <span className="pulse-dot" />
@@ -1091,11 +1253,11 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
         </div>
       )}
       {(busy || error) && progressSources.length > 0 && (
-        <aside className="preparation-sources" aria-label="Documents saved during preparation">
-          <strong>
+        <details className="preparation-sources" aria-label="Documents saved during preparation">
+          <summary>
             {progressSources.length} primary{' '}
             {progressSources.length === 1 ? 'document' : 'documents'} saved
-          </strong>
+          </summary>
           <ul>
             {progressSources.map((source) => (
               <li key={source.id}>
@@ -1110,7 +1272,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
             These documents will be reused on retry. Saving a document does not yet establish an
             answer.
           </small>
-        </aside>
+        </details>
       )}
       {error && (
         <div className="research-error" role="alert">
@@ -1185,23 +1347,6 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
               {current.investigation.assessment}
             </p>
           )}
-          <div className="coverage-line">
-            {current.financial_results ? (
-              <>
-                <span>{current.financial_results.sources.length} primary results filings</span>
-                <span>Source-backed figures</span>
-                <span>Calculated QoQ / YoY</span>
-              </>
-            ) : (
-              <>
-                <span>
-                  {current.coverage.annual_reports} annual{' '}
-                  {current.coverage.annual_reports === 1 ? 'report' : 'reports'}
-                </span>
-                <span>{current.coverage.transcripts} call transcripts</span>
-              </>
-            )}
-          </div>
           {current.financial_results ? (
             <FinancialResults
               key={answerIdentity(current)}
@@ -1212,11 +1357,10 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                 if (claim) setSelected(evidenceSelection(current, claim))
               }}
             />
-          ) : current.claims.length ? (
+          ) : current.comparison ? null : current.claims.length ? (
             <ol className="claim-list">
               {current.claims.map((claim, index) => (
                 <li key={`${claim.citation.id}-${index}`}>
-                  <span className="claim-number">0{index + 1}</span>
                   <div>
                     {claim.heading && <h3 className="analysis-heading">{claim.heading}</h3>}
                     {current.evidence_context && (
@@ -1297,6 +1441,132 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
               )}
             </div>
           )}
+          {comparisonAnswer?.symbol === ticker && comparisonAnswer.comparison && (
+            <section className="comparison-content" aria-labelledby="comparison-heading">
+              <p className="eyebrow">NARRATIVE & EVIDENCE</p>
+              <div className="comparison-title">
+                <h3 id="comparison-heading">
+                  {comparisonAnswer.comparison.topic || 'Follow the statement.'}
+                </h3>
+                <span className="saved-label">
+                  {(
+                    {
+                      supported: 'Later evidence supports it',
+                      diverged: 'Evidence diverges',
+                      not_assessable: 'Not yet assessable',
+                      not_yet_assessable: 'Not yet assessable',
+                      reaffirmed: 'Outlook reaffirmed',
+                      revised: 'Outlook revised',
+                      progress_reported: 'Progress reported',
+                      delivered: 'Milestone completed',
+                    } as Record<string, string>
+                  )[comparisonAnswer.comparison.verdict] || 'Review the evidence'}
+                </span>
+              </div>
+              <div className="comparison-sides">
+                {[
+                  ['Earlier statement', comparisonAnswer.comparison.earlier],
+                  ['Later evidence', comparisonAnswer.comparison.later],
+                ].map(([heading, raw]) => {
+                  const claim = raw as Claim
+                  return (
+                    <div key={heading as string}>
+                      <p className="eyebrow">{heading as string}</p>
+                      <button
+                        className="claim-statement"
+                        onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
+                      >
+                        {claim.statement}
+                      </button>
+                      <button
+                        className="citation-button"
+                        onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
+                      >
+                        {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+              {comparisonAnswer.comparison.analysis_claims?.length ? (
+                <div className="comparison-analysis" aria-label="What the evidence indicates">
+                  {comparisonAnswer.comparison.analysis_claims.map((claim) => (
+                    <div key={claim.citation.id + claim.statement}>
+                      <button
+                        className="claim-statement"
+                        onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
+                      >
+                        {claim.statement}
+                      </button>
+                      <div className="claim-sources">
+                        {(claim.citations || [claim.citation]).map((citation) => (
+                          <button
+                            className="citation-button"
+                            key={citation.id}
+                            onClick={() =>
+                              setSelected({
+                                ...evidenceSelection(comparisonAnswer, claim),
+                                claim: { ...claim, citation },
+                              })
+                            }
+                          >
+                            {citation.document_label} · PDF p. {citation.pdf_page} ↗
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="comparison-assessment">{comparisonAnswer.comparison.assessment}</p>
+              )}
+              {comparisonAnswer.comparison.uncertainty && (
+                <p className="comparison-uncertainty">{comparisonAnswer.comparison.uncertainty}</p>
+              )}
+              {comparisonAnswer.financial_context && (
+                <aside className="comparison-context">
+                  <p className="eyebrow">REPORTED QUARTER CONTEXT</p>
+                  <button
+                    className="claim-statement"
+                    onClick={() => {
+                      const f = comparisonAnswer.financial_context!
+                      setSelected({
+                        answer: {
+                          id: f.research_id,
+                          symbol: f.symbol,
+                          company_name: f.company_name,
+                        },
+                        claim: f.claim,
+                        claimIndex: f.claim_index,
+                      })
+                    }}
+                  >
+                    {comparisonAnswer.financial_context.claim.statement}
+                  </button>
+                  <p className="fine-print">{comparisonAnswer.financial_context.note}</p>
+                </aside>
+              )}
+              {comparisonAnswer.comparison.additional_context?.map((claim) => (
+                <div className="comparison-context" key={claim.citation.id}>
+                  <button
+                    className="claim-statement"
+                    onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
+                  >
+                    {claim.statement}
+                  </button>
+                  <button
+                    className="citation-button"
+                    onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
+                  >
+                    {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
+                  </button>
+                </div>
+              ))}
+              <p className="fine-print">
+                Statement-level assessment from the cited company documents.
+              </p>
+            </section>
+          )}
           <div className="answer-bottom">
             <p>
               Generated {stamp(current.generated_at)}
@@ -1321,145 +1591,12 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
           <ResearchDetails key={current.id} answer={current} />
         </section>
       )}
-      {savedComparison?.symbol === ticker && savedComparison.comparison && (
-        <section className="comparison-panel" aria-labelledby="comparison-heading">
-          <p className="eyebrow">NARRATIVE & EVIDENCE</p>
-          <div className="comparison-title">
-            <h2 id="comparison-heading">
-              {savedComparison.comparison.topic || 'Follow the statement.'}
-            </h2>
-            <span className="saved-label">
-              {(
-                {
-                  supported: 'Later evidence supports it',
-                  diverged: 'Evidence diverges',
-                  not_assessable: 'Not yet assessable',
-                  not_yet_assessable: 'Not yet assessable',
-                  reaffirmed: 'Outlook reaffirmed',
-                  revised: 'Outlook revised',
-                  progress_reported: 'Progress reported',
-                  delivered: 'Milestone completed',
-                } as Record<string, string>
-              )[savedComparison.comparison.verdict] || 'Review the evidence'}
-            </span>
-          </div>
-          <div className="comparison-sides">
-            {[
-              ['Earlier statement', savedComparison.comparison.earlier],
-              ['Later evidence', savedComparison.comparison.later],
-            ].map(([heading, raw]) => {
-              const claim = raw as Claim
-              return (
-                <div key={heading as string}>
-                  <p className="eyebrow">{heading as string}</p>
-                  <button
-                    className="claim-statement"
-                    onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
-                  >
-                    {claim.statement}
-                  </button>
-                  <button
-                    className="citation-button"
-                    onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
-                  >
-                    {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-          {savedComparison.comparison.analysis_claims?.length ? (
-            <div className="comparison-analysis" aria-label="What the evidence indicates">
-              {savedComparison.comparison.analysis_claims.map((claim) => (
-                <div key={claim.citation.id + claim.statement}>
-                  <button
-                    className="claim-statement"
-                    onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
-                  >
-                    {claim.statement}
-                  </button>
-                  <div className="claim-sources">
-                    {(claim.citations || [claim.citation]).map((citation) => (
-                      <button
-                        className="citation-button"
-                        key={citation.id}
-                        onClick={() =>
-                          setSelected({
-                            ...evidenceSelection(savedComparison, claim),
-                            claim: { ...claim, citation },
-                          })
-                        }
-                      >
-                        {citation.document_label} · PDF p. {citation.pdf_page} ↗
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="comparison-assessment">{savedComparison.comparison.assessment}</p>
-          )}
-          {savedComparison.comparison.uncertainty && (
-            <p className="comparison-uncertainty">{savedComparison.comparison.uncertainty}</p>
-          )}
-          {savedComparison.financial_context && (
-            <aside className="comparison-context">
-              <p className="eyebrow">REPORTED QUARTER CONTEXT</p>
-              <button
-                className="claim-statement"
-                onClick={() => {
-                  const f = savedComparison.financial_context!
-                  setSelected({
-                    answer: { id: f.research_id, symbol: f.symbol, company_name: f.company_name },
-                    claim: f.claim,
-                    claimIndex: f.claim_index,
-                  })
-                }}
-              >
-                {savedComparison.financial_context.claim.statement}
-              </button>
-              <p className="fine-print">{savedComparison.financial_context.note}</p>
-            </aside>
-          )}
-          {savedComparison.comparison.additional_context?.map((claim) => (
-            <div className="comparison-context" key={claim.citation.id}>
-              <button
-                className="claim-statement"
-                onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
-              >
-                {claim.statement}
-              </button>
-              <button
-                className="citation-button"
-                onClick={() => setSelected(evidenceSelection(savedComparison, claim))}
-              >
-                {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
-              </button>
-            </div>
-          ))}
-          <p className="fine-print">
-            Generated {stamp(savedComparison.generated_at)}. A statement-level comparison, not a
-            verdict on the whole company.
-          </p>
-        </section>
-      )}
-      <div className="comparison-action">
-        <button
-          className="text-button"
-          disabled={busy}
-          onClick={() => setQuestion(COMPARISON_QUESTION)}
-        >
-          Trace a management statement ↗
-        </button>
-        <span>Compare earlier commentary with later call evidence.</span>
-      </div>
       {!current && !busy && !loadingSaved && (
         <section className="research-empty">
           <span aria-hidden="true">↗</span>
-          <h2>Start with a question.</h2>
+          <h2>No saved answer yet</h2>
           <p>
-            Enter a ticker and investigate. FINN will find original documents and show what the
+            Choose a company and investigate. FINN will find original documents and show what the
             evidence can—and cannot—support.
           </p>
         </section>

@@ -1,9 +1,9 @@
 .financial-results {
-  margin-top: 26px;
+  margin-top: var(--space-4);
 }
 .financial-performance {
-  margin: 22px 0;
-  padding: 18px;
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
   border: 1px solid var(--border);
   border-radius: 9px;
   background: var(--surface-read);
@@ -11,7 +11,7 @@
 }
 .financial-performance p:not(.eyebrow) {
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .financial-performance .eyebrow {
   margin: 0 0 10px;
@@ -21,7 +21,7 @@
 .basis-availability {
   color: var(--text-secondary);
   font-size: 11px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .financial-performance summary {
   cursor: pointer;
@@ -56,7 +56,7 @@
 .financial-heading h3 {
   font-family: Georgia, serif;
   font-weight: 400;
-  font-size: 25px;
+  font-size: 19px;
   margin: 8px 0 0;
 }
 .financial-bases {
@@ -84,7 +84,7 @@
 .financial-policy {
   font-size: 11px;
   color: var(--text-muted);
-  line-height: 1.8;
+  line-height: 1.65;
   margin: 16px 0;
 }
 .financial-table {
@@ -104,7 +104,7 @@
 .financial-table th,
 .financial-table td {
   text-align: right;
-  padding: 13px 8px;
+  padding: 9px 8px;
   vertical-align: top;
   border-bottom: 1px solid var(--divider);
   overflow-wrap: anywhere;
@@ -151,7 +151,7 @@
   color: var(--text-muted);
 }
 .financial-changes {
-  margin-top: 26px;
+  margin-top: var(--space-4);
 }
 .financial-movement strong {
   font-size: 13px;
@@ -175,13 +175,13 @@
   cursor: default;
 }
 .financial-calculation {
-  padding: 18px;
+  padding: var(--space-3);
   margin: 20px 0;
   background: var(--surface-tint);
   border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .financial-calculation > div {
   display: flex;
@@ -200,7 +200,7 @@
 .financial-coverage {
   font-size: 11px;
   color: var(--text-secondary);
-  line-height: 1.8;
+  line-height: 1.65;
   border-top: 1px solid var(--border);
   padding-top: 14px;
 }
@@ -237,14 +237,14 @@
   overflow-wrap: anywhere;
   font-size: 11px;
   font-family: inherit;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 @media (max-width: 600px) {
   .financial-heading h3 {
-    font-size: 23px;
+    font-size: 19px;
   }
   .financial-table {
-    font-size: 11px;
+    font-size: 13px;
   }
   .financial-table th,
   .financial-table td {
@@ -257,7 +257,7 @@
     font-size: 10px;
   }
   .financial-table small {
-    font-size: 9px;
+    font-size: 11px;
   }
   .financial-movement strong {
     font-size: 12px;
@@ -268,4 +268,23 @@
   .financial-bases button {
     flex: 1;
   }
+}
+
+.basis-current {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+.financial-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.financial-table-wrap .financial-table {
+  min-width: 500px;
+}
+.financial-table-wrap .financial-table th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
 }

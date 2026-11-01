@@ -32,7 +32,9 @@ try {
   await page.locator('.answer-panel .citation-button').first().click()
   await pause()
   await page.getByRole('button', { name: 'Close evidence' }).click()
-  await page.locator('.comparison-panel').scrollIntoViewIfNeeded()
+  await page.goto(`${base}/?view=research&symbol=CCL`, { waitUntil: 'networkidle' })
+  await page.locator('[data-research-action="comparison"]').click()
+  await page.locator('.comparison-content').scrollIntoViewIfNeeded()
   await pause()
   await pause()
   await page

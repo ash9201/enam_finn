@@ -164,27 +164,33 @@ export default function FinancialResults({
           <p className="eyebrow">QUARTERLY RESULTS</p>
           <h3>Quarter ended {quarterDate(data.periods.latest)}</h3>
         </div>
-        <div className="financial-bases" role="group" aria-label="Accounting basis">
-          {['consolidated', 'standalone'].map((value) => (
-            <button
-              type="button"
-              key={value}
-              disabled={!available.includes(value)}
-              title={
-                !available.includes(value)
-                  ? 'No verified figures are available for this accounting basis.'
-                  : undefined
-              }
-              aria-pressed={basis === value}
-              onClick={() => {
-                setChoice(value)
-                setCalculation(null)
-              }}
-            >
-              {value === 'consolidated' ? 'Consolidated' : 'Standalone'}
-            </button>
-          ))}
-        </div>
+        {available.length > 1 ? (
+          <div className="financial-bases" role="group" aria-label="Accounting basis">
+            {['consolidated', 'standalone'].map((value) => (
+              <button
+                type="button"
+                key={value}
+                disabled={!available.includes(value)}
+                title={
+                  !available.includes(value)
+                    ? 'No verified figures are available for this accounting basis.'
+                    : undefined
+                }
+                aria-pressed={basis === value}
+                onClick={() => {
+                  setChoice(value)
+                  setCalculation(null)
+                }}
+              >
+                {value === 'consolidated' ? 'Consolidated' : 'Standalone'}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="basis-current">
+            {basis === 'consolidated' ? 'Consolidated' : 'Standalone'}
+          </span>
+        )}
       </div>
       {available.length < 2 && (
         <p className="basis-availability">
@@ -263,7 +269,12 @@ export default function FinancialResults({
           comparisons are shown; missing values are left blank.
         </p>
       )}
-      <div className="financial-table-wrap">
+      <div
+        className="financial-table-wrap"
+        tabIndex={0}
+        role="region"
+        aria-label="Quarterly figures; scroll horizontally on smaller screens"
+      >
         <table className="financial-table" aria-label={`${basis} quarterly figures`}>
           <caption>Reported figures · {basis}</caption>
           <thead>
@@ -408,14 +419,14 @@ export default function FinancialResults({
           </div>
         </aside>
       )}
-      <p className="financial-policy">
-        {data.policy} Changes are arithmetic, not an assessment of investment merit.
-      </p>
       <details className="financial-coverage">
         <summary>
           Source coverage &amp; withheld cells
           {data.rejected_cells.length ? ` · ${data.rejected_cells.length}` : ''}
         </summary>
+        <p className="financial-policy">
+          {data.policy} Changes are arithmetic, not an assessment of investment merit.
+        </p>
         <p>
           EBITDA is unavailable when the filing does not report it explicitly. “—” is not zero.
           Figures from different accounting bases are never combined.

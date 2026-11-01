@@ -166,12 +166,13 @@ try {
       await expect(page.getByLabel('Active evidence context')).toHaveCount(0)
 
       await page.goto(base + '/?view=research&symbol=CCL')
-      await expect(page.locator('.comparison-panel')).toContainText('Outlook reaffirmed', {
+      await expect(page.locator('.claim-list .analysis-heading').first()).toBeVisible()
+      await page.locator('[data-research-action="comparison"]').click()
+      await expect(page.locator('.comparison-content')).toContainText('Outlook reaffirmed', {
         timeout: 30000,
       })
-      await expect(page.locator('.claim-list .analysis-heading').first()).toBeVisible()
       await audit(page.locator('.answer-panel'))
-      await audit(page.locator('.comparison-panel'))
+      await audit(page.locator('.comparison-content'))
       const analysis = page.locator('.comparison-analysis')
       await expect(analysis).toBeVisible()
       await analysis.locator('.citation-button').last().click()

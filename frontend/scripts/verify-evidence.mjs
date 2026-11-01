@@ -1,3 +1,4 @@
+import { chooseResearchCompany } from './research-ui-helpers.mjs'
 // Opt-in: replay a real private root answer, then exercise real API jobs/cache.
 // Generate the local fixture with scripts/verify_evidence_research.py first.
 import { chromium, expect } from '@playwright/test'
@@ -130,7 +131,7 @@ try {
       await page.locator('.claim-list .citation-button').nth(root.claims.indexOf(selected)).click()
       await dialog.getByRole('button', { name: /What happened later/ }).click()
       await expect(page.locator('.active-evidence')).toContainText(selected.statement)
-      await expect(page.getByLabel('NSE ticker')).toHaveValue(root.symbol)
+      await expect(page.getByLabel('Selected company')).toContainText(root.symbol)
       await expect(page.getByLabel('Your question')).toBeFocused()
       await page.getByRole('checkbox', { name: /Check latest sources/ }).uncheck()
       await page.getByLabel('Your question').fill(followup.question)
@@ -181,7 +182,7 @@ try {
       await page.getByRole('button', { name: 'Investigate', exact: true }).click()
       await expect(page.getByRole('alert')).toContainText(/evidence context/i, { timeout: 20000 })
       await expect(page.locator('.active-evidence')).toContainText(selected.statement)
-      await page.getByLabel('NSE ticker').fill('INFY')
+      await chooseResearchCompany(page, 'INFY')
       await expect(page.locator('.active-evidence')).toHaveCount(0)
       await expect(page.getByRole('navigation', { name: 'Research trail' })).toHaveCount(0)
       expect(errors).toEqual([])

@@ -13,6 +13,8 @@
     "test:layout": "node scripts/verify-layout.mjs",
     "test:briefing": "node scripts/verify-briefing.mjs",
     "test:briefing:model": "node --test scripts/briefing-model.test.mjs",
+    "test:company-search": "node --test scripts/company-search.test.mjs",
+    "test:research-redesign": "node scripts/verify-research-redesign.mjs",
     "test:product": "node scripts/verify-product.mjs",
     "test:prices": "node scripts/verify-price-sources.mjs",
     "test:theme": "node scripts/verify-theme.mjs",
