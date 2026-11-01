@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import Navigation from './navigation'
+import { AppFooter, PageHeading } from './layout'
 import { publicRead } from './data'
-import ThemeSelector from './theme'
 import FinancialResults, {
   RESULTS_QUESTION,
   type ResultsData,
@@ -559,7 +558,7 @@ function Evidence({
   )
 }
 
-export default function ResearchApp() {
+export default function ResearchApp({ active = true }: { active?: boolean }) {
   const [companies, setCompanies] = useState<Company[]>([])
   const initial = new URLSearchParams(window.location.search)
   const [ticker, setTicker] = useState(initial.get('symbol') || 'INFY')
@@ -586,6 +585,10 @@ export default function ResearchApp() {
   const [savedResults, setSavedResults] = useState<Answer | null>(null)
   const generation = useRef(0)
   const mounted = useRef(true)
+
+  useEffect(() => {
+    if (!active) setSelected(null)
+  }, [active])
 
   useEffect(() => {
     if (!busy) return
@@ -866,31 +869,8 @@ export default function ResearchApp() {
     answer?.symbol === ticker.trim().toUpperCase().replace(/\.NS$/, '') ? answer : null
   const visibleTrail = trail.filter((item) => item.id !== current?.id)
   const researchContent = (
-    <main className="research-app">
-      <header>
-        <a href="/" className="wordmark" aria-label="FINN home">
-          finn<span>.</span>
-        </a>
-        <div className="research-header">
-          <span className="active-label">Research</span>
-          <a href="?view=foundation" className="muted">
-            Connection status ↗
-          </a>
-          <ThemeSelector />
-        </div>
-      </header>
-      <section className="research-intro">
-        <p className="eyebrow">A CLOSER LOOK.</p>
-        <h1>
-          Know the business.
-          <br />
-          See the evidence.
-        </h1>
-        <p className="lead">
-          A clear view of a company, drawn from its own reports and earnings calls. Every point
-          takes you back to the source.
-        </p>
-      </section>
+    <main className="research-app" id="research-content" tabIndex={-1}>
+      <PageHeading title="Company Research" />
       <section className="research-form" aria-labelledby="research-heading" ref={composer}>
         <h2 id="research-heading">
           {context ? 'Follow this evidence.' : 'What are you looking into?'}
@@ -1484,10 +1464,9 @@ export default function ResearchApp() {
           </p>
         </section>
       )}
-      <footer>
-        <span>Primary documents. Clear sources. Your judgment.</span>
+      <AppFooter>
         <span>Reports and calls · No live market prices</span>
-      </footer>
+      </AppFooter>
       {selected && (
         <Evidence
           key={selected.claim.citation.id}
@@ -1502,10 +1481,5 @@ export default function ResearchApp() {
       )}
     </main>
   )
-  return (
-    <div className="research-shell">
-      {researchContent}
-      <Navigation active="research" />
-    </div>
-  )
+  return researchContent
 }

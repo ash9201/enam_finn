@@ -22,7 +22,7 @@ try {
     )
     try {
       await page.goto(base, { waitUntil: 'networkidle' })
-      await page.getByRole('heading', { name: /What deserves/ }).waitFor()
+      await page.getByRole('heading', { name: 'Your Briefing' }).waitFor()
     } catch (error) {
       await page.screenshot({ path: `${output}/${name}-load-failure.png` })
       await writeFile(
@@ -31,7 +31,7 @@ try {
       )
       throw error
     }
-    await page.getByText('companies followed', { exact: true }).waitFor({ timeout: 20000 })
+    await page.locator('.freshness').waitFor({ timeout: 20000 })
     if ((await page.locator('.filing-card').count()) < 1)
       throw new Error('No actual portfolio filings loaded.')
     await page.getByRole('button', { name: '7 days', exact: true }).click()

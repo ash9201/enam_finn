@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const base = process.env.FINN_BROWSER_URL || 'http://127.0.0.1:4173'
 const output = fileURLToPath(new URL('../../artifacts/theme-browser/', import.meta.url))
 await mkdir(output, { recursive: true })
-for (const name of ['style.css', 'briefing.css', 'research.css']) {
+for (const name of ['style.css', 'briefing.css', 'research.css', 'layout.css']) {
   const css = await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8')
   if (/#[\da-f]{3,8}\b|\brgba?\(/i.test(css))
     throw new Error(`${name} has a colour outside shared tokens.`)
@@ -185,13 +185,12 @@ try {
       await audit(page, `${size}-${choice}-research-error`)
       await page.screenshot({ path: `${output}/${size}-${choice}-error.png`, fullPage: true })
 
-      await page.goto(`${base}/?view=foundation`, { waitUntil: 'networkidle' })
       await page.route('**/health/live', (route) =>
         route.fulfill({ status: 503, headers: cors, body: 'Simulated failure' }),
       )
-      await page.getByRole('button', { name: 'Check API connection' }).click()
-      await page.getByText('API unavailable', { exact: true }).waitFor()
-      await audit(page, `${size}-${choice}-foundation-error`)
+      await page.goto(`${base}/?view=status`, { waitUntil: 'networkidle' })
+      await page.getByText('Unavailable', { exact: true }).first().waitFor()
+      await audit(page, `${size}-${choice}-status-error`)
       if (errors.length) throw new Error(errors.join('\n'))
       await context.close()
     }
@@ -216,7 +215,7 @@ try {
   await expect(page.getByLabel('Colour theme')).toHaveValue('dark')
   await audit(page, 'narrow-mobile-persisted-dark')
   const tab = await context.newPage()
-  await tab.goto(`${base}/?view=foundation`, { waitUntil: 'networkidle' })
+  await tab.goto(`${base}/?view=status`, { waitUntil: 'networkidle' })
   await tab.getByLabel('Colour theme').selectOption('light')
   await theme(page, 'light')
   await expect(page.getByLabel('Colour theme')).toHaveValue('light')
@@ -285,7 +284,7 @@ try {
     }),
   )
   const blockedPage = await blocked.newPage()
-  await blockedPage.goto(`${base}/?view=foundation`, { waitUntil: 'networkidle' })
+  await blockedPage.goto(`${base}/?view=status`, { waitUntil: 'networkidle' })
   await theme(blockedPage, 'dark')
   await blockedPage.getByLabel('Colour theme').selectOption('light')
   await theme(blockedPage, 'light')

@@ -1,5 +1,17 @@
 # Build history summary
 
+### Shared layout redesign - phase 1 (1 November)
+
+- Unified page chrome with compact desktop header navigation and a mobile bottom row
+  outside the scroll area. Replaced promotional introductions with functional titles,
+  removed the large summary strip and added shared spacing tokens.
+- Retained visited section state/history, drafts, results, evidence context and scroll;
+  deliberate company links still open the chosen research entry. Paused inactive
+  portfolio polling and kept shared alert preferences consistent.
+- Replaced the obsolete setup page with live connection-only System Status and a
+  return action. Page-specific contents, backend and calculation logic are unchanged.
+  See [scope and targeted verification](SHARED_LAYOUT.md).
+
 ### Investor QA fixes (1 November)
 
 - Reproduced cached-result reopening accumulating NTPC financial sections; fixed

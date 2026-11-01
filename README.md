@@ -1,6 +1,9 @@
 # FINN
 
-Latest: [investor QA fixes](docs/INVESTOR_QA.md) address repeated quarterly views,
+The [shared layout redesign](docs/SHARED_LAYOUT.md) adds compact desktop/mobile
+navigation, retained section state and System Status. Page-specific redesigns follow separately.
+
+[Investor QA fixes](docs/INVESTOR_QA.md) address repeated quarterly views,
 basis switching, navigation overlap, question coverage, concrete management figures
 and brief financial interpretation. Final backend regression: **190 tests pass**.
 
@@ -115,7 +118,8 @@ python scripts/npm.py run dev
 ```
 
 Open `http://localhost:5173`. `/` is Briefing, `/?view=research` is Research,
-`/?view=portfolio` is Portfolio, and `/?view=foundation` retains connection diagnostics.
+`/?view=portfolio` is Portfolio, and `/?view=status` is System Status.
+The old `/?view=foundation` URL is a compatibility alias.
 The bootstrap uses a SHA-256-verified workspace-local Node 24 and `.venv`; it does not
 change system PATH or PowerShell execution policy. On other platforms use Node 24 and
 Python 3.12 directly with the same package manifests.
@@ -152,12 +156,13 @@ python scripts/npm.py run build
 python scripts/npm.py exec -- playwright install chromium
 python scripts/npm.py run test:product
 python scripts/npm.py run test:browser
+python scripts/npm.py run test:layout
 ```
 
 Browser checks use real local API/cache connections; run both local servers first.
 They cover phone/desktop layout, source drawers, windows/settings, 15-company data,
 persisted research jobs, and an unknown ticker. Screenshots/results are in ignored
-`artifacts/`. `test:browser` checks the separate connection-diagnostics view.
+`artifacts/`. `test:browser` checks System Status; `test:layout` checks shared navigation/state.
 `python scripts/npm.py run record:demo` records a short phone walkthrough as a local
 WebM file. Set `FINN_BROWSER_URL` to record or test the deployed frontend.
 

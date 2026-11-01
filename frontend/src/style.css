@@ -1,17 +1,5 @@
 @import 'tailwindcss';
 
-.cache-check {
-  border-top: 1px solid var(--divider);
-  margin-top: 24px;
-  padding-top: 8px;
-}
-.cache-check small {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.7;
-  margin-top: 12px;
-}
 .secondary {
   background: var(--accent-fill) !important;
   color: var(--accent-strong) !important;
@@ -33,7 +21,7 @@ body {
 main {
   max-width: 1080px;
   margin: auto;
-  padding: 32px 48px;
+  padding: var(--space-5);
 }
 header {
   display: flex;
@@ -53,18 +41,10 @@ header {
 .wordmark span {
   color: var(--brand-mark);
 }
-.milestone,
 .eyebrow {
   font-size: 10px;
   font-weight: 650;
   letter-spacing: 2px;
-}
-.milestone {
-  color: var(--text-muted);
-}
-.intro {
-  margin: 76px 0 40px;
-  max-width: 650px;
 }
 .eyebrow {
   color: var(--gold);
@@ -72,23 +52,11 @@ header {
 }
 h1 {
   font-family: Georgia, serif;
-  font-size: clamp(40px, 6vw, 65px);
+  font-size: 28px;
   font-weight: 400;
   line-height: 1.1;
-  letter-spacing: -2px;
-  margin: 0 0 24px;
-}
-.lead {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1.8;
-  max-width: 510px;
-}
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px;
+  letter-spacing: -0.7px;
+  margin: 0;
 }
 .panel-top {
   display: flex;
@@ -152,13 +120,6 @@ select:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
-.header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 12px;
-}
 .theme-picker {
   position: relative;
   display: inline-flex;
@@ -218,26 +179,6 @@ select:focus-visible {
     display: block;
   }
 }
-.checklist {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  border-top: 1px solid var(--divider);
-  margin-top: 28px;
-  padding-top: 24px;
-}
-.checklist > div > span {
-  font-size: 10px;
-  color: var(--gold);
-}
-.checklist p {
-  font-size: 13px;
-  margin: 8px 0;
-}
-.checklist small {
-  color: var(--text-muted);
-  font-size: 11px;
-}
 footer {
   font-size: 10px;
   color: var(--text-muted);
@@ -251,39 +192,11 @@ footer {
   main {
     padding: 24px;
   }
-  .intro {
-    margin-top: 52px;
-  }
-  .panel {
-    padding: 22px;
-  }
-  .checklist {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-  .checklist > div {
-    display: grid;
-    grid-template-columns: 24px 1fr;
-    gap: 0 8px;
-    align-items: center;
-  }
-  .checklist small {
-    grid-column: 2;
-  }
-  .checklist p {
-    margin-top: 0;
-  }
   footer {
     flex-direction: column;
     gap: 8px;
   }
-  .milestone {
-    font-size: 9px;
-  }
   h1 {
     letter-spacing: -1.4px;
-  }
-  .lead {
-    font-size: 14px;
   }
 }

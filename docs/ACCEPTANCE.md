@@ -1,5 +1,10 @@
 # Working-prototype acceptance
 
+**Shared layout, phase 1 (1 November):** compact header/mobile navigation, functional
+titles, shared spacing and System Status. Desktop/mobile Light/Dark checks cover retained
+section state/history, company links, figure evidence, keyboard access and reserved
+navigation space. Build and credential scan pass. [Scope and checks](SHARED_LAYOUT.md).
+
 **Investor QA (1 November, latest):** 190 backend tests pass, production build and
 bundle credential scan pass. Reproduced and fixed duplicate cached NTPC results;
 four affected browser scenes verify one financial section, both bases, reserved

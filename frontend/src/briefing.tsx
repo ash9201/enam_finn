@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { publicRead } from './data'
-import Navigation from './navigation'
-import ThemeSelector from './theme'
+import { AppFooter, PageHeading } from './layout'
 
 type Filing = {
   id: string
@@ -77,12 +76,13 @@ const label = (category: string) =>
     unclassified: 'Review filing',
   })[category] || category
 
+let sessionPreferences: { price?: number; volume?: number } = {}
 function savedPreferences(): { price?: number; volume?: number } {
   try {
     const value = JSON.parse(localStorage.getItem('finn-alerts-v1') || '{}')
     return value && typeof value === 'object' ? value : {}
   } catch {
-    return {}
+    return sessionPreferences
   }
 }
 function savedRead(): string[] {
@@ -94,7 +94,13 @@ function savedRead(): string[] {
   }
 }
 
-export default function BriefingApp({ portfolio = false }: { portfolio?: boolean }) {
+export default function BriefingApp({
+  portfolio = false,
+  active = true,
+}: {
+  portfolio?: boolean
+  active?: boolean
+}) {
   const [companies, setCompanies] = useState<Company[]>([])
   const [filings, setFilings] = useState<Filing[]>([])
   const [prices, setPrices] = useState<Price[]>([])
@@ -138,13 +144,19 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
     }
   }
   useEffect(() => {
+    if (!active) return
+    // Alert preferences are shared by both retained views.
+    const preferences = savedPreferences()
+    setPriceThreshold(Number(preferences.price) || 4)
+    setVolumeThreshold(Number(preferences.volume) || 2)
     void load()
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') void load()
     }, 60000)
     return () => clearInterval(interval)
-  }, [])
+  }, [active])
   useEffect(() => {
+    sessionPreferences = { price: priceThreshold, volume: volumeThreshold }
     try {
       localStorage.setItem(
         'finn-alerts-v1',
@@ -243,48 +255,32 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
   }
 
   return (
-    <main className="briefing-app">
-      <header>
-        <a href="/" className="wordmark" aria-label="FINN home">
-          finn<span>.</span>
-        </a>
-        <div className="research-header">
-          <span className="active-label">{portfolio ? 'Portfolio' : 'Your briefing'}</span>
-          <button className="text-button" onClick={() => setShowSettings(!showSettings)}>
-            Alert settings ⚙
+    <main
+      className="briefing-app"
+      id={portfolio ? 'portfolio-content' : 'briefing-content'}
+      tabIndex={-1}
+    >
+      <PageHeading
+        title={portfolio ? 'Your Portfolio' : 'Your Briefing'}
+        actions={
+          <button
+            className="text-button"
+            aria-expanded={showSettings}
+            aria-controls={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
+            onClick={() => setShowSettings(!showSettings)}
+          >
+            Alert settings
           </button>
-          <ThemeSelector />
-        </div>
-      </header>
-      <section className="briefing-intro">
-        <p className="eyebrow">
-          {portfolio ? 'THE COMPANIES YOU FOLLOW.' : 'A LITTLE LESS NOISE.'}
-        </p>
-        <h1>
-          {portfolio ? (
-            <>
-              A view of
-              <br />
-              your watchlist.
-            </>
-          ) : (
-            <>
-              What deserves
-              <br />
-              your attention.
-            </>
-          )}
-        </h1>
-        <p className="lead">
-          {portfolio
-            ? 'A mock portfolio of 15 listed companies. Prices reflect completed trading sessions.'
-            : 'The changes worth reviewing across your portfolio. The routine paperwork stays out of your way.'}
-        </p>
-      </section>
+        }
+      />
       {showSettings && (
-        <section className="settings-panel" aria-label="Alert settings">
+        <section
+          className="settings-panel"
+          id={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
+          aria-label="Alert settings"
+        >
           <div>
-            <h2>Your definition of unusual.</h2>
+            <h2>Alert thresholds</h2>
             <p>Applied to the latest completed session. Saved in this browser.</p>
           </div>
           <label>
@@ -328,25 +324,8 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
       )}
       {!loading && (
         <>
-          <div className="briefing-stats">
-            <div>
-              <strong>{companies.length}</strong>
-              <span>companies followed</span>
-            </div>
-            <div>
-              <strong>{important.length}</strong>
-              <span>filings to review</span>
-            </div>
-            <div>
-              <strong>{alerts.length}</strong>
-              <span>EOD signals</span>
-            </div>
-            <div>
-              <strong>{routine.length}</strong>
-              <span>routine filings tucked away</span>
-            </div>
-          </div>
           <div className="freshness">
+            {portfolio && <span>{companies.length} companies · Demo watchlist</span>}
             <span>
               {filingsSync?.last_success_at
                 ? `Filings checked ${dateTime(filingsSync.last_success_at)}`
@@ -426,7 +405,7 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
                 <section className="signals-section">
                   <div className="section-heading">
                     <h2>Unusual, by your rules.</h2>
-                    <span>Latest completed session</span>
+                    <span>{alerts.length} signals · Latest completed session</span>
                   </div>
                   <div className="signal-grid">
                     {alerts.map((price) => (
@@ -456,7 +435,10 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
               )}
               <section className="filings-section" aria-labelledby="filings-heading">
                 <div className="section-heading">
-                  <h2 id="filings-heading">Your portfolio, filtered.</h2>
+                  <h2 id="filings-heading">
+                    Your portfolio, filtered.{' '}
+                    <small className="context-count">{important.length} to review</small>
+                  </h2>
                   <div className="window-options" aria-label="Filing time window">
                     {[
                       ['24h', '24 hours'],
@@ -554,13 +536,11 @@ export default function BriefingApp({ portfolio = false }: { portfolio?: boolean
           </div>
         </>
       )}
-      <footer>
-        <span>Less noise. More room for judgment.</span>
+      <AppFooter>
         <span>
           {lastLoaded ? `Saved updates loaded ${dateTime(lastLoaded)}` : 'No live prices'}
         </span>
-      </footer>
-      <Navigation active={portfolio ? 'portfolio' : 'briefing'} />
+      </AppFooter>
     </main>
   )
 }

@@ -119,11 +119,12 @@ try {
     }
     for (const proportion of [0, 0.5, 1]) {
       await page
-        .locator('.research-app')
+        .locator('.app-view[data-view="research"]')
         .evaluate((el, n) => (el.scrollTop = n * (el.scrollHeight - el.clientHeight)), proportion)
-      const content = await page.locator('.research-app').boundingBox(),
+      const content = await page.locator('.app-view[data-view="research"]').boundingBox(),
         nav = await page.getByRole('navigation', { name: 'Main navigation' }).boundingBox()
-      expect(content.y + content.height).toBeLessThanOrEqual(nav.y)
+      if (viewport.width < 768) expect(content.y + content.height).toBeLessThanOrEqual(nav.y)
+      else expect(content.y).toBeGreaterThanOrEqual(nav.y + nav.height)
     }
     if (symbol === 'SUNPHARMA' && theme === 'dark') {
       await page.evaluate(() => {
@@ -131,7 +132,7 @@ try {
         banner.className = 'recorded-notice'
         banner.id = 'qa-layout-notice'
         banner.textContent = 'Recorded demo layout check. Original source dates remain visible.'
-        document.getElementById('root').prepend(banner)
+        document.querySelector('.app-shell').prepend(banner)
       })
       const nav = await page.getByRole('navigation', { name: 'Main navigation' }).boundingBox()
       expect(nav.y + nav.height).toBeLessThanOrEqual(viewport.height)
