@@ -22,14 +22,24 @@ function Application() {
   const view = viewOf(url)
   const [visited, setVisited] = useState<View[]>([view])
   const [researchEntry, setResearchEntry] = useState(0)
+  const [briefingEntry, setBriefingEntry] = useState(0)
   const locations = useRef<Partial<Record<View, string>>>({ [view]: url })
   const lastSection = useRef<View>(view === 'status' ? 'briefing' : view)
   const scrollPositions = useRef<Partial<Record<View, number>>>({})
   const pages = useRef<Partial<Record<View, HTMLDivElement | null>>>({})
   const shouldFocus = useRef(false)
 
-  function navigate(nextUrl: string, push = true, explicitResearch = false) {
+  function navigate(
+    nextUrl: string,
+    push = true,
+    explicitResearch = false,
+    explicitBriefing = false,
+  ) {
     const next = viewOf(nextUrl)
+    if (explicitBriefing) {
+      setBriefingEntry((value) => value + 1)
+      scrollPositions.current.briefing = 0
+    }
     if (
       next === 'research' &&
       locations.current.research &&
@@ -94,7 +104,11 @@ function Application() {
       !anchor.hasAttribute('data-return-to-finn') &&
       viewOf(target.href) === 'research' &&
       ['symbol', 'analysis', 'question', 'refresh'].some((key) => target.searchParams.has(key))
-    navigate(target.pathname + target.search, true, explicitResearch)
+    const explicitBriefing =
+      !anchor.dataset.section &&
+      viewOf(target.href) === 'briefing' &&
+      target.searchParams.has('company')
+    navigate(target.pathname + target.search, true, explicitResearch, explicitBriefing)
   }
 
   return (
@@ -127,7 +141,12 @@ function Application() {
                 active={view === section}
               />
             ) : (
-              <BriefingApp portfolio={section === 'portfolio'} active={view === section} />
+              <BriefingApp
+                portfolio={section === 'portfolio'}
+                active={view === section}
+                entryUrl={locations.current[section]}
+                entryKey={briefingEntry}
+              />
             )}
           </div>
         ))}

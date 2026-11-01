@@ -41,10 +41,10 @@ try {
     .getByRole('navigation', { name: 'Main navigation' })
     .getByRole('link', { name: 'Portfolio' })
     .click()
-  await page.locator('.portfolio-card').first().waitFor({ timeout: 20000 })
-  await page.locator('.portfolio-card').first().scrollIntoViewIfNeeded()
+  await page.locator('.portfolio-row').first().waitFor({ timeout: 20000 })
+  await page.locator('.portfolio-row').first().scrollIntoViewIfNeeded()
   await pause()
-  await page.locator('.portfolio-card').nth(4).scrollIntoViewIfNeeded()
+  await page.locator('.portfolio-row').nth(4).scrollIntoViewIfNeeded()
   await pause()
 } finally {
   await context.close()

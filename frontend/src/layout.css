@@ -181,7 +181,6 @@
     .comparison-panel,
     .settings-panel,
     .filing-card,
-    .portfolio-card,
     .signal-card
   ) {
   padding: var(--panel-space);

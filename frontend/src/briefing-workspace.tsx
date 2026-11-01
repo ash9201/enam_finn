@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './briefing-workspace.css'
 import BriefingEvidence from './briefing-evidence'
 import {
@@ -49,6 +49,8 @@ export default function BriefingWorkspace({
   onSettings,
   priceThreshold,
   volumeThreshold,
+  entryUrl,
+  entryKey,
 }: {
   filings: Filing[]
   companies: Company[]
@@ -60,6 +62,8 @@ export default function BriefingWorkspace({
   onSettings: () => void
   priceThreshold: number
   volumeThreshold: number
+  entryUrl?: string
+  entryKey?: number
 }) {
   const [filters, setFilters] = useState<FilingFilters>({
     company: '',
@@ -72,6 +76,21 @@ export default function BriefingWorkspace({
   const [view, setView] = useState('company')
   const [includeRoutine, setIncludeRoutine] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    const params = new URL(entryUrl || window.location.href, window.location.origin).searchParams
+    const company = params.get('company')
+    if (!company || !/^[A-Z0-9&-]{1,30}$/.test(company)) return
+    setFilters({
+      company,
+      category: '',
+      review: 'all',
+      window: params.get('window') === '24h' ? '24h' : '7d',
+      start: '',
+      end: '',
+    })
+    setView('company')
+    setExpanded((previous) => new Set([...previous, `main:${company}`]))
+  }, [entryUrl, entryKey])
   const [undo, setUndo] = useState<{
     ids: string[]
     previous: Set<string>

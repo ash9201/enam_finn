@@ -149,68 +149,11 @@
   font: inherit;
   padding: 9px;
 }
-.portfolio-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.portfolio-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 22px;
-}
-.portfolio-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-.portfolio-card-top > span:last-child {
-  font-size: 9px;
-  color: var(--text-muted);
-  text-align: right;
-}
-.portfolio-card h2 {
-  font-size: 13px;
-  line-height: 1.7;
-  margin: 18px 0 16px;
-  font-weight: 500;
-  min-height: 44px;
-}
-.portfolio-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-.portfolio-price strong {
-  font-size: 21px;
-  font-family: Georgia, serif;
-  font-weight: 400;
-}
-.portfolio-price > span {
-  font-size: 11px;
-}
 .positive {
   color: var(--positive);
 }
 .negative {
   color: var(--negative);
-}
-.portfolio-card > p {
-  font-size: 9px;
-  color: var(--text-muted);
-  line-height: 1.8;
-}
-.portfolio-card > .investigate-link {
-  display: inline-block;
-  margin-top: 10px;
-}
-@media (max-width: 800px) {
-  .portfolio-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 @media (max-width: 600px) {
   .freshness {
@@ -230,21 +173,12 @@
   .section-heading > span {
     font-size: 9px;
   }
-  .portfolio-grid {
-    grid-template-columns: 1fr;
-  }
   .settings-panel {
     grid-template-columns: 1fr;
     padding: 20px;
   }
   .custom-window {
     flex-direction: column;
-  }
-  .portfolio-card h2 {
-    min-height: 0;
-  }
-  .portfolio-price strong {
-    font-size: 25px;
   }
 }
 .recorded-notice {

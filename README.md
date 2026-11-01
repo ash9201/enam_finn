@@ -1,5 +1,9 @@
 # FINN
 
+The [Portfolio redesign](docs/PORTFOLIO_REDESIGN.md) adds a sortable desktop
+watchlist and compact mobile rows, genuine activity flags, company Briefing links,
+and central EOD/source metadata. Price calculations and watchlist membership are unchanged.
+
 The [Briefing redesign](docs/BRIEFING_REDESIGN.md) groups source-backed developments
 by company/event, adds combined filters and clear local review states, and separates
 filing windows from EOD thresholds. Latest regression: **209 backend + 12 frontend model tests pass**.

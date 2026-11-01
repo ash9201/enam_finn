@@ -1,5 +1,21 @@
 # Build history summary
 
+### Portfolio watchlist redesign (2 November)
+
+- Replaced oversized cards with a sortable desktop table and mobile rows using
+  the shared warm light/dark tokens. Full names, sectors, Last close, signed 1D
+  change and primary Research actions are visible, with optional company details.
+- Centralized EOD date and source methodology, preserving original per-company
+  source URLs and local freshness/error warnings. Membership and calculations
+  are unchanged; these are share prices, not invested amounts or returns.
+- Shared Briefing's existing threshold predicate and grouped recent events for
+  genuine attention indicators, with filtered company Briefing links and retained
+  navigation state. No backend or model workflow changes.
+- Six model checks and targeted browser verification passed for all 15 real saved
+  rows, sorting, expansion, links, preferences, source attribution, contrast and
+  failure handling across desktop/mobile and both themes. See
+  [Portfolio redesign](PORTFOLIO_REDESIGN.md) for actual data and test boundaries.
+
 ### Research workspace redesign (1 November)
 
 - Added a dated official 2,620-company NSE directory with name/symbol histories,

@@ -3,22 +3,9 @@ import { publicRead } from './data'
 import { AppFooter, PageHeading } from './layout'
 import BriefingWorkspace from './briefing-workspace'
 import type { Filing } from './briefing-model'
+import PortfolioWorkspace from './portfolio-workspace'
+import { priceSignals, type Price } from './portfolio-model'
 
-type Price = {
-  symbol: string
-  data: {
-    last_session: string
-    close: number
-    volume: number
-    price_change_pct: number | null
-    volume_ratio: number | null
-    volume_note?: string
-    source_note?: string | null
-    source_url?: string | null
-  } | null
-  error: string | null
-  last_success_at: string | null
-}
 type Sync = {
   id: string
   state: string
@@ -42,12 +29,6 @@ const dateTime = (date: string) =>
     minute: '2-digit',
     timeZone: 'Asia/Kolkata',
   }).format(new Date(date)) + ' IST'
-const rupees = (value: number) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 2,
-  }).format(value)
 let sessionPreferences: { price?: number; volume?: number } = {}
 function savedPreferences(): { price?: number; volume?: number } {
   try {
@@ -69,9 +50,13 @@ function savedRead(): string[] {
 export default function BriefingApp({
   portfolio = false,
   active = true,
+  entryUrl,
+  entryKey = 0,
 }: {
   portfolio?: boolean
   active?: boolean
+  entryUrl?: string
+  entryKey?: number
 }) {
   const [companies, setCompanies] = useState<Company[]>([])
   const [filings, setFilings] = useState<Filing[]>([])
@@ -149,21 +134,14 @@ export default function BriefingApp({
       return next
     })
   }
-  const alerts = prices.filter(
-    (price) =>
-      !price.error &&
-      price.data &&
-      ((price.data.price_change_pct !== null &&
-        Math.abs(price.data.price_change_pct) >= priceThreshold) ||
-        (price.data.volume_ratio !== null && price.data.volume_ratio >= volumeThreshold)),
-  )
+  const alerts = prices.filter((price) => {
+    const signals = priceSignals(price, priceThreshold, volumeThreshold)
+    return signals.price || signals.volume
+  })
   const filingsSync = syncs.find((sync) => sync.id === 'filings')
   const pricesSync = syncs.find((sync) => sync.id === 'prices')
   const missingPrices =
     companies.length - prices.filter((price) => price.data && !price.error).length
-  const researchLink = (symbol: string, refresh = false) =>
-    `/?view=research&symbol=${encodeURIComponent(symbol)}${refresh ? '&refresh=1' : ''}`
-
   const alertSettings = (
     <section
       className="settings-panel"
@@ -238,22 +216,23 @@ export default function BriefingApp({
       )}
       {!loading && (
         <>
-          <div className="freshness">
-            {portfolio && <span>{companies.length} companies · Demo watchlist</span>}
-            <span>
-              {filingsSync?.last_success_at
-                ? `Filings checked ${dateTime(filingsSync.last_success_at)}`
-                : 'Filings not yet collected'}
-            </span>
-            <span>
-              {pricesSync?.last_success_at
-                ? `EOD checked ${dateTime(pricesSync.last_success_at)}`
-                : 'EOD not fully refreshed'}
-            </span>
-            <button className="text-button" onClick={() => void load()}>
-              Reload saved updates ↻
-            </button>
-          </div>
+          {!portfolio && (
+            <div className="freshness">
+              <span>
+                {filingsSync?.last_success_at
+                  ? `Filings checked ${dateTime(filingsSync.last_success_at)}`
+                  : 'Filings not yet collected'}
+              </span>
+              <span>
+                {pricesSync?.last_success_at
+                  ? `EOD checked ${dateTime(pricesSync.last_success_at)}`
+                  : 'EOD not fully refreshed'}
+              </span>
+              <button className="text-button" onClick={() => void load()}>
+                Reload saved updates ↻
+              </button>
+            </div>
+          )}
           {syncs.some((sync) => sync.state === 'failed' || sync.state === 'partial') && (
             <div className="coverage-warning" role="status">
               Some sources are incomplete.{' '}
@@ -267,54 +246,21 @@ export default function BriefingApp({
             </div>
           )}
           {portfolio ? (
-            <section className="portfolio-grid" aria-label="Portfolio watchlist">
-              {companies.map((company) => {
-                const price = prices.find((item) => item.symbol === company.symbol)
-                return (
-                  <article key={company.symbol} className="portfolio-card">
-                    <div className="portfolio-card-top">
-                      <span className="ticker-badge">{company.symbol}</span>
-                      <span>{company.sector}</span>
-                    </div>
-                    <h2>{company.name}</h2>
-                    <div className="portfolio-price">
-                      <strong>{price?.data ? rupees(price.data.close) : '—'}</strong>
-                      <span
-                        className={
-                          price?.data?.price_change_pct !== null &&
-                          (price?.data?.price_change_pct || 0) < 0
-                            ? 'negative'
-                            : 'positive'
-                        }
-                      >
-                        {price?.data?.price_change_pct != null
-                          ? `${price.data.price_change_pct > 0 ? '+' : ''}${price.data.price_change_pct.toFixed(2)}%`
-                          : 'Comparison unavailable'}
-                      </span>
-                    </div>
-                    <p>
-                      {price?.data ? `EOD · ${price.data.last_session}` : 'Price unavailable'}
-                      {price?.error ? ' · Refresh failed; last saved value shown' : ''}
-                    </p>
-                    {price?.data?.source_note && (
-                      <p className="fine-print">
-                        {price.data.source_note}{' '}
-                        {price.data.source_url?.startsWith('https://nsearchives.nseindia.com/') && (
-                          <a href={price.data.source_url} target="_blank" rel="noopener noreferrer">
-                            NSE source ↗
-                          </a>
-                        )}
-                      </p>
-                    )}
-                    <a className="investigate-link" href={researchLink(company.symbol)}>
-                      Research company ↗
-                    </a>
-                  </article>
-                )
-              })}
-            </section>
+            <PortfolioWorkspace
+              companies={companies}
+              prices={prices}
+              filings={filings}
+              priceThreshold={priceThreshold}
+              volumeThreshold={volumeThreshold}
+              onReload={() => void load()}
+              pricesCheckedAt={pricesSync?.last_success_at}
+              filingsCheckedAt={filingsSync?.last_success_at}
+              capturedSince={filingsSync?.captured_since}
+            />
           ) : (
             <BriefingWorkspace
+              entryUrl={entryUrl}
+              entryKey={entryKey}
               filings={filings}
               companies={companies}
               read={read}
@@ -327,23 +273,25 @@ export default function BriefingApp({
               volumeThreshold={volumeThreshold}
             />
           )}
-          <div className="coverage-footnote">
-            <strong>Know the coverage.</strong>
-            <p>
-              Recent NSE RSS and filings captured since monitoring began
-              {filingsSync?.captured_since ? ` (${dateTime(filingsSync.captured_since)})` : ''}.
-              Earlier history may be incomplete.{' '}
-              {filingsSync?.details.automation_verified === false
-                ? 'The last refresh was manual; automatic announcement updates are not yet verified. '
-                : filingsSync?.details.automation_verified === true
-                  ? 'Announcements are checked on a schedule. '
-                  : 'Coverage reflects the last completed scan shown above. '}
-              EOD signals use the latest completed session, independently of the filing window.{' '}
-              {missingPrices > 0
-                ? `${missingPrices} of ${companies.length} prices need attention.`
-                : `${prices.length} portfolio prices available.`}
-            </p>
-          </div>
+          {!portfolio && (
+            <div className="coverage-footnote">
+              <strong>Know the coverage.</strong>
+              <p>
+                Recent NSE RSS and filings captured since monitoring began
+                {filingsSync?.captured_since ? ` (${dateTime(filingsSync.captured_since)})` : ''}.
+                Earlier history may be incomplete.{' '}
+                {filingsSync?.details.automation_verified === false
+                  ? 'The last refresh was manual; automatic announcement updates are not yet verified. '
+                  : filingsSync?.details.automation_verified === true
+                    ? 'Announcements are checked on a schedule. '
+                    : 'Coverage reflects the last completed scan shown above. '}
+                EOD signals use the latest completed session, independently of the filing window.{' '}
+                {missingPrices > 0
+                  ? `${missingPrices} of ${companies.length} prices need attention.`
+                  : `${prices.length} portfolio prices available.`}
+              </p>
+            </div>
+          )}
         </>
       )}
       <AppFooter>

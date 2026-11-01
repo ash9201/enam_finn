@@ -130,9 +130,9 @@ try {
         .click()
       await theme(page, choice)
       await expect(page.getByLabel('Colour theme')).toHaveValue(choice)
-      await expect(page.locator('.portfolio-card')).toHaveCount(15)
-      const positive = page.locator('.portfolio-price .positive').first()
-      const negative = page.locator('.portfolio-price .negative').first()
+      await expect(page.locator('.portfolio-row')).toHaveCount(15)
+      const positive = page.locator('.portfolio-change.positive').first()
+      const negative = page.locator('.portfolio-change.negative').first()
       if ((await positive.count()) && (await negative.count())) {
         if (
           (await positive.evaluate((e) => getComputedStyle(e).color)) ===

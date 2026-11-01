@@ -19,13 +19,18 @@ try {
     const errors = []
     page.on('pageerror', (error) => errors.push(error.name))
     await page.goto(`${base}/?view=portfolio`, { waitUntil: 'networkidle' })
-    const cards = page.locator('.portfolio-card')
+    const cards = page.locator('.portfolio-row')
     await cards.first().waitFor({ timeout: 20000 })
-    if ((await cards.count()) !== 15) throw new Error('Expected 15 portfolio price cards.')
+    if ((await cards.count()) !== 15) throw new Error('Expected 15 portfolio rows.')
+    const common = await page.locator('.portfolio-session time').getAttribute('datetime')
+    if (expectedSession && common !== expectedSession)
+      throw new Error('Unexpected common EOD session.')
+    await page.locator('.portfolio-method summary').click()
+    const methodology = await page.locator('.portfolio-method').innerText()
     let officialSources = 0
     for (const card of await cards.all()) {
       const text = await card.innerText()
-      const session = text.match(/EOD\s*·\s*(\d{4}-\d{2}-\d{2})/)?.[1]
+      const session = await card.getAttribute('data-session')
       if (!session || (expectedSession && session !== expectedSession))
         throw new Error(`Unexpected displayed price session: ${session}`)
       if (text.includes('Refresh failed') !== expectFailure)
@@ -36,7 +41,7 @@ try {
         if (
           !href.startsWith('https://nsearchives.nseindia.com/content/cm/') ||
           !href.includes(session.replaceAll('-', '')) ||
-          !text.includes('Prior 20 sessions: Yahoo Finance.')
+          !methodology.includes('Prior 20 sessions: Yahoo Finance.')
         )
           throw new Error('Mixed-provider price provenance is missing or dated incorrectly.')
         officialSources++
@@ -48,11 +53,9 @@ try {
     )
       throw new Error('Price labels caused overflow or an uncaught browser error.')
     await cards.first().evaluate((element) => element.scrollIntoView({ block: 'center' }))
-    await cards
-      .first()
-      .screenshot({
-        path: `${output}/${name}-${expectFailure ? 'failed-refresh' : 'verified-source'}.png`,
-      })
+    await cards.first().screenshot({
+      path: `${output}/${name}-${expectFailure ? 'failed-refresh' : 'verified-source'}.png`,
+    })
     checks.push({
       viewport: name,
       companies: 15,
