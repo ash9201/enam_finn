@@ -192,10 +192,10 @@ export default function PortfolioWorkspace({
             excluded from that average. Missing or split-affected comparisons remain unavailable.
           </p>
           <p>
-            Recent events are non-routine disclosures captured over the last seven days, grouped
-            using Briefing’s existing source-backed references. Capture began{' '}
-            {capturedSince ? stamp(capturedSince) : 'when monitoring started'}; earlier history may
-            be incomplete.
+            Recent events are company updates captured over the last seven days, excluding
+            priority-0 administrative records and grouped using Briefing’s source-backed references.
+            Capture began {capturedSince ? stamp(capturedSince) : 'when monitoring started'};
+            earlier history may be incomplete.
           </p>
           <p>
             Prioritize unusual activity places companies crossing either configured EOD threshold

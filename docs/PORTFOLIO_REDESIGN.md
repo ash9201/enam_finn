@@ -17,8 +17,9 @@ Company-name buttons expand trading volume, volume ratio and source limitations.
 - Price and volume signals use the existing browser-local thresholds (default
   ±4% and 2× prior 20-session average). The exact predicate is shared with Briefing.
   Failed price fetches cannot create signals from retained values.
-- Recent-event counts use the existing Briefing grouping of non-routine captured
-  filings within seven days. These count events rather than individual PDFs,
+- Recent-event counts use the existing Briefing grouping of captured company updates
+  above administrative priority 0 within seven days. Priority-1 informational events
+  remain included even though their significance label is Routine. These count events rather than individual PDFs,
   exclude future records, and retain all source identities/review state in Briefing.
 - **Prioritize unusual activity** is a separate checkbox, enabled by default.
   Companies crossing either configured threshold form the first group; one versus
