@@ -633,6 +633,8 @@ def build_result(company, documents, facts, rejected, usage):
 
 
 def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lambda stage: None):
+    from finn.financial_insights import with_performance
+
     cached = store.rows(
         "finn_research_cache",
         symbol="eq." + symbol,
@@ -651,7 +653,7 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
         if (datetime.now(UTC) - checked).total_seconds() < 86400:
             if publish and not cached[0]["is_public"]:
                 store.patch("finn_research_cache", {"is_public": True}, id="eq." + cached[0]["id"])
-            return {**cached[0]["result"], "cached": True}
+            return with_performance({**cached[0]["result"], "cached": True})
     progress("discovery")
     facts, documents, rejected, usage = [], [], [], []
     with public_client() as client:
@@ -864,7 +866,10 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
         ]
         for f in facts
     ]
-    result = build_result(company, documents, facts, rejected, usage)
+    result = with_performance(build_result(company, documents, facts, rejected, usage))
+    from finn.disclosed_context import add_disclosed_context
+
+    result = add_disclosed_context(store, result)
     fingerprint = hashlib.sha256(
         json.dumps(
             [VERSION, RESULTS_VERSION, [d["sha256"] for d in documents], signature], sort_keys=True

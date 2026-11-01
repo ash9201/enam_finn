@@ -1,5 +1,10 @@
 # Quarterly financial results
 
+The [1 November investor QA release](INVESTOR_QA.md) adds concise deterministic
+performance observations, directly cited current-quarter note context where verified,
+additive preservation of missing native financial pages, and fixes repeated results
+rendering and navigation overlap. The original figures and comparison policy remain.
+
 FINN acquires original quarterly filings and compares verified Revenue, explicitly
 reported EBITDA, PBT and PAT. Research has a Quarterly results action; actual-results
 briefing cards offer Compare quarters. Acquisition is generic for NSE tickers with

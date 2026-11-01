@@ -1,6 +1,42 @@
 .financial-results {
   margin-top: 26px;
 }
+.financial-performance {
+  margin: 22px 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-read);
+  color: var(--text);
+}
+.financial-performance p:not(.eyebrow) {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.financial-performance .eyebrow {
+  margin: 0 0 10px;
+}
+.financial-performance details,
+.financial-performance small,
+.basis-availability {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.financial-performance summary {
+  cursor: pointer;
+  min-height: 36px;
+}
+.performance-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.financial-bases button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 .financial-partial {
   padding: 12px 14px;
   border-left: 2px solid var(--warning-border);

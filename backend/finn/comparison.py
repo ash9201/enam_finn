@@ -467,6 +467,8 @@ what is missing and suggest the most relevant investigation. Do not manufacture 
 
 
 def compare_management(store, corpus, *, refresh=False, publish=False, progress=lambda stage: None):
+    from finn.management_readings import concrete_comparison
+
     model = os.getenv("GEMINI_LITE_MODEL", "gemini-3.5-flash-lite")
     key = hashlib.sha256(
         json.dumps([corpus["symbol"], corpus["corpus_fingerprint"], model, VERSION]).encode()
@@ -475,7 +477,9 @@ def compare_management(store, corpus, *, refresh=False, publish=False, progress=
     if cached and (cached[0]["result"].get("comparison") or not refresh):
         if publish:
             store.patch("finn_research_cache", {"is_public": True}, id="eq." + cached[0]["id"])
-        return financial_context(store, {**cached[0]["result"], "cached": True})
+        return financial_context(
+            store, concrete_comparison({**cached[0]["result"], "cached": True})
+        )
     progress("retrieval")
     passages = comparison_passages(store, corpus)
     result = {
@@ -634,4 +638,4 @@ def compare_management(store, corpus, *, refresh=False, publish=False, progress=
         ],
         conflict="cache_key",
     )
-    return financial_context(store, result)
+    return financial_context(store, concrete_comparison(result))

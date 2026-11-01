@@ -1,5 +1,9 @@
 # FINN
 
+Latest: [investor QA fixes](docs/INVESTOR_QA.md) address repeated quarterly views,
+basis switching, navigation overlap, question coverage, concrete management figures
+and brief financial interpretation. Final backend regression: **189 tests pass**.
+
 A mobile-first investor attention inbox and primary-source company research prototype
 for the ENAM AI Engineer challenge. The first working release includes **Push and Pull**
 with real sources. The original [plan](docs/PLAN.md) records scope and trade-offs.
@@ -14,9 +18,9 @@ reactivated if needed after turning GitHub scheduling off. Prices preserve actua
 session dates, with bounded rate-limit retries and explicit primary-source recovery.
 See [acceptance](docs/ACCEPTANCE.md).
 
-The [latest research experience report](docs/RESEARCH_IMPROVEMENTS.md) records measured
+The [31 October research experience report](docs/RESEARCH_IMPROVEMENTS.md) records measured
 cache/acquisition latency, richer answers, 15-company financial coverage, reviewed
-management comparisons and resumable indexing. Full regression: **173 tests pass**.
+management comparisons and resumable indexing. That release passed 173 backend tests.
 
 ## What works
 

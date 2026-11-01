@@ -1,5 +1,21 @@
 # Build history summary
 
+### Investor QA fixes (1 November)
+
+- Reproduced cached-result reopening accumulating NTPC financial sections; fixed
+  answer identity reuse and generation boundaries. Both NTPC bases and the working
+  SUNPHARMA reference pass repeated-view tests. Research navigation has reserved space.
+- Added bounded intent-aware evidence selection and a required response section per
+  requested aspect. Real owner questions verify better INFY commercial focus and CCL
+  demand/capacity/profitability/growth coverage. M&M numeric contribution limitations
+  are explicit; unapproved segment tables never become figures.
+- Kept the working CCL management comparison intact. KPIT now repeats the actual
+  primary-source figures while explicitly preserving unit/period uncertainty.
+- Added deterministic quarterly observations and preserved missing financial notes
+  additively. SUNPHARMA's current-quarter disclosures are cited without inventing a
+  complete earnings bridge. Final regression: 189 pass; build/bundle checks and four
+  targeted viewport/theme scenes pass. [Detailed report](INVESTOR_QA.md).
+
 ### Research experience improvements (31 October, latest)
 
 - Preserved main at release/pre-research-improvements-20261031 before development.

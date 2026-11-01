@@ -116,6 +116,8 @@ type Answer = {
   }
   timings?: { queue_ms: number; processing_ms: number; span_ms: Record<string, number> }
   financial_results?: ResultsData
+  reading_version?: string
+  question_coverage?: { aspect: string; label: string; status: string; note: string | null }[]
   evidence_context?: EvidenceContext
   investigation?: {
     other_documents_retrieved: number
@@ -231,6 +233,17 @@ type Company = {
   sector: string | null
   source_checked_at: string | null
 }
+function answerIdentity(answer: Answer) {
+  return [
+    answer.id,
+    answer.generated_at,
+    answer.source_checked_at,
+    answer.financial_results?.performance_version,
+    answer.financial_results?.context_version,
+    answer.reading_version,
+  ].join(':')
+}
+
 function evidenceSelection(answer: Answer, claim: Claim): Selection {
   const claims = [
     ...answer.claims,
@@ -720,7 +733,11 @@ export default function ResearchApp() {
             setTrail((items) =>
               [...items.filter((item) => item.id !== answer.id), answer].slice(-6),
             )
-          setAnswer(job.result)
+          setAnswer((previous) =>
+            previous && answerIdentity(previous) === answerIdentity(job.result)
+              ? previous
+              : job.result,
+          )
           setQuestion(query)
           setContext(anchor)
           setIncludeHistory(history)
@@ -848,7 +865,7 @@ export default function ResearchApp() {
   const current =
     answer?.symbol === ticker.trim().toUpperCase().replace(/\.NS$/, '') ? answer : null
   const visibleTrail = trail.filter((item) => item.id !== current?.id)
-  return (
+  const researchContent = (
     <main className="research-app">
       <header>
         <a href="/" className="wordmark" aria-label="FINN home">
@@ -1013,6 +1030,7 @@ export default function ResearchApp() {
               onClick={() => {
                 setQuestion(RESULTS_QUESTION)
                 if (savedResults?.symbol === ticker) {
+                  if (answer && answerIdentity(answer) === answerIdentity(savedResults)) return
                   if (answer && answer.id !== savedResults.id)
                     setTrail((items) =>
                       [...items.filter((item) => item.id !== answer.id), answer].slice(-6),
@@ -1144,7 +1162,12 @@ export default function ResearchApp() {
         </nav>
       )}
       {current && (
-        <section className="answer-panel" aria-labelledby="answer-heading" ref={answerPanel}>
+        <section
+          key={answerIdentity(current)}
+          className="answer-panel"
+          aria-labelledby="answer-heading"
+          ref={answerPanel}
+        >
           <div className="answer-heading">
             <div>
               <p className="eyebrow">{current.symbol} · COMPANY RESEARCH</p>
@@ -1166,6 +1189,17 @@ export default function ResearchApp() {
             </div>
           )}
           <p className="answer-question">{current.question}</p>
+          {current.question_coverage?.some((item) => item.status !== 'covered') && (
+            <aside className="question-gaps" aria-label="Unresolved parts of your question">
+              {current.question_coverage
+                .filter((item) => item.status !== 'covered')
+                .map((item) => (
+                  <p key={item.aspect}>
+                    <strong>{item.label}:</strong> {item.note}
+                  </p>
+                ))}
+            </aside>
+          )}
           {current.investigation?.assessment && (
             <p className="investigation-note" role="status">
               {current.investigation.assessment}
@@ -1190,8 +1224,9 @@ export default function ResearchApp() {
           </div>
           {current.financial_results ? (
             <FinancialResults
-              key={current.id}
+              key={answerIdentity(current)}
               data={current.financial_results}
+              claims={current.claims}
               onEvidence={(index) => {
                 const claim = current.claims[index]
                 if (claim) setSelected(evidenceSelection(current, claim))
@@ -1465,7 +1500,12 @@ export default function ResearchApp() {
           }
         />
       )}
-      <Navigation active="research" />
     </main>
+  )
+  return (
+    <div className="research-shell">
+      {researchContent}
+      <Navigation active="research" />
+    </div>
   )
 }

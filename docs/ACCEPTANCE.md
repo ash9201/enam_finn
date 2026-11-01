@@ -1,5 +1,13 @@
 # Working-prototype acceptance
 
+**Investor QA (1 November, latest):** 189 backend tests pass, production build and
+bundle credential scan pass. Reproduced and fixed duplicate cached NTPC results;
+four affected browser scenes verify one financial section, both bases, reserved
+navigation space, SUNPHARMA's working figures and interpretations, evidence controls,
+unavailable-basis messaging and no page errors/overflow. Owner research questions were
+reviewed against real primary documents. M&M numeric contributions remain explicitly
+unverified. [Actual checks and limits](INVESTOR_QA.md).
+
 **Research experience release (31 October, latest):** **173 backend tests pass**,
 TypeScript/Vite build and privileged-credential asset scan pass. One consolidated
 390x844 / 1440x1000 Light/Dark browser matrix passes contrast, overflow, figure evidence,

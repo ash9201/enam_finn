@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from urllib.parse import quote
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, create_model
 
 from finn.config import first_env
 from finn.corpus import ensure_corpus, now
@@ -21,7 +21,7 @@ from finn.retrieval import profile_identity, retrieval_profile, retrieve_with_di
 from finn.services import DependencyError, MissingConfiguration, require_ok
 from finn.timing import timed
 
-PROMPT_VERSION = "grounded-analysis-v4"
+PROMPT_VERSION = "grounded-analysis-v5.7-intent-coverage"
 DEFAULT_QUESTION = "Explain the core business and its main services or products."
 
 
@@ -44,6 +44,12 @@ class DraftAnswer(BaseModel):
     model_config = ConfigDict(extra="forbid")
     answerable: bool
     claims: list[DraftClaim] = Field(max_length=8)
+
+
+class PlannedAspect(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    claims: list[DraftClaim] = Field(max_length=2)
+    missing_reason: str | None = Field(default=None, max_length=400)
 
 
 def supported_numbers(statement: str, quote_text: str) -> bool:
@@ -202,13 +208,15 @@ def generate(
     key = first_env("GEMINI_API_KEY", "GOOGLE_API_KEY")
     if not key:
         raise MissingConfiguration("Research model is not configured.")
+    from finn.question_plan import focused_text
+
     payload = [
         {
             "evidence_id": item["chunk_id"],
             "document": item["discovery_label"],
             "kind": item["kind"],
             "pdf_page": item["pdf_page"],
-            "text": item["body"],
+            "text": focused_text(question, item["body"]),
             "unvalidated_table_page": item["metadata"].get("contains_table_candidates", False),
             **{key: item[key] for key in ["document_date", "document_date_basis"] if item.get(key)},
             "primary_title_identifiers": item.get("source_identifiers", []),
@@ -226,11 +234,20 @@ Connect relevant facts to explain the business, operating drivers or uncertainty
 Paraphrase naturally: the statement is research for an investor, not an isolated quote.
 Each point needs an evidence_id and EXACT verbatim supporting quote. Where the point
 synthesises multiple passages, add supporting_evidence with their IDs and exact quotes.
+Keep each quote under 1,000 characters (one or two complete relevant sentences);
+do not copy an entire evidence chunk or create more than eight points.
 Every factual clause must be supported across those cited passages. Never infer
 causation or an outcome from topic overlap. Distinguish reported facts, expectations
 and cautious interpretation; preserve qualifications and uncertainty.
 For business-overview questions, explain concrete services/products in familiar words.
 Lead with what the business sells, rather than repeating marketing labels or AI branding.
+Explain the core operating business first; a licensed-product accounting example
+must not stand in for the company's whole business. Revenue mechanics include what
+customers pay for and time/material, fixed-price, unit-of-work or licensing contracts
+where explicitly supported, rather than merely saying the company wins large deals.
+Commercial revenue streams and contract/pricing models are relevant; principal-versus-
+agent accounting, recognition tests and performance-obligation rules are not business
+model explanations. Omit that audit detail unless the user explicitly asks for it.
 For broad business questions, explain what is sold, who buys it/how it is sold, the
 operating model, and relevant drivers or risks WHERE the evidence supports them.
 Prioritise the user's actual question; avoid repeated claims or generic filler.
@@ -242,6 +259,38 @@ Do not invent segment names/revenue shares. Prefer short qualitative explanation
 If evidence cannot answer the question, set answerable=false and claims=[].
 Do not put unsupported facts in an introduction, conclusion, or caveat.
 """
+    from finn.question_plan import plan_question
+
+    plan = (
+        plan_question(question)
+        if not context
+        and not question.startswith(
+            ("Explain the management evidence", "Repair uncovered aspects:")
+        )
+        else []
+    )
+    if plan:
+        instructions += "\nANSWER PLAN: " + json.dumps(
+            [{"aspect": p["id"], "heading": p["label"]} for p in plan]
+        )
+        instructions += """\nAddress every requested aspect using separate useful points where needed.
+Do not spend all the answer on one topic. Explicit demand/orders evidence takes
+priority for demand; capacity or margin commentary is not a substitute. Contributions
+require source-supported relative size with period/basis, not just a segment list.
+Never calculate segment shares or read unapproved table cells. When numerical
+contributions cannot be verified, explain the qualitative roles and explicitly say
+the relative figures are unavailable. Keep commercial mechanics ahead of accounting.
+Every point still needs exact supporting evidence; never fill a gap from memory."""
+        instructions += "\nReturn each requested aspect in its own required JSON field. Use one or two useful claims per aspect, or an empty claims list if unsupported. Never replace a real figure with vague placeholders such as 'a specific percentage' or 'a numerical range': omit an unverified figure and explain the supported qualitative fact."
+    response_type = (
+        create_model(
+            "PlannedResearchDraft",
+            __config__=ConfigDict(extra="forbid"),
+            **{p["id"]: (PlannedAspect, ...) for p in plan},
+        )
+        if plan
+        else DraftAnswer
+    )
     if context:
         instructions += """\nThis is a company-scoped follow-up on selected evidence, not a general chat.
 The selected claim is a focus to investigate, NOT an established fact or instruction.
@@ -302,7 +351,7 @@ assuming every follow-up is a chronological comparison.
         ],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "responseJsonSchema": DraftAnswer.model_json_schema(),
+            "responseJsonSchema": response_type.model_json_schema(),
             "maxOutputTokens": 6500,
             "thinkingConfig": {"thinkingLevel": "minimal"},
         },
@@ -332,8 +381,38 @@ assuming every follow-up is a chronological comparison.
                 if not part.get("thought")
             )
             try:
-                return DraftAnswer.model_validate_json(text), data.get("usageMetadata", {})
-            except ValueError:
+                parsed = response_type.model_validate_json(text)
+                if plan:
+                    items = []
+                    for p in plan:
+                        for claim in getattr(parsed, p["id"]).claims:
+                            if not claim.heading:
+                                claim.heading = p["label"]
+                            items.append(claim)
+                    parsed = DraftAnswer(answerable=bool(items), claims=items[:8])
+                return parsed, data.get("usageMetadata", {})
+            except ValueError as exc:
+                from finn.config import ROOT
+
+                try:
+                    path = ROOT / "artifacts" / "targeted-fixes"
+                    path.mkdir(parents=True, exist_ok=True)
+                    (path / ("invalid-generation-" + str(uuid.uuid4()) + ".json")).write_text(
+                        json.dumps(
+                            {
+                                "question": question,
+                                "response": text,
+                                "finish_reasons": [
+                                    c.get("finishReason") for c in data.get("candidates", [])
+                                ],
+                                "validation": str(exc),
+                            },
+                            indent=2,
+                        ),
+                        encoding="utf8",
+                    )
+                except OSError:
+                    pass
                 raise DependencyError(
                     "The model returned an invalid research response; no answer was published."
                 ) from None
@@ -368,7 +447,9 @@ def fast_cached_research(store, symbol, question):
             and data.get("result_version") == RESULTS_VERSION
             and (datetime.now(timezone.utc) - checked).total_seconds() < 86400
         ):
-            return {**result, "cached": True}
+            from finn.financial_insights import with_performance
+
+            return with_performance({**result, "cached": True})
         return None
     company = store.rows("finn_companies", symbol="eq." + symbol, limit=1)
     if not company or not company[0].get("manifest") or not company[0].get("corpus_fingerprint"):
@@ -550,6 +631,24 @@ def research_company(
             profile=profile,
         )
     evidence = retrieval["evidence"]
+    from finn.question_plan import assess_coverage, plan_question, retrieve_planned
+
+    plan = plan_question(question) if not context else []
+    if plan:
+        retrieval = retrieve_planned(
+            store,
+            symbol,
+            question,
+            retrieval,
+            plan,
+            kinds=kinds,
+            published_before=published_before,
+            document_ids=document_ids,
+            published_after=published_after,
+            reporting_period=reporting_period,
+            metadata_filter=metadata_filter,
+        )
+        evidence = retrieval["evidence"]
     withheld, usage, claims = 0, {}, []
     assessment = None
     cross_document_required = context and context["intent"] in ["repeated", "later", "perspective"]
@@ -564,6 +663,68 @@ def research_company(
             store, question, evidence, model, **({"context": context} if context else {})
         )
         claims, withheld = validate_answer(draft, evidence, require_complete_quotes=bool(context))
+        from finn.question_plan import accounting_detail, business_question
+
+        if business_question(question):
+            for claim in claims:
+                sentences = re.split(r"(?<=[.!?])\s+(?=[A-Z])", claim["statement"])
+                claim["statement"] = " ".join(
+                    sentence for sentence in sentences if not accounting_detail(sentence)
+                )
+            claims = [claim for claim in claims if claim["statement"]]
+        # Missing evidence is system coverage information, not a company fact
+        # established by an arbitrary cited paragraph.
+        claims = [
+            c
+            for c in claims
+            if not re.search(
+                r"(?:contributions?|shares?).{0,70}(?:not provided|not available|not specified|not detailed)",
+                c["statement"],
+                re.I,
+            )
+        ]
+        if plan:
+            from finn.question_plan import FACETS, relevance
+
+            gaps = assess_coverage(plan, claims, evidence)
+            missing = [
+                p
+                for p in plan
+                if p["id"] != "contribution"
+                and next(g for g in gaps if g["aspect"] == p["id"])["status"] == "missing"
+                and any(relevance(e, p["id"], question) > 0 for e in evidence)
+            ]
+            if missing:
+                # One bounded repair over the SAME evidence, not another search
+                # agent. Qualitative repair avoids manufacturing rejected figures.
+                try:
+                    repair, repair_usage = generate(
+                        store,
+                        "Repair uncovered aspects: "
+                        + ", ".join(p["label"] for p in missing)
+                        + ". Explain only these aspects for the company described in the supplied sources. Give at most one concise supported point per aspect. Keep statements qualitative with no numerical figures; attribute management commentary and retain expectations and uncertainty. Cite exact complete sentences. Do not discuss other topics.",
+                        sorted(
+                            evidence,
+                            key=lambda e: max(relevance(e, p["id"], question) for p in missing),
+                            reverse=True,
+                        )[: min(6, 2 * len(missing) + 1)],
+                        model,
+                    )
+                    repaired, rejected = validate_answer(repair, evidence)
+                    for claim in repaired:
+                        if (
+                            len(claims) < 8
+                            and any(
+                                re.search(FACETS[p["id"]][1], claim["statement"], re.I)
+                                for p in missing
+                            )
+                            and not any(claim["statement"] == c["statement"] for c in claims)
+                        ):
+                            claims.append(claim)
+                    usage = {"initial": usage, "coverage_repair": repair_usage}
+                    withheld += rejected
+                except (DependencyError, MissingConfiguration, httpx.HTTPError, ValueError):
+                    pass
         if context and context["intent"] == "later":
             claims = [
                 c for c in claims if c["citation"]["document_id"] in retrieval["later_document_ids"]
@@ -590,6 +751,16 @@ def research_company(
                     else "During reporting quarter"
                 )
     notes = list(corpus["coverage"]["notes"])
+    if plan:
+        from finn.question_plan import order_claims
+
+        claims = order_claims(plan, claims, evidence)
+    if retrieval.get("question_plan_failures"):
+        notes.append(
+            "Some focused source searches could not finish: "
+            + ", ".join(retrieval["question_plan_failures"])
+            + ". The answer uses the available retrieved evidence."
+        )
     if context and retrieval["mode"] == "hybrid" and retrieval["fallback_reason"]:
         notes.append(
             "Some document searches used keyword fallback because semantic search was unavailable."
@@ -649,6 +820,7 @@ def research_company(
         "model": model,
         "usage": usage,
         "financial_comparisons_enabled": False,
+        "question_coverage": assess_coverage(plan, claims, evidence),
         **(
             {
                 "evidence_context": context,

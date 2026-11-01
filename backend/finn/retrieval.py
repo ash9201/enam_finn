@@ -203,10 +203,11 @@ def retrieve_with_diagnostics(
     strategy=None,
     settings=SETTINGS,
     profile=None,
+    keyword_override=None,
 ) -> dict:
     started = time.perf_counter()
     profile = profile or retrieval_profile(store, symbol, strategy=strategy, settings=settings)
-    query = keyword_query(question)
+    query = keyword_override if keyword_override is not None else keyword_query(question)
     base = {
         "p_symbol": symbol,
         "p_kinds": kinds,

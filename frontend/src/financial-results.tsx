@@ -20,7 +20,19 @@ type MetricRow = {
 }
 export type ResultsData = {
   periods: Record<string, string>
-  bases: Record<string, { unit: string; currency: string; rows: MetricRow[] }>
+  bases: Record<
+    string,
+    {
+      unit: string
+      currency: string
+      rows: MetricRow[]
+      performance?: { statement: string; comparison: string; claim_indices: number[] }[]
+      context_claim_indices?: number[]
+    }
+  >
+  performance_caveat?: string
+  performance_version?: string
+  context_version?: string
   rejected_cells: string[]
   sources: {
     id: string
@@ -100,11 +112,15 @@ function Movement({
 export default function FinancialResults({
   data,
   onEvidence,
+  claims,
 }: {
   data: ResultsData
   onEvidence: (index: number) => void
+  claims?: { statement: string }[]
 }) {
-  const available = ['consolidated', 'standalone'].filter((basis) => data.bases[basis])
+  const available = ['consolidated', 'standalone'].filter((basis) =>
+    data.bases[basis]?.rows.some((row) => Object.keys(row.figures).length > 0),
+  )
   const [choice, setChoice] = useState('consolidated')
   const [calculation, setCalculation] = useState<{ row: MetricRow; kind: 'qoq' | 'yoy' } | null>(
     null,
@@ -119,7 +135,7 @@ export default function FinancialResults({
       }),
     )
   }
-  const basis = data.bases[choice] ? choice : available[0]
+  const basis = available.includes(choice) ? choice : available[0]
   const statement = data.bases[basis]
   if (!statement)
     return (
@@ -142,16 +158,23 @@ export default function FinancialResults({
       </div>
     )
   return (
-    <div className="financial-results">
+    <div className="financial-results" data-basis={basis}>
       <div className="financial-heading">
         <div>
           <p className="eyebrow">QUARTERLY RESULTS</p>
           <h3>Quarter ended {quarterDate(data.periods.latest)}</h3>
         </div>
         <div className="financial-bases" role="group" aria-label="Accounting basis">
-          {available.map((value) => (
+          {['consolidated', 'standalone'].map((value) => (
             <button
+              type="button"
               key={value}
+              disabled={!available.includes(value)}
+              title={
+                !available.includes(value)
+                  ? 'No verified figures are available for this accounting basis.'
+                  : undefined
+              }
               aria-pressed={basis === value}
               onClick={() => {
                 setChoice(value)
@@ -163,10 +186,73 @@ export default function FinancialResults({
           ))}
         </div>
       </div>
+      {available.length < 2 && (
+        <p className="basis-availability">
+          {available.includes('consolidated') ? 'Standalone' : 'Consolidated'} figures are
+          unavailable or unverified in the current sources.
+        </p>
+      )}
       <p className="financial-unit">
         All figures in {statement.currency} {statement.unit}. Tap a figure to inspect its source
         cell.
       </p>
+      {statement.performance?.length ? (
+        <aside className="financial-performance" aria-label={`${basis} financial performance`}>
+          <p className="eyebrow">WHAT THE FIGURES SHOW</p>
+          {statement.performance.map((note) => (
+            <div key={note.comparison}>
+              <p>{note.statement}</p>
+              <details>
+                <summary>Inspect supporting figures</summary>
+                <div className="performance-sources">
+                  {note.claim_indices.map((index) => (
+                    <button
+                      type="button"
+                      className="text-chip"
+                      key={index}
+                      onClick={() => onEvidence(index)}
+                    >
+                      {statement.rows.flatMap((row) =>
+                        Object.entries(row.figures)
+                          .filter(([, figure]) => figure.claim_index === index)
+                          .map(([role]) => `${row.metric} · ${quarterDate(data.periods[role])}`),
+                      )[0] || `Figure ${index + 1}`}{' '}
+                      ↗
+                    </button>
+                  ))}
+                </div>
+              </details>
+            </div>
+          ))}
+          <small>{data.performance_caveat}</small>
+          {statement.context_claim_indices?.map(
+            (index) =>
+              claims?.[index] && (
+                <div className="disclosed-context" key={index}>
+                  <p className="eyebrow">DISCLOSED CONTEXT</p>
+                  <button
+                    type="button"
+                    className="claim-statement"
+                    onClick={() => onEvidence(index)}
+                  >
+                    {claims[index].statement}
+                  </button>
+                  <button
+                    type="button"
+                    className="citation-button"
+                    onClick={() => onEvidence(index)}
+                  >
+                    Inspect original filing passage ↗
+                  </button>
+                  <small>
+                    These are disclosed items for this quarter, not a complete attribution of the
+                    change.
+                  </small>
+                </div>
+              ),
+          )}
+        </aside>
+      ) : null}
       {statement.rows.some(
         (row) =>
           row.metric !== 'EBITDA' &&
