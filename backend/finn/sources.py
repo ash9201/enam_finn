@@ -180,7 +180,9 @@ def fetch_pdf(
             for piece in streamed.iter_bytes():
                 buffer.extend(piece)
                 if len(buffer) > max_bytes:
-                    raise ValueError("The source PDF exceeds the prototype's 50 MB download limit.")
+                    raise ValueError(
+                        f"The source PDF exceeds the prototype's {max_bytes // (1024 * 1024)} MB download limit."
+                    )
             data, final_url = bytes(buffer), str(streamed.url)
             response = httpx.Response(
                 streamed.status_code,

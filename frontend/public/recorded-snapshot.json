@@ -1,7 +1,7 @@
 {
   "mode": "recorded_demo_snapshot",
-  "exported_at": "2026-10-30T22:18:25.398947+00:00",
-  "notice": "Recorded demo data. Live saved updates could not be loaded. Original source and session dates remain authoritative.",
+  "exported_at": "2026-11-01T09:49:12.398044+00:00",
+  "notice": "Recorded demo snapshot. Filing details refreshed from anonymously readable official-source caches; other tables retain their recorded source dates. Original source and session dates remain authoritative.",
   "tables": {
     "finn_companies": [
       {
@@ -259,62 +259,6 @@
     ],
     "finn_filings": [
       {
-        "id": "7a01a925479e4cca660d5a85f1b21e06ba21e3a2c4a29cbb19d632db1f7f4ea5",
-        "symbol": "SUNPHARMA",
-        "company_name": "Sun Pharmaceutical Industries Limited",
-        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
-        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange about Link of Recording |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
-        "source_url": "https://nsearchives.nseindia.com/corporate/SUNPHARMA456_30102026201207_IntimationSE20261030_Q2FY27_Call_Recording_Signed.pdf",
-        "published_at": "2026-10-30T14:43:58+00:00",
-        "category": "earnings_call",
-        "priority": 1,
-        "review_reason": "Management commentary is available for further company research.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
-      },
-      {
-        "id": "118f6e28e059cea8ab9273d8736b76f12f519f51def7158ed07256c8b52b29f2",
-        "symbol": "RELIANCE",
-        "company_name": "Reliance Industries Limited",
-        "title": "Statement of utilization of issue proceeds",
-        "description": "Statement of utilization of issue proceeds |SUBJECT: Statement of utilization of issue proceeds",
-        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195733_SE_Utilisation_of_issue_proceeds.pdf",
-        "published_at": "2026-10-30T14:27:43+00:00",
-        "category": "unclassified",
-        "priority": 2,
-        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
-      },
-      {
-        "id": "97d62e46f1228d7c99074e583172e70efecf1679c1d37ea77e50fe2d59f7d8d6",
-        "symbol": "RELIANCE",
-        "company_name": "Reliance Industries Limited",
-        "title": "Security Cover",
-        "description": "Security Cover |SUBJECT: Security Cover",
-        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195206_SE_SC.pdf",
-        "published_at": "2026-10-30T14:22:44+00:00",
-        "category": "unclassified",
-        "priority": 2,
-        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
-      },
-      {
-        "id": "9a9f9b134c23c115f0251bf687ef0788b1e67204d877c126e6d3a28c1b8a9b75",
-        "symbol": "RELIANCE",
-        "company_name": "Reliance Industries Limited",
-        "title": "Investor Presentation",
-        "description": "Reliance Industries Limited has informed the Exchange about Investor Presentation |SUBJECT: Investor Presentation",
-        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194557_SE_30102026_IP.pdf",
-        "published_at": "2026-10-30T14:17:12+00:00",
-        "category": "unclassified",
-        "priority": 2,
-        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.534703+00:00"
-      },
-      {
         "id": "2a45c5988feaad10e0c362760e90f520600ae21246592f8bdd3c0a6b17ddbbab",
         "symbol": "RELIANCE",
         "company_name": "Reliance Industries Limited",
@@ -326,7 +270,40 @@
         "priority": 3,
         "review_reason": "New results may change the financial picture. Review the original filing.",
         "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194315_SE_30102026_MR.pdf",
+            "method": "native_pdf_text",
+            "sha256": "587a23505889ee73d948cdc26c311c80cbf93ac406cbd438f016ea2b82f59aad",
+            "fetched_at": "2026-11-01T09:22:30.138148+00:00",
+            "total_pages": 23,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "In continuation of our letter of today's date on the Unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026, we attach a copy of media release being issued by the Company.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "In continuation of our letter of today's date on the Unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026, we attach a copy of media release being issued by the Company.",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Financial-results media release",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:22:31.270620+00:00",
+          "event_kind": "results",
+          "input_hash": "f65dbc272d1dd638d30e608274dd9deab0a7c2ace31b17b7ad6724ba21c29661",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
       },
       {
         "id": "ca507348e652b9ce065cd04b5cc42942dbe4f66edca6f970ccde759c5cb1311d",
@@ -340,161 +317,86 @@
         "priority": 3,
         "review_reason": "New results may change the financial picture. Review the original filing.",
         "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193935_SE_30102026_Results.pdf",
+            "method": "native_pdf_text",
+            "sha256": "7c1b0618fa7aeb2d2e951aa54ef31e88639aa44031ece74eced1e1fd96ee32db",
+            "fetched_at": "2026-11-01T09:22:48.430348+00:00",
+            "total_pages": 31,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026 along with Independent Auditor's Review Report thereon, as recommended by the Audit Committee; and ii. passed an enabling resolution authorising the issua",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Financial results & debt-issue authorisation",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:22:48.442373+00:00",
+          "event_kind": "results",
+          "input_hash": "042de6800ab331dd7d676523b24203280fc0bad6827cac1a89692013457c7cb3",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
       },
       {
-        "id": "e70eb7bfdf989222a09ab8640faa5198b16f0ab6a29de04519bdb94e4f47e6b2",
+        "id": "97d62e46f1228d7c99074e583172e70efecf1679c1d37ea77e50fe2d59f7d8d6",
         "symbol": "RELIANCE",
         "company_name": "Reliance Industries Limited",
-        "title": "Outcome of Board Meeting",
-        "description": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis. |SUBJECT: Outcome of Board Meeting",
-        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193952_SE_30102026_Results.pdf",
-        "published_at": "2026-10-30T14:10:11+00:00",
-        "category": "results",
-        "priority": 3,
-        "review_reason": "New results may change the financial picture. Review the original filing.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
-      },
-      {
-        "id": "b14564c4b962a11a922e3aa3c170bbe506fe1be95eeff23bf4d7ffdc99bc072d",
-        "symbol": "INFY",
-        "company_name": "Infosys Limited",
-        "title": "Updates",
-        "description": "Infosys Limited has informed the Exchange regarding 'Infosys Announces Expansion of Pocharam Development Center in Hyderabad'. |SUBJECT: Updates",
-        "source_url": "https://nsearchives.nseindia.com/corporate/INFY_30102026185037_PR_30102026.pdf",
-        "published_at": "2026-10-30T13:20:50+00:00",
-        "category": "unclassified",
-        "priority": 2,
-        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
-      },
-      {
-        "id": "e445c62d50061beaea90f22311ebdb517b8427a06cfa8a3e01edecd6965b3274",
-        "symbol": "TATASTEEL",
-        "company_name": "Tata Steel Limited",
-        "title": "Confirmation of Redemption/Payment of Interest and Principal",
-        "description": "Confirmation of Redemption/Payment of Interest and Principal |SUBJECT: Confirmation of Redemption/Payment of Interest and Principal",
-        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/NIDHIFADNAVIS_30102026170023_BSENSECP.pdf",
-        "published_at": "2026-10-30T11:32:04+00:00",
-        "category": "unclassified",
-        "priority": 2,
-        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.537716+00:00"
-      },
-      {
-        "id": "5894336cfb51e11c040bd6bac462151e1860a07f4655097e0a454ccc7cf5dc81",
-        "symbol": "BHARTIARTL",
-        "company_name": "Bharti Airtel Limited",
-        "title": "Copy of Newspaper Publication",
-        "description": "Bharti Airtel Limited has informed the Exchange about Copy of Newspaper Publication |SUBJECT: Copy of Newspaper Publication",
-        "source_url": "https://nsearchives.nseindia.com/corporate/BHARTIARTL_30102026152337_STXintimationOctober302026.pdf",
-        "published_at": "2026-10-30T09:53:54+00:00",
-        "category": "publication",
-        "priority": 0,
-        "review_reason": "Publication notice; the actual results filing carries the financial detail.",
-        "first_seen_at": "2026-10-30T10:16:28.856876+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.537716+00:00"
-      },
-      {
-        "id": "abc40e08c4e1a9b013c3cd24acde3f473a38f90fa90d6a1e4140ea1b657adf0f",
-        "symbol": "SUNPHARMA",
-        "company_name": "Sun Pharmaceutical Industries Limited",
-        "title": "General Updates",
-        "description": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor Rotation |SUBJECT: General Updates",
-        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026151827_BMOutcome30102026_Conclusion.pdf",
-        "published_at": "2026-10-30T09:48:46+00:00",
-        "category": "routine",
-        "priority": 0,
-        "review_reason": "Scheduled auditor rotation; expand to inspect the governance disclosure.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
-      },
-      {
-        "id": "d801bc8500cc6a8c929235f31d435877629645f87f8eb6e78f11b1cc01f2fc71",
-        "symbol": "SUNPHARMA",
-        "company_name": "Sun Pharmaceutical Industries Limited",
-        "title": "Outcome of Board Meeting",
-        "description": "Unaudited Financial Results for the quarter and half year ended 30 September 2026 |SUBJECT: Outcome of Board Meeting",
-        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026141321_BMOutcomeFinancialoct26signed.pdf",
-        "published_at": "2026-10-30T08:45:10+00:00",
-        "category": "results",
-        "priority": 3,
-        "review_reason": "New results may change the financial picture. Review the original filing.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
-      },
-      {
-        "id": "5338cb87a5d8bf936215aa3f8d4bdbb797151b83e4e3a610f3d62fac4142a342",
-        "symbol": "HDFCBANK",
-        "company_name": "HDFC Bank Limited",
-        "title": "Alteration Of Capital and Fund Raising-XBRL",
-        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of Securities |SUBJECT: Alteration Of Capital and Fund Raising-XBRL",
-        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/ALTERATION_OF_CAPITAL_AND_FUND_RAISING_797_WebXMLFile_20261030_133011636.xml",
-        "published_at": "2026-10-30T08:00:12+00:00",
+        "title": "Security Cover",
+        "description": "Security Cover |SUBJECT: Security Cover",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195206_SE_SC.pdf",
+        "published_at": "2026-10-30T14:22:44+00:00",
         "category": "capital",
-        "priority": 2,
-        "review_reason": "Review the terms and potential effect on capital or funding.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
-      },
-      {
-        "id": "2203898650310cf432479e390b8f4827f949d7385540a3b546731a5002b54a18",
-        "symbol": "HDFCBANK",
-        "company_name": "HDFC Bank Limited",
-        "title": "ESOP/ESOS/ESPS",
-        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of 4675598  Shares. |SUBJECT: ESOP/ESOS/ESPS",
-        "source_url": "https://nsearchives.nseindia.com/corporate/HDFCBANK_30102026132409_SELetterESOP30102026.pdf",
-        "published_at": "2026-10-30T07:54:25+00:00",
-        "category": "routine",
-        "priority": 0,
-        "review_reason": "Routine disclosure; available here if you need the original.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.538718+00:00"
-      },
-      {
-        "id": "7ccc7e5847c29395a59b9e81029570aa56050dd0f1e150989cc2f5cfae836ecf",
-        "symbol": "NTPC",
-        "company_name": "NTPC Limited",
-        "title": "General Updates",
-        "description": "NTPC Limited has informed the Exchange about declaration of Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited. |SUBJECT: General Updates",
-        "source_url": "https://nsearchives.nseindia.com/corporate/NTPC_30102026123023_2021030_NGELCOD.pdf",
-        "published_at": "2026-10-30T07:04:39+00:00",
-        "category": "business_update",
-        "priority": 2,
-        "review_reason": "A business development worth assessing in the context of the company.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.539716+00:00"
-      },
-      {
-        "id": "f3d6ab692a442268001fb77f9617f2025d803a155f774108d74bb5930be44df0",
-        "symbol": "POLYCAB",
-        "company_name": "Polycab India Limited",
-        "title": "Corporate Insolvency Resolution Process",
-        "description": "Polycab India Limited has informed the Exchange about the order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07, 2026 |SUBJECT: Corporate Insolvency Resolution Process",
-        "source_url": "https://nsearchives.nseindia.com/corporate/POLYCAB_30102026121954_SECIRP30102026.pdf",
-        "published_at": "2026-10-30T06:50:09+00:00",
-        "category": "litigation",
-        "priority": 3,
-        "review_reason": "Review the scope and potential exposure in the original disclosure.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.539716+00:00"
-      },
-      {
-        "id": "2525b565b5c690af5549eb991197ae5e53d42bf6b23c110a46cd7986bef503f7",
-        "symbol": "SUNPHARMA",
-        "company_name": "Sun Pharmaceutical Industries Limited",
-        "title": "Press Release",
-        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange regarding a press release dated October 30, 2026, titled \"ILUMYA® (tildrakizumab-asmn) approved in the U.S. for the Treatment of Adults with Active Psoriatic Arthritis\". |SUBJECT: Press Release",
-        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026080437_SE_Intimation_of_Press_Release_ILUMYA_PsA_Approval.pdf",
-        "published_at": "2026-10-30T02:35:47+00:00",
-        "category": "unclassified",
-        "priority": 2,
+        "priority": 1,
         "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
-        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.541723+00:00"
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195206_SE_SC.pdf",
+            "method": "native_pdf_text",
+            "sha256": "e928d05e2d3ec633038c6d8ca0443bd2e174b1ec354cef3b0940a7e162477a59",
+            "fetched_at": "2026-11-01T09:23:13.614750+00:00",
+            "total_pages": 6,
+            "pages_scanned": 6
+          },
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [],
+          "headline": "Debt security cover certificate",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:15.894030+00:00",
+          "event_kind": "capital",
+          "input_hash": "3f24adbaaf02b67f68346a1b079d565d22993992de21d85bea0dfc9f735c3db0",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
       },
       {
         "id": "e63113a269b26327eaf5ad1a04f49a868ab6109b75959f2433fb03f1290620b4",
@@ -508,7 +410,1216 @@
         "priority": 0,
         "review_reason": "Scheduled discussion; management commentary is not established by the notice alone.",
         "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "feed_details",
+          "summary": "Schedule of Analysts or Institutional Investors…",
+          "version": "official-filing-narrative-v1",
+          "category": "investor_meeting",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Tata Steel Limited has informed the Exchange about Schedule of Analysts or Institutional Investors Meet",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Investor meeting notice",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:29.688726+00:00",
+          "event_kind": "investor_meeting",
+          "input_hash": "f4173af3e2d9609636adc3c8ed8e12e0227186111d0938e6a76c9199b83978f7",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "5894336cfb51e11c040bd6bac462151e1860a07f4655097e0a454ccc7cf5dc81",
+        "symbol": "BHARTIARTL",
+        "company_name": "Bharti Airtel Limited",
+        "title": "Copy of Newspaper Publication",
+        "description": "Bharti Airtel Limited has informed the Exchange about Copy of Newspaper Publication |SUBJECT: Copy of Newspaper Publication",
+        "source_url": "https://nsearchives.nseindia.com/corporate/BHARTIARTL_30102026152337_STXintimationOctober302026.pdf",
+        "published_at": "2026-10-30T09:53:54+00:00",
+        "category": "publication",
+        "priority": 0,
+        "review_reason": "Publication notice; the actual results filing carries the financial detail.",
+        "first_seen_at": "2026-10-30T10:16:28.856876+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.537716+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "publication",
+          "evidence": [],
+          "headline": "Results publication notice",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:30.220094+00:00",
+          "event_kind": "publication",
+          "input_hash": "0bd06346561fd24b7ee618be9a9e93d690d76f7f021289ab9e4b822f6fec405f",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "d801bc8500cc6a8c929235f31d435877629645f87f8eb6e78f11b1cc01f2fc71",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "Unaudited Financial Results for the quarter and half year ended 30 September 2026 |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026141321_BMOutcomeFinancialoct26signed.pdf",
+        "published_at": "2026-10-30T08:45:10+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026141321_BMOutcomeFinancialoct26signed.pdf",
+            "method": "native_pdf_text",
+            "sha256": "a61d4ac3bb8430419e443083de66f0e77bc9a714a8bfe141d067fdbbbec85c33",
+            "fetched_at": "2026-11-01T09:22:52.430206+00:00",
+            "total_pages": 34,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Approved Quarterly Financial Results The Unaudited Standalone and Consolidated Financial Results of the Company for the quarter and half year ended 30 September 2026, together with the Limited Review Reports issued by the Statutory Auditors, are enclosed herewith as Annexure A. 2.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Unaudited Financial Results for the quarter and half year ended 30 September 2026",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Approved Quarterly Financial Results The Unaudited Standalone and Consolidated Financial Results of the Company for the quarter and half year ended 30 September 2026, together with the Limited Review Reports issued by the Statutory Auditors, are enclosed herewith as Annexure A. 2. Press Release and Earnings Presentation The press rele",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved by the Board of Directors at their respective meetings held on October 30, 2026. 2 The above unaudited standalone financial results have been prepared In accordance with the Companies (Indian Accounting Standards) Rules, 2015 (\"Ind AS\") as amended , prescribed under Section 133 of the Companies Act, 2013 , read with relevant rules issued thereunder . Pursuant to the on",
+              "pdf_page": 6
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "acquisition. The impact on the financial position of the Company was not material on account of these subsidiaries 6 With effect from the financial year 2026-27 , the Company decided to exercise the option available under Section 115BAA of the Income-tax Act, 1",
+              "pdf_page": 6
+            }
+          ],
+          "headline": "Financial results for 30 Sep 2026",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:22:57.172888+00:00",
+          "event_kind": "results",
+          "input_hash": "abf6e28510a02c9c85ac1aee126f00c407cafec0ce1bb5cbd3b13abc55032e9e",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "2203898650310cf432479e390b8f4827f949d7385540a3b546731a5002b54a18",
+        "symbol": "HDFCBANK",
+        "company_name": "HDFC Bank Limited",
+        "title": "ESOP/ESOS/ESPS",
+        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of 4675598  Shares. |SUBJECT: ESOP/ESOS/ESPS",
+        "source_url": "https://nsearchives.nseindia.com/corporate/HDFCBANK_30102026132409_SELetterESOP30102026.pdf",
+        "published_at": "2026-10-30T07:54:25+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "Routine disclosure; available here if you need the original.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "feed_details",
+          "summary": "Allotment of 4675598 Shares.",
+          "version": "official-filing-narrative-v1",
+          "category": "unclassified",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "HDFC Bank Limited has informed the Exchange regarding Allotment of 4675598 Shares.",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Announcement awaiting classification",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:30.743471+00:00",
+          "event_kind": "unclassified",
+          "input_hash": "5b7b954a7c3003bff2a44891a96329b78ebaa2e1d022c34dc95b0c1d6f51c422",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "c3bc103b43dcfd9d92e6f509eced8ac1d334bfaa825e8f4b7a8d3ef0c73e14b6",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Analyst/Investor Meet Para A-XBRL",
+        "description": "NTPC LIMITED has informed the Exchange about Audio Recording/Video Recording |SUBJECT: Analyst/Investor Meet Para A-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/SAIIM_2249_WebXMLFile_20261031_182253408.xml",
+        "published_at": "2026-10-31T12:52:55+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Meeting notice; no new business information is established by the notice alone.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.495681+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC LIMITED has informed the Exchange about Audio Recording/Video Recording",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Earnings-call recording available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:07:19.804715+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "7b2c4f679de96abe1ed5031e8625e3c50350b43e1e195c4dc3b68d78581868b9",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "fd02d57a8dadcd25d6edd0f5d4839b40e40231cdab31560dbb402ccb47281fc1",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Analyst/Investor Meet Para A-XBRL",
+        "description": "Reliance Industries Limited has informed the Exchange about Audio Recording/Video Recording |SUBJECT: Analyst/Investor Meet Para A-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/SAIIM_242_WebXMLFile_20261031_174441351.xml",
+        "published_at": "2026-10-31T12:14:43+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Meeting notice; no new business information is established by the notice alone.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496049+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Reliance Industries Limited has informed the Exchange about Audio Recording/Video Recording",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Earnings-call recording available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:29.184180+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "cbd7c4802a7b996a400e2beedbb837d5445fc8a7c99977ff58c8fa90de97a1b2",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "3fc4c8b00e1bff151f9d6fc1173c73cd8ab4acc91a0d2246230542d4a40145b8",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Copy of Newspaper Publication",
+        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange about Copy of Newspaper Publication |SUBJECT: Copy of Newspaper Publication",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_31102026173121_SEIntimationforFinancialResultsNewspaperadvertisement.pdf",
+        "published_at": "2026-10-31T12:02:02+00:00",
+        "category": "publication",
+        "priority": 0,
+        "review_reason": "Publication notice; the actual results filing carries the financial detail.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496212+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "publication",
+          "evidence": [],
+          "headline": "Results publication notice",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:29.443977+00:00",
+          "event_kind": "publication",
+          "input_hash": "d9ee40026c819e812c208d7631e1481a118fef653adf30e47368f14987cf8fc6",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "c41cc2f7aa91a4875379f93092af996fe120abe3cf526a70edc34d918e766118",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Statement of utilization of issue proceeds",
+        "description": "Statement of utilization of issue proceeds |SUBJECT: Statement of utilization of issue proceeds",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155414_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T10:25:36+00:00",
+        "category": "capital",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496535+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155414_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:48.455184+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Use of debt-issue proceeds",
+          "priority": 1,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:48.459688+00:00",
+          "event_kind": "results",
+          "input_hash": "c2cde503abb50ff697ad5b6bf90ee5e6346627f2fbc697f7d20c176e20c215cd",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "a0c28b976a257a871c9e93b72c6f91f603f9904618d6e12fbcdfe58acce4ad13",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Security Cover",
+        "description": "Security Cover |SUBJECT: Security Cover",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155314_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T10:25:34+00:00",
+        "category": "capital",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496678+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155314_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:54.341766+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Debt security cover certificate",
+          "priority": 1,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:54.345772+00:00",
+          "event_kind": "results",
+          "input_hash": "74b3674d488f7fb9d0b293b0f52eb34070f922984daeec37a20ccbe91a6ddd3e",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "09c3643d17b67f53147d9038d57f70c7c6eb402914372a17817014e7bc8adc65",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Record Date",
+        "description": "NTPC Limited has informed the Exchange that Record date for the purpose of Dividend  is 06-Nov-2026. |SUBJECT: Record Date",
+        "source_url": "https://nsearchives.nseindia.com/corporate/NTPC_31102026145929_RECORDDATE_06112026_STEX.pdf",
+        "published_at": "2026-10-31T09:30:04+00:00",
+        "category": "corporate_action",
+        "priority": 2,
+        "review_reason": "Check the terms, record date, and eligibility in the filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.497154+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/NTPC_31102026145929_RECORDDATE_06112026_STEX.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:43.690080+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Record date for the purpose of Dividend is 06-Nov-2026.",
+          "version": "official-filing-narrative-v1",
+          "category": "corporate_action",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has informed the Exchange that Record date for the purpose of Dividend is 06-Nov-2026.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Dividend record date",
+          "priority": 2,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:43.695091+00:00",
+          "event_kind": "results",
+          "input_hash": "0fc0aeb7f88fb9e8a78291f7cb77f539502d5b91742780209d9f7685c539bc72",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "b2b0b7227d456fb4979adf604b8ea9cecd130abbc25e3d54cd15552a3adf16ec",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Disclosure under Regulation 52(4)",
+        "description": "Disclosure under Regulation 52(4) |SUBJECT: Disclosure under Regulation 52(4)",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155350_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T10:25:35+00:00",
+        "category": "capital",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496612+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155350_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:50.786386+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Debt-related financial disclosures",
+          "priority": 1,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:50.790407+00:00",
+          "event_kind": "results",
+          "input_hash": "7694c62798c4f86d9bb6524674dbc72171b7303300e93bfde38181dc6dc5ed21",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "4495a1ed23cde3cefb3193b235576c12e46889464d9ddb495fdcdeb599f4fd30",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "General Updates",
+        "description": "NTPC Limited has informed the Exchange about General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September 2026 |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026151008_2__Disclosure_for_OFS_Q2_FY27_Signed.pdf",
+        "published_at": "2026-10-31T09:40:20+00:00",
+        "category": "business_update",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.497057+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026151008_2__Disclosure_for_OFS_Q2_FY27_Signed.pdf",
+            "method": "native_pdf_text",
+            "sha256": "7b6dd570ca47b6ccf7c3d534b2badb776b392d25f6277b7b617351b2e8a4680c",
+            "fetched_at": "2026-11-01T09:07:02.392453+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "feed_details",
+          "summary": "General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September…",
+          "version": "official-filing-narrative-v1",
+          "category": "business_update",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has informed the Exchange about General Updates- Operational & Financial Snapshot for Quarter & Half Year ended 30 September 2026",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Quarterly operational and financial snapshot",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:07:04.412670+00:00",
+          "event_kind": "business_update",
+          "input_hash": "4826155084855f882d090183514e27ca2f1c88d5d4619a586325afea2d6f8652",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "71c89e06baea32462e26166a55f9d8f7b1f66fc9ac5f1b7e3e0d7fdf915a1ca6",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "NTPC Limited has submitted to the Exchange, the financial results for the period ended September 30, 2026. |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026144738_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T09:20:38+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.497309+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026144738_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:37.502547+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has submitted to the Exchange, the financial results for the period ended September 30, 2026.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Financial results for 30 Sep 2026",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:37.507611+00:00",
+          "event_kind": "results",
+          "input_hash": "1d58fc538a6d9e8def13d484f7820a626f4a4a91ec0b8a90c7ab6736acfcc7bb",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "76d2a207498cb17789a940da3dd1d745de9a69673201216077c1be2ccabcbd8a",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Financial Results Updates",
+        "description": "Financial Results Updates |SUBJECT: Financial Results Updates",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155300_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T10:25:33+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496731+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/akshatjain_31102026155300_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:08.435186+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Financial results for 30 Sep 2026",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:24.087660+00:00",
+          "event_kind": "results",
+          "input_hash": "9e6597e96c7815599552b4238c2b50eea4d95e2e2f70dca1ebecc34dbe216b8c",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "212fccd5f43516c4510f5a2f430a59f13144947c4c346f641e5f8bd626e205b8",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Dividend",
+        "description": "NTPC Limited has informed the Exchange that Board of Directors at its meeting held on October 31, 2026, declared Interim Dividend of Rs. 3 per equity share. |SUBJECT: Dividend",
+        "source_url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026145152_QFRQ2FY27_Final.pdf",
+        "published_at": "2026-10-31T09:22:28+00:00",
+        "category": "corporate_action",
+        "priority": 2,
+        "review_reason": "Check the terms, record date, and eligibility in the filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.497249+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026145152_QFRQ2FY27_Final.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f9627994f4304c66ee8ce54fe6983ba56ce639692b1a4091ef84461b55359de4",
+            "fetched_at": "2026-11-01T09:14:45.935779+00:00",
+            "total_pages": 30,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Board of Directors at its meeting held on October 31, 2026, declared Interim Dividend of Rs. 3 per equity share.",
+          "version": "official-filing-narrative-v1",
+          "category": "corporate_action",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has informed the Exchange that Board of Directors at its meeting held on October 31, 2026, declared Interim Dividend of Rs. 3 per equity share.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the Unaudited Standalone and Consolidated Financial Results for the quarter and half year ended 30 September 2026, as recommended by the Audit Committee at its meeting held on 31 October 2026 . The said Financial Results duly signed by Director (Finance ), a whole-time director of NTPC Limited , al",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "declared the First Interim Dividend at the rate of 30% (t3 per equity share) on the face value of ~10/- each for the Financial Year 2026-27 . Further , the Company nas fixed 6 November 2026 as the \"record date\" for the purpose of payment of 1st Interim Di",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "record date; and l!.,c!/ttld/ ff;,[1,es (Wffl ~ qf( ~ ) NTPC Limited (A Govt. of India Enterprise) ~ ~ / Corporate Centre Dated: 31 October 2026 Department of Corporate Services, BSE Limited, Rotunda Building, P",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission (Terms and Conditions of Tariff} Regulations, 2024 vide Notification dated 15 March 2024 (Regulations, 2024) for determination of tariff for the tariff period 2024-2029. Pending issue of provisional/final tariff orders, capacity charges wnh effect f",
+              "pdf_page": 7
+            }
+          ],
+          "headline": "Dividend declared",
+          "priority": 2,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:14:45.940280+00:00",
+          "event_kind": "results",
+          "input_hash": "1258f35b44160a48244d017c92dc5a3b18fd2c0a47c0b13e4577d1b0c361ab7e",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "7ccc7e5847c29395a59b9e81029570aa56050dd0f1e150989cc2f5cfae836ecf",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "General Updates",
+        "description": "NTPC Limited has informed the Exchange about declaration of Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited. |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/NTPC_30102026123023_2021030_NGELCOD.pdf",
+        "published_at": "2026-10-30T07:04:39+00:00",
+        "category": "business_update",
+        "priority": 2,
+        "review_reason": "A business development worth assessing in the context of the company.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.539716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/NTPC_30102026123023_2021030_NGELCOD.pdf",
+            "method": "native_pdf_text",
+            "sha256": "ff043c41243b1ce7bbbf360d51520c3fd30a8fd1b2a7b822ed599c88253fc856",
+            "fetched_at": "2026-11-01T09:07:15.551199+00:00",
+            "total_pages": 2,
+            "pages_scanned": 2
+          },
+          "status": "source_extracted",
+          "summary": "Declaration of Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited.",
+          "version": "official-filing-narrative-v1",
+          "category": "business_update",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has informed the Exchange about declaration of Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commercial Operation of fifth part capacity of 95.6 MW of Kalasar Solar Energy Project, Bikaner, Rajasthan, out of 650 MW of Solar component under 500 MW REMCL RTC Project of NTPC Renewable Energy Limited, a step-down subsidiary of NTPC Limited through NGEL w.e.f. 00:00",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Commercial operation declared",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:07:16.447161+00:00",
+          "event_kind": "business_update",
+          "input_hash": "6efe2c7cb1a384c00f3b8e3f875f410a7ecf2fd2ff405bd2aacdec724a489f97",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "1055c7ac7af1745afd9407e4041907838cd2d386fc950414c9b36d52322f6342",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Outcome of Board Meeting-XBRL",
+        "description": "NTPC LIMITED has informed the Exchange regarding Outcome of Board Meeting held on 31-Oct-2026 for Dividend |SUBJECT: Outcome of Board Meeting-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/OUTCOME_2249_WebXMLFile_20261031_151619656.xml",
+        "published_at": "2026-10-31T09:46:20+00:00",
+        "category": "corporate_action",
+        "priority": 2,
+        "review_reason": "Check the terms, record date, and eligibility in the filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496936+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/xbrl/OUTCOME_2249_WebXMLFile_20261031_151619656.xml",
+            "method": "exchange_xml",
+            "sha256": "87f326a3363883801ccf668547db6f6053c7ad89011d0590ea1ec720e25144a7",
+            "fetched_at": "2026-11-01T09:14:38.828526+00:00",
+            "total_pages": null,
+            "pages_scanned": null
+          },
+          "status": "feed_details",
+          "summary": "Outcome of Board Meeting held on 31-Oct-2026 for…",
+          "version": "official-filing-narrative-v1",
+          "category": "corporate_action",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC LIMITED has informed the Exchange regarding Outcome of Board Meeting held on 31-Oct-2026 for Dividend",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Dividend-related board outcome",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:14:38.830036+00:00",
+          "event_kind": "corporate_action",
+          "input_hash": "473cba7ae40207e1c16dd32b18f825e0404cae9e75e294bb899fe892b9a89fab",
+          "limitation": "No usable native text was extracted; no OCR or inferred details were substituted.",
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "f3d6ab692a442268001fb77f9617f2025d803a155f774108d74bb5930be44df0",
+        "symbol": "POLYCAB",
+        "company_name": "Polycab India Limited",
+        "title": "Corporate Insolvency Resolution Process",
+        "description": "Polycab India Limited has informed the Exchange about the order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07, 2026 |SUBJECT: Corporate Insolvency Resolution Process",
+        "source_url": "https://nsearchives.nseindia.com/corporate/POLYCAB_30102026121954_SECIRP30102026.pdf",
+        "published_at": "2026-10-30T06:50:09+00:00",
+        "category": "litigation",
+        "priority": 3,
+        "review_reason": "Review the scope and potential exposure in the original disclosure.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.539716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/POLYCAB_30102026121954_SECIRP30102026.pdf",
+            "method": "native_pdf_text",
+            "sha256": "729698f1dcce0ae0eb51e03c1cec9905a66013dfe0e41b9e8332b99e7099190e",
+            "fetched_at": "2026-11-01T09:23:00.688345+00:00",
+            "total_pages": 19,
+            "pages_scanned": 8
+          },
+          "status": "feed_details",
+          "summary": "The order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07,…",
+          "version": "official-filing-narrative-v1",
+          "category": "litigation",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Polycab India Limited has informed the Exchange about the order passed by NCLAT setting aside the order of NCLT Ahmedabad bench dated October 07, 2026",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Legal or regulatory disclosure",
+          "priority": 3,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:03.477791+00:00",
+          "event_kind": "litigation",
+          "input_hash": "16fc8d0466955f94fed682eb86748489b07060557f814dd0db855323ecf70e35",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "b14564c4b962a11a922e3aa3c170bbe506fe1be95eeff23bf4d7ffdc99bc072d",
+        "symbol": "INFY",
+        "company_name": "Infosys Limited",
+        "title": "Updates",
+        "description": "Infosys Limited has informed the Exchange regarding 'Infosys Announces Expansion of Pocharam Development Center in Hyderabad'. |SUBJECT: Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/INFY_30102026185037_PR_30102026.pdf",
+        "published_at": "2026-10-30T13:20:50+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/INFY_30102026185037_PR_30102026.pdf",
+            "method": "native_pdf_text",
+            "sha256": "a7acc53453e7674d6aebbe1b7a32093fb92d3cb2acd0526a73a61f0be861dfea",
+            "fetched_at": "2026-11-01T09:23:20.820218+00:00",
+            "total_pages": 4,
+            "pages_scanned": 4
+          },
+          "status": "source_extracted",
+          "summary": "'Infosys Announces Expansion of Pocharam Development Center in Hyderabad'.",
+          "version": "official-filing-narrative-v1",
+          "category": "unclassified",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Infosys Limited has informed the Exchange regarding 'Infosys Announces Expansion of Pocharam Development Center in Hyderabad'.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission filings including our Annual Report on Form 20-F for the fiscal year ended March 31, 2026. These filings are available at www.sec.gov. In light of these and other",
+              "pdf_page": 3
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "acquisitions, cybersecurity matters, the outcome of pending litigation and the US government investigation, and the effect of current and future tariffs. These and additional factors that may cause actual results or outcomes to differ from tho se implied by the",
+              "pdf_page": 3
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Commission and our reports to shareholders. The Company does not undertake to update any forward - looking statements that may be made from time to time by or on behalf of the Company unless it is required by law. Media contact For more information, please con",
+              "pdf_page": 4
+            }
+          ],
+          "headline": "Announcement awaiting classification",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:23.438771+00:00",
+          "event_kind": "unclassified",
+          "input_hash": "62511cd64d51359fdf3ebb3f29a0e5276a0fefdf53f848fd246e42a4408b63a6",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "5338cb87a5d8bf936215aa3f8d4bdbb797151b83e4e3a610f3d62fac4142a342",
+        "symbol": "HDFCBANK",
+        "company_name": "HDFC Bank Limited",
+        "title": "Alteration Of Capital and Fund Raising-XBRL",
+        "description": "HDFC Bank Limited has informed the Exchange regarding Allotment of Securities |SUBJECT: Alteration Of Capital and Fund Raising-XBRL",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/ALTERATION_OF_CAPITAL_AND_FUND_RAISING_797_WebXMLFile_20261030_133011636.xml",
+        "published_at": "2026-10-30T08:00:12+00:00",
+        "category": "routine",
+        "priority": 0,
+        "review_reason": "Review the terms and potential effect on capital or funding.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/xbrl/ALTERATION_OF_CAPITAL_AND_FUND_RAISING_797_WebXMLFile_20261030_133011636.xml",
+            "method": "exchange_xml",
+            "sha256": "ee566d9bc83a0bebc77345ab41135956279a7818ca5e4d3733c5ea143b52849c",
+            "fetched_at": "2026-11-01T09:23:25.687692+00:00",
+            "total_pages": null,
+            "pages_scanned": null
+          },
+          "status": "feed_details",
+          "summary": "Allotment of…",
+          "version": "official-filing-narrative-v1",
+          "category": "routine",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "HDFC Bank Limited has informed the Exchange regarding Allotment of Securities",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Routine disclosure",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:25.687692+00:00",
+          "event_kind": "routine",
+          "input_hash": "63911b951a59130c1892ccf5618640d147214b997cf3468542722d9d19e5ed31",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "ef945965d64178eb21b1b7a2d1b4c78afcd14aaec734ef960e0058a7f8ec03c8",
+        "symbol": "M&M",
+        "company_name": "Mahindra & Mahindra Limited",
+        "title": "Monthly Business Updates",
+        "description": "Mahindra & Mahindra Limited has informed the Exchange regarding Monthly Business Updates for the month of October 2026 |SUBJECT: Monthly Business Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/ferozebaria_01112026101454_SEIntimationNovember2026PR.pdf",
+        "published_at": "2026-11-01T04:45:10+00:00",
+        "category": "routine",
+        "priority": 0,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-11-01T06:53:26.664877+00:00",
+        "last_seen_at": "2026-11-01T06:53:26.523771+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/ferozebaria_01112026101454_SEIntimationNovember2026PR.pdf",
+            "method": "native_pdf_text",
+            "sha256": "2509f292483fc0739de7439210129468f2c73d433d2445f247a7cdbf65d6a67f",
+            "fetched_at": "2026-11-01T09:23:05.154797+00:00",
+            "total_pages": 7,
+            "pages_scanned": 7
+          },
+          "status": "feed_details",
+          "summary": "Monthly Business Updates for the month of October…",
+          "version": "official-filing-narrative-v1",
+          "category": "routine",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Mahindra & Mahindra Limited has informed the Exchange regarding Monthly Business Updates for the month of October 2026",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Routine disclosure",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:07.562126+00:00",
+          "event_kind": "routine",
+          "input_hash": "6931a48ef8b0244ea4305eee4ac828b86ee82e7036eae7a8a0980e3628e98fb0",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "274f798847751fdbcbcb64c3cb6a572c6fe625e8fa45bdee98d4af0358615a39",
+        "symbol": "KPITTECH",
+        "company_name": "KPIT Technologies Limited",
+        "title": "Change in Directors/KMP/SMP/Auditor/RTA",
+        "description": "KPIT TECHNOLOGIES LIMITED has informed the Exchange about Change in Directors/KMP/SMP/Auditor/RTA |SUBJECT: Change in Directors/KMP/SMP/Auditor/RTA",
+        "source_url": "https://nsearchives.nseindia.com/corporate/xbrl/CIM_17417_WebXMLFile_20261031_182636654.xml",
+        "published_at": "2026-10-31T12:56:37+00:00",
+        "category": "management_change",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.495368+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/xbrl/CIM_17417_WebXMLFile_20261031_182636654.xml",
+            "method": "exchange_xml",
+            "sha256": "96025e2939eff4ae7a89a2397ab147236462bd138ae1ff47ca3e1e19543f837c",
+            "fetched_at": "2026-11-01T09:15:01.603886+00:00",
+            "total_pages": null,
+            "pages_scanned": null
+          },
+          "status": "source_extracted",
+          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date.",
+          "version": "official-filing-narrative-v1",
+          "category": "management_change",
+          "evidence": [
+            {
+              "kind": "official_document",
+              "field": "RemarksForChangeInManagement",
+              "quote": "Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date. Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the C",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Independent director completes scheduled term",
+          "priority": 1,
+          "event_key": "tenure:09360601:2026-10-31",
+          "checked_at": "2026-11-01T09:15:01.605891+00:00",
+          "event_kind": "scheduled_tenure",
+          "input_hash": "62f8c0372d50f0f7b97c7d104b5159f13913389bf701f9a37511079b0c65adc9",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "dcdda777bde259e66e035b9ae7a612d54856c69c945c41372832eee200032b77",
+        "symbol": "KPITTECH",
+        "company_name": "KPIT Technologies Limited",
+        "title": "Cessation",
+        "description": "KPIT Technologies Limited has informed the Exchange that Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date. |SUBJECT: Cessation",
+        "source_url": "https://nsearchives.nseindia.com/corporate/KPITTECH_31102026182503_KPIT_Rajiv_Lal_Completion_of_Tenure-S.pdf",
+        "published_at": "2026-10-31T12:55:33+00:00",
+        "category": "management_change",
+        "priority": 1,
+        "review_reason": "Leadership changes can affect execution and oversight. Check the role and effective date.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.495584+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/KPITTECH_31102026182503_KPIT_Rajiv_Lal_Completion_of_Tenure-S.pdf",
+            "method": "native_pdf_text",
+            "sha256": "584c773ca2363a39531ed92b3842eb88e8865dfe98a816f5129d8d308aeb40b6",
+            "fetched_at": "2026-11-01T09:14:59.744350+00:00",
+            "total_pages": 2,
+            "pages_scanned": 2
+          },
+          "status": "source_extracted",
+          "summary": "Prof. Rajiv Lal completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date.",
+          "version": "official-filing-narrative-v1",
+          "category": "management_change",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "KPIT Technologies Limited has informed the Exchange that Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Prof. Rajiv Lal (DIN: 09360601) completed his 2nd term as an Independent Director of the Company on October 31, 2026, and consequently he has ceased to be a Director of the Company w.e.f. the end of business hours of said date. Accordingly, he has also ceased to be a Director of KPIT Technologies Inc., material unlisted subsidiary of the C",
+              "pdf_page": 1
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "appointment/re - appointment; October 31, 2026, after the end of business hours Brief profile (in case of appointment); Not Applicable Disclosure of relationships between directors (in case of appointment of a director). Not Applicable Information required purs",
+              "pdf_page": 2
+            }
+          ],
+          "headline": "Independent director completes scheduled term",
+          "priority": 1,
+          "event_key": "tenure:09360601:2026-10-31",
+          "checked_at": "2026-11-01T09:15:01.104255+00:00",
+          "event_kind": "scheduled_tenure",
+          "input_hash": "bcb5465aaec7fd7a37c3651473f05c6675789c2ca9122e8394449f0248905e3d",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": "The filing describes completion of a scheduled term, rather than an unexpected resignation.",
+          "display_version": "filing-display-v3"
+        }
       },
       {
         "id": "4acda523600ffd86faa1974eef256ebd4597fb602cc96d784cb8455a7499f050",
@@ -522,7 +1633,499 @@
         "priority": 0,
         "review_reason": "Scheduled discussion; management commentary is not established by the notice alone.",
         "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
-        "last_seen_at": "2026-10-30T16:27:10.535716+00:00"
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "feed_details",
+          "summary": "Schedule of meet for 2QFY27 Earnings…",
+          "version": "official-filing-narrative-v1",
+          "category": "investor_meeting",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Tata Steel Limited has informed the Exchange about Schedule of meet for 2QFY27 Earnings Discussion",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Investor meeting notice",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:29.959151+00:00",
+          "event_kind": "investor_meeting",
+          "input_hash": "1ba72dcc7a0ed2fe745eb8b5c7c05f549d53bb18f19f5ac942c7d553e02eb9db",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "abc40e08c4e1a9b013c3cd24acde3f473a38f90fa90d6a1e4140ea1b657adf0f",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "General Updates",
+        "description": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor Rotation |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026151827_BMOutcome30102026_Conclusion.pdf",
+        "published_at": "2026-10-30T09:48:46+00:00",
+        "category": "routine",
+        "priority": 0,
+        "review_reason": "Scheduled auditor rotation; expand to inspect the governance disclosure.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.538718+00:00",
+        "enrichment": {
+          "source": null,
+          "status": "feed_details",
+          "summary": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor…",
+          "version": "official-filing-narrative-v1",
+          "category": "routine",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Appointment of Statutory Auditors Pursuant to Mandatory Auditor Rotation",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Routine disclosure",
+          "priority": 0,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:30.482420+00:00",
+          "event_kind": "routine",
+          "input_hash": "20a71d4f9b5f2700d0f20db1d78e781a5542b3d170f4a35a6b2d041bed555b12",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "7acfc1f0d7e1c9835e7547d3baeb38234139168bfe9fd4901bf1913486a1d77a",
+        "symbol": "NTPC",
+        "company_name": "NTPC Limited",
+        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "description": "NTPC Limited has informed the Exchange about Link of Recording |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026181950_5_Disclosure_for_recording_of_Earnings_Conference_Call_Q2_FY27_signed.pdf",
+        "published_at": "2026-10-31T12:50:07+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Management commentary is available for further company research.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.495857+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/9425178051_31102026181950_5_Disclosure_for_recording_of_Earnings_Conference_Call_Q2_FY27_signed.pdf",
+            "method": "native_pdf_text",
+            "sha256": "0138eccde23db5909e1e0d06e83bd50238773183b242759ee330ed401ab375f8",
+            "fetched_at": "2026-11-01T09:07:17.604059+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "source_extracted",
+          "summary": "Audio Recording of Earnings Conference Call for Quarter and Half Year ended 30 Sep 2026 In terms of Regulation 30 of the SEBI (Listing Obligations and Disclosure Requirements) Regulations, 2015, this is to inform that a conference…",
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "NTPC Limited has informed the Exchange about Link of Recording",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Audio Recording of Earnings Conference Call for Quarter and Half Year ended 30 Sep 2026 In terms of Regulation 30 of the SEBI (Listing Obligations and Disclosure Requirements) Regulations, 2015, this is to inform that a conference call",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Earnings-call recording available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:07:19.566486+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "c838a4e5b01e186d2e9135bb3fc8da24c9297d651e25034960de673ad5cfbede",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "e70eb7bfdf989222a09ab8640faa5198b16f0ab6a29de04519bdb94e4f47e6b2",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Outcome of Board Meeting",
+        "description": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis. |SUBJECT: Outcome of Board Meeting",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193952_SE_30102026_Results.pdf",
+        "published_at": "2026-10-30T14:10:11+00:00",
+        "category": "results",
+        "priority": 3,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.535716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026193952_SE_30102026_Results.pdf",
+            "method": "native_pdf_text",
+            "sha256": "7c1b0618fa7aeb2d2e951aa54ef31e88639aa44031ece74eced1e1fd96ee32db",
+            "fetched_at": "2026-11-01T09:22:39.637927+00:00",
+            "total_pages": 31,
+            "pages_scanned": 8
+          },
+          "status": "source_extracted",
+          "summary": "Approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis.",
+          "version": "official-filing-narrative-v1",
+          "category": "results",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "In continuation of our letter dated October 27, 2026, we wish to inform you that the Board of Directors of the Company, at its meeting held today, has, inter alia:1. approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026; and2. passed an enabling resolution authorising the issuance of listed, secured / unsecured, redeemable non-convertible debentures up to Rs. 15,000 crore, in one or more tranches, on private placement basis.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "approved the unaudited Financial Results (Consolidated and Standalone) for the quarter and half year ended September 30, 2026 along with Independent Auditor's Review Report thereon, as recommended by the Audit Committee; and ii. passed an enabling resolution authorising the issua",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Financial results & debt-issue authorisation",
+          "priority": 3,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:22:43.522462+00:00",
+          "event_kind": "results",
+          "input_hash": "ebad81df17b5fbc9b0ace3f55a38403e1217a81f0ef4f4a312cdd59d8f70d707",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": true,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "e445c62d50061beaea90f22311ebdb517b8427a06cfa8a3e01edecd6965b3274",
+        "symbol": "TATASTEEL",
+        "company_name": "Tata Steel Limited",
+        "title": "Confirmation of Redemption/Payment of Interest and Principal",
+        "description": "Confirmation of Redemption/Payment of Interest and Principal |SUBJECT: Confirmation of Redemption/Payment of Interest and Principal",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/NIDHIFADNAVIS_30102026170023_BSENSECP.pdf",
+        "published_at": "2026-10-30T11:32:04+00:00",
+        "category": "capital",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.537716+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/NIDHIFADNAVIS_30102026170023_BSENSECP.pdf",
+            "method": "native_pdf_text",
+            "sha256": "e75cd5d03ffe540cd361181123eb774ad85855b8194c0db19fcecc24833a93fb",
+            "fetched_at": "2026-11-01T09:23:24.332890+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [],
+          "headline": "Debt redemption or payment disclosure",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:25.272670+00:00",
+          "event_kind": "capital",
+          "input_hash": "379379c27bf00327a5264a3bafacf95ae4d441c6798e4da287613b1c2949538b",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "2525b565b5c690af5549eb991197ae5e53d42bf6b23c110a46cd7986bef503f7",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Press Release",
+        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange regarding a press release dated October 30, 2026, titled \"ILUMYA® (tildrakizumab-asmn) approved in the U.S. for the Treatment of Adults with Active Psoriatic Arthritis\". |SUBJECT: Press Release",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026080437_SE_Intimation_of_Press_Release_ILUMYA_PsA_Approval.pdf",
+        "published_at": "2026-10-30T02:35:47+00:00",
+        "category": "business_update",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T09:50:13.253745+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.541723+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/SUNSEC_30102026080437_SE_Intimation_of_Press_Release_ILUMYA_PsA_Approval.pdf",
+            "method": "native_pdf_text",
+            "sha256": "440fc1a8628459eaf6aa1f010300f2680a65ab3c8a9de06bb991d78076f14bda",
+            "fetched_at": "2026-11-01T09:23:26.359542+00:00",
+            "total_pages": 5,
+            "pages_scanned": 5
+          },
+          "status": "feed_details",
+          "summary": "A press release dated October 30, 2026, titled \"ILUMYA® (tildrakizumab-asmn) approved in the U.S. for the Treatment of Adults with Active Psoriatic Arthritis\".",
+          "version": "official-filing-narrative-v1",
+          "category": "business_update",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Sun Pharmaceutical Industries Limited has informed the Exchange regarding a press release dated October 30, 2026, titled \"ILUMYA® (tildrakizumab-asmn) approved in the U.S. for the Treatment of Adults with Active Psoriatic Arthritis\".",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Business development",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:27.842561+00:00",
+          "event_kind": "business_update",
+          "input_hash": "6dcc9ee0bcbc644335ef3205126db0d89d2a1ca5d29e477862573d278384f648",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "84fdbc32bb5cfcfbb4e6192f38521f9d6fbf039d651e9a1a485bb1149a8f184f",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "description": "Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is available on the website of the Company. |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_31102026173331_SE_31102026_AR.pdf",
+        "published_at": "2026-10-31T12:04:03+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "New results may change the financial picture. Review the original filing.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.496152+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/kavinavora_31102026173331_SE_31102026_AR.pdf",
+            "method": "native_pdf_text",
+            "sha256": "20e733ddbe180dec8a580916839d719bf8bd2aecc7fd5635bedbd6c381f48f86",
+            "fetched_at": "2026-11-01T09:22:26.982229+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "source_extracted",
+          "summary": "Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is available on the website of the Company.",
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is available on the website of the Company.",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "Audio recording Audio recording of the discussion on the Unaudited Financial Results (Consolidated and Standalone) of the Company for the quarter and half year ended September 30, 2026, at the analyst meet held on October 30, 2026, is",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Earnings-call recording available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:22:27.793262+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "9840e55b68cab620e856b0bd2039a1968e6bbeae76406610a86e7de64fde78b3",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "7a01a925479e4cca660d5a85f1b21e06ba21e3a2c4a29cbb19d632db1f7f4ea5",
+        "symbol": "SUNPHARMA",
+        "company_name": "Sun Pharmaceutical Industries Limited",
+        "title": "Analysts/Institutional Investor Meet/Con. Call Updates",
+        "description": "Sun Pharmaceutical Industries Limited has informed the Exchange about Link of Recording |SUBJECT: Analysts/Institutional Investor Meet/Con. Call Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/SUNPHARMA456_30102026201207_IntimationSE20261030_Q2FY27_Call_Recording_Signed.pdf",
+        "published_at": "2026-10-30T14:43:58+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "Management commentary is available for further company research.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/SUNPHARMA456_30102026201207_IntimationSE20261030_Q2FY27_Call_Recording_Signed.pdf",
+            "method": "native_pdf_text",
+            "sha256": "1644c70aee96b80fd952cbaa4001b498aa0d073672c8dc9f8ed2d117779c6402",
+            "fetched_at": "2026-11-01T09:23:28.381131+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "source_extracted",
+          "summary": "Audio recording Pursuant to Regulation 30 of the Securities and Exchange Board of India (Listing Obligations and Disclosure Requirements) Regulations, 2015, further to our intimation dated 15th October 2026 regarding earnings call,…",
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Sun Pharmaceutical Industries Limited has informed the Exchange about Link of Recording",
+              "pdf_page": null
+            },
+            {
+              "kind": "official_document",
+              "field": null,
+              "quote": "audio recording Pursuant to Regulation 30 of the Securities and Exchange Board of India (Listing Obligations and Disclosure Requirements) Regulations, 2015, further to our intimation dated 15th October 2026 regarding earnings call, the",
+              "pdf_page": 1
+            }
+          ],
+          "headline": "Earnings-call recording available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:28.921671+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "f330176932295ac8862f106dc7baa8fe623b2d994bdc376d4aad13f0e6d676fa",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "9a90aac9e5ed4c1680d90afe38b8cd4bf014de516bd4c7026c9416d82de60337",
+        "symbol": "LT",
+        "company_name": "Larsen & Toubro Limited",
+        "title": "General Updates",
+        "description": "Updates on the Business Transfer Agreement with Vyoma.AI Limited (Vyoma), Wholly owned Subsidiary of the Company and Share Purchase Agreement towards sale of entire stake held in L&T Network Services Private Limited to Vyoma   Extension of timeline of completion |SUBJECT: General Updates",
+        "source_url": "https://nsearchives.nseindia.com/corporate/AB_31102026130022_SEIntimation_ExtensionofBTAVyoma_31102026.pdf",
+        "published_at": "2026-10-31T07:30:35+00:00",
+        "category": "unclassified",
+        "priority": 2,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-31T13:40:04.640205+00:00",
+        "last_seen_at": "2026-10-31T13:40:04.515739+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/AB_31102026130022_SEIntimation_ExtensionofBTAVyoma_31102026.pdf",
+            "method": "native_pdf_text",
+            "sha256": "a860c41c89dc6ceb5b809f0a847155c87627ce873bfe40e009ff2f36472e7f0e",
+            "fetched_at": "2026-11-01T09:23:09.014464+00:00",
+            "total_pages": 1,
+            "pages_scanned": 1
+          },
+          "status": "feed_details",
+          "summary": "Updates on the Business Transfer Agreement with Vyoma.AI Limited (Vyoma), Wholly owned Subsidiary of the Company and Share Purchase Agreement towards sale of entire stake held in L&T Network Services Private Limited to Vyoma Extension of timeline of…",
+          "version": "official-filing-narrative-v1",
+          "category": "unclassified",
+          "evidence": [
+            {
+              "kind": "exchange_feed",
+              "field": null,
+              "quote": "Updates on the Business Transfer Agreement with Vyoma.AI Limited (Vyoma), Wholly owned Subsidiary of the Company and Share Purchase Agreement towards sale of entire stake held in L&T Network Services Private Limited to Vyoma Extension of timeline of completion",
+              "pdf_page": null
+            }
+          ],
+          "headline": "Announcement awaiting classification",
+          "priority": 2,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:10.342743+00:00",
+          "event_kind": "unclassified",
+          "input_hash": "63c2cd33ee596cf2dc3bbe6b09a6aa5b9bade6bb7a76417570632e9644efe435",
+          "limitation": null,
+          "period_end": null,
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "118f6e28e059cea8ab9273d8736b76f12f519f51def7158ed07256c8b52b29f2",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Statement of utilization of issue proceeds",
+        "description": "Statement of utilization of issue proceeds |SUBJECT: Statement of utilization of issue proceeds",
+        "source_url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195733_SE_Utilisation_of_issue_proceeds.pdf",
+        "published_at": "2026-10-30T14:27:43+00:00",
+        "category": "capital",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/content/debt/WDM/kavinavora_30102026195733_SE_Utilisation_of_issue_proceeds.pdf",
+            "method": "native_pdf_text",
+            "sha256": "f5d163eec57905079d555f5f8e0f5aacc28da5c4ed9a9a24e0a5d810c6dab50f",
+            "fetched_at": "2026-11-01T09:23:11.098481+00:00",
+            "total_pages": 3,
+            "pages_scanned": 3
+          },
+          "status": "source_extracted",
+          "summary": "Supporting debt disclosure within the filed financial-results package.",
+          "version": "official-filing-narrative-v1",
+          "category": "capital",
+          "evidence": [],
+          "headline": "Use of debt-issue proceeds",
+          "priority": 1,
+          "event_key": "results:2026-09-30",
+          "checked_at": "2026-11-01T09:23:11.848202+00:00",
+          "event_kind": "results",
+          "input_hash": "c609ecc1e8df2173eb99b041f342b8506fb0785b51d172543d754d3157ccf45f",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
+      },
+      {
+        "id": "9a9f9b134c23c115f0251bf687ef0788b1e67204d877c126e6d3a28c1b8a9b75",
+        "symbol": "RELIANCE",
+        "company_name": "Reliance Industries Limited",
+        "title": "Investor Presentation",
+        "description": "Reliance Industries Limited has informed the Exchange about Investor Presentation |SUBJECT: Investor Presentation",
+        "source_url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194557_SE_30102026_IP.pdf",
+        "published_at": "2026-10-30T14:17:12+00:00",
+        "category": "earnings_call",
+        "priority": 1,
+        "review_reason": "This disclosure has not been reliably classified. It remains visible for your review.",
+        "first_seen_at": "2026-10-30T16:27:11.061718+00:00",
+        "last_seen_at": "2026-10-30T16:27:10.534703+00:00",
+        "enrichment": {
+          "source": {
+            "url": "https://nsearchives.nseindia.com/corporate/kavinavora_30102026194557_SE_30102026_IP.pdf",
+            "method": "native_pdf_text",
+            "sha256": "0c33aee54acafd8d9aba1f8bece9cc242809b0b8c3e73a42d056fdd4327bea40",
+            "fetched_at": "2026-11-01T09:23:17.163004+00:00",
+            "total_pages": 69,
+            "pages_scanned": 8
+          },
+          "status": "headline_only",
+          "summary": null,
+          "version": "official-filing-narrative-v1",
+          "category": "earnings_call",
+          "evidence": [],
+          "headline": "Investor presentation available",
+          "priority": 1,
+          "event_key": null,
+          "checked_at": "2026-11-01T09:23:19.656752+00:00",
+          "event_kind": "earnings_call",
+          "input_hash": "88a03ea8997a162b675fde2102875c123d5dfd8002cc341f5063df4ea0caa5d9",
+          "limitation": null,
+          "period_end": "2026-09-30",
+          "actual_results": false,
+          "interpretation": null,
+          "display_version": "filing-display-v3"
+        }
       }
     ],
     "finn_price_snapshots": [
@@ -1011,16 +2614,16 @@
       {
         "id": "filings",
         "state": "completed",
-        "started_at": "2026-10-30T22:17:04.518037+00:00",
-        "finished_at": "2026-10-30T22:17:05.047655+00:00",
-        "last_success_at": "2026-10-30T22:17:05.047665+00:00",
+        "started_at": "2026-11-01T06:53:25.868506+00:00",
+        "finished_at": "2026-11-01T06:53:26.762215+00:00",
+        "last_success_at": "2026-11-01T06:53:26.762225+00:00",
         "captured_since": "2026-10-30T09:50:11.134086+00:00",
         "error": null,
         "details": {
           "coverage": "Recent NSE RSS plus filings captured since monitoring started. Earlier history may be incomplete.",
-          "feed_items": 2,
-          "execution_origin": "supabase_cron",
-          "portfolio_filings": 0,
+          "feed_items": 84,
+          "execution_origin": "github_actions",
+          "portfolio_filings": 1,
           "invalid_timestamps": 0,
           "automation_verified": true,
           "portfolio_companies": 15

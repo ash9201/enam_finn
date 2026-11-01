@@ -1,5 +1,19 @@
 # Build history summary
 
+### Briefing redesign (1 November)
+
+- Added compact company/event groups, chronological activity, combined filing filters
+  and explicit browser-local review/undo/counts. Full names and contextual actions
+  replace raw-label cards and repeated template advice. EOD settings sit with signals.
+- Owner applied 0010 with RLS enabled. Cached native-PDF/XML/feed extraction retains
+  source excerpts, pages/fields and hashes; no new model calls or financial-table
+  comparisons. Scheduled sync incrementally prepares six pending records per run.
+- Reviewed all 37 captured records. Verified NTPC's related results package, neutral
+  KPIT tenure completion, Reliance's enabling debt authorisation, and conservative
+  headline-only handling of ambiguous debt tables. Raw IDs/dates/text/URLs are preserved.
+- Final regression: 209 backend and 12 frontend model tests pass; four targeted
+  viewport/theme scenes and a labelled fallback check pass. [Detailed report](BRIEFING_REDESIGN.md).
+
 ### Shared layout redesign - phase 1 (1 November)
 
 - Unified page chrome with compact desktop header navigation and a mobile bottom row

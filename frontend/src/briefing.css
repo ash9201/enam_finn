@@ -59,126 +59,17 @@
   font-size: 10px;
   color: var(--text-muted);
 }
-.signal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 13px;
-}
-.signal-card {
-  padding: 20px;
-  background: var(--surface-tint);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-.signal-card > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-}
 .ticker-badge {
   font-size: 10px;
   font-weight: 650;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
 }
-.signal-date {
-  font-size: 8px;
-  color: var(--text-muted);
-}
-.signal-card h3 {
-  font-family: Georgia, serif;
-  font-size: 24px;
-  font-weight: 400;
-  margin: 22px 0 10px;
-}
-.signal-card p {
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--text-muted);
-}
 .investigate-link {
   font-size: 11px;
   font-weight: 550;
   color: var(--accent);
   text-decoration: none;
-}
-.signal-card > .investigate-link {
-  display: inline-block;
-  margin-top: 10px;
-}
-.filing-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 23px;
-  margin: 12px 0;
-}
-.filing-meta {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.event-category {
-  font-size: 9px;
-  padding: 4px 7px;
-  border-radius: 4px;
-  background: var(--surface-soft);
-  color: var(--text-muted);
-}
-.priority-3 {
-  background: var(--warning-bg);
-  color: var(--warning-text);
-}
-.filing-meta time {
-  margin-left: auto;
-  font-size: 9px;
-  color: var(--text-muted);
-}
-.filing-card h3 {
-  font-size: 15px;
-  line-height: 1.7;
-  font-weight: 550;
-  margin: 18px 0 10px;
-  color: var(--text-secondary);
-}
-.review-reason {
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--text-muted);
-  margin: 0;
-  max-width: 720px;
-}
-.filing-actions {
-  display: flex;
-  gap: 22px;
-  align-items: center;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-.filing-actions > a {
-  font-size: 10px;
-  text-decoration: none;
-  color: var(--text-muted);
-}
-.filing-actions > a:first-child {
-  color: var(--accent);
-  font-weight: 650;
-}
-.filing-actions > button {
-  background: transparent !important;
-  padding: 0 !important;
-  font-size: 9px !important;
-  color: var(--text-muted) !important;
-  margin-left: auto;
-  gap: 0 !important;
-}
-.filing-card.is-read {
-  background: var(--surface-read);
-}
-.filing-card.is-read h3 {
-  color: var(--text-muted);
 }
 .window-options {
   display: flex;
@@ -213,28 +104,6 @@
   font-size: 11px !important;
   border: 1px solid var(--border) !important;
   border-radius: 9px !important;
-}
-.quiet-state {
-  padding: 44px 25px;
-  text-align: center;
-  border: 1px dashed var(--border);
-  border-radius: 11px;
-  color: var(--text-muted);
-}
-.quiet-state > span {
-  font-size: 24px;
-}
-.quiet-state h3 {
-  font-family: Georgia, serif;
-  font-size: 26px;
-  font-weight: 400;
-  margin: 18px 0 12px;
-}
-.quiet-state p {
-  font-size: 12px;
-  line-height: 1.8;
-  max-width: 420px;
-  margin: auto;
 }
 .coverage-footnote {
   margin-top: 34px;
@@ -339,7 +208,6 @@
   margin-top: 10px;
 }
 @media (max-width: 800px) {
-  .signal-grid,
   .portfolio-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -362,35 +230,8 @@
   .section-heading > span {
     font-size: 9px;
   }
-  .signal-grid,
   .portfolio-grid {
     grid-template-columns: 1fr;
-  }
-  .signal-card {
-    padding: 20px;
-  }
-  .signal-card h3 {
-    margin-top: 17px;
-  }
-  .filing-card {
-    padding: 20px;
-  }
-  .filing-card h3 {
-    font-size: 14px;
-  }
-  .filing-meta time {
-    margin-left: 0;
-    flex-basis: 100%;
-    margin-top: 3px;
-  }
-  .filing-actions {
-    gap: 18px;
-  }
-  .filing-actions > button {
-    margin-left: 0;
-  }
-  .review-reason {
-    font-size: 11px;
   }
   .settings-panel {
     grid-template-columns: 1fr;
@@ -405,16 +246,6 @@
   .portfolio-price strong {
     font-size: 25px;
   }
-}
-.filing-description {
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--text-secondary);
-  margin: 0 0 12px;
-  overflow-wrap: anywhere;
-}
-.filing-card h3 {
-  overflow-wrap: anywhere;
 }
 .recorded-notice {
   padding: 12px 24px;

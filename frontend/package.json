@@ -11,6 +11,8 @@
     "build": "tsc -b && vite build",
     "test:browser": "node scripts/verify-foundation.mjs",
     "test:layout": "node scripts/verify-layout.mjs",
+    "test:briefing": "node scripts/verify-briefing.mjs",
+    "test:briefing:model": "node --test scripts/briefing-model.test.mjs",
     "test:product": "node scripts/verify-product.mjs",
     "test:prices": "node scripts/verify-price-sources.mjs",
     "test:theme": "node scripts/verify-theme.mjs",

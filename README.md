@@ -1,5 +1,9 @@
 # FINN
 
+The [Briefing redesign](docs/BRIEFING_REDESIGN.md) groups source-backed developments
+by company/event, adds combined filters and clear local review states, and separates
+filing windows from EOD thresholds. Latest regression: **209 backend + 12 frontend model tests pass**.
+
 The [shared layout redesign](docs/SHARED_LAYOUT.md) adds compact desktop/mobile
 navigation, retained section state and System Status. Page-specific redesigns follow separately.
 

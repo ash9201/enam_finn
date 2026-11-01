@@ -1,19 +1,9 @@
 import { useEffect, useState } from 'react'
 import { publicRead } from './data'
 import { AppFooter, PageHeading } from './layout'
+import BriefingWorkspace from './briefing-workspace'
+import type { Filing } from './briefing-model'
 
-type Filing = {
-  id: string
-  symbol: string
-  company_name: string
-  title: string
-  description: string
-  source_url: string
-  published_at: string
-  category: string
-  priority: number
-  review_reason: string
-}
 type Price = {
   symbol: string
   data: {
@@ -58,24 +48,6 @@ const rupees = (value: number) =>
     currency: 'INR',
     maximumFractionDigits: 2,
   }).format(value)
-const label = (category: string) =>
-  ({
-    m_and_a: 'M&A',
-    management_change: 'Leadership',
-    litigation: 'Legal & regulatory',
-    results: 'Results',
-    earnings_call: 'Earnings call',
-    routine: 'Routine',
-    publication: 'Publication',
-    meeting_notice: 'Board meeting',
-    investor_meeting: 'Investor meeting',
-    capital: 'Capital',
-    corporate_action: 'Corporate action',
-    credit_rating: 'Credit rating',
-    business_update: 'Business update',
-    unclassified: 'Review filing',
-  })[category] || category
-
 let sessionPreferences: { price?: number; volume?: number } = {}
 function savedPreferences(): { price?: number; volume?: number } {
   try {
@@ -105,16 +77,12 @@ export default function BriefingApp({
   const [filings, setFilings] = useState<Filing[]>([])
   const [prices, setPrices] = useState<Price[]>([])
   const [syncs, setSyncs] = useState<Sync[]>([])
-  const [windowSize, setWindowSize] = useState('24h')
-  const [customStart, setCustomStart] = useState('')
-  const [customEnd, setCustomEnd] = useState('')
   const [priceThreshold, setPriceThreshold] = useState(Number(savedPreferences().price) || 4)
   const [volumeThreshold, setVolumeThreshold] = useState(Number(savedPreferences().volume) || 2)
   const [showSettings, setShowSettings] = useState(false)
   const [read, setRead] = useState<string[]>(savedRead)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [routineOpen, setRoutineOpen] = useState(false)
   const [lastLoaded, setLastLoaded] = useState('')
 
   async function load() {
@@ -166,33 +134,21 @@ export default function BriefingApp({
       /* Preferences still apply in this session. */
     }
   }, [priceThreshold, volumeThreshold])
-  function markRead(id: string) {
-    const next = read.includes(id) ? read.filter((value) => value !== id) : [...read, id]
-    setRead(next)
-    try {
-      localStorage.setItem('finn-read-v1', JSON.stringify(next))
-    } catch {
-      /* Session-only read state. */
-    }
-  }
-  const from =
-    windowSize === 'custom'
-      ? customStart
-        ? new Date(`${customStart}:00+05:30`).getTime()
-        : 0
-      : Date.now() - (windowSize === '7d' ? 7 : 1) * 86400000
-  const to =
-    windowSize === 'custom' && customEnd ? new Date(`${customEnd}:00+05:30`).getTime() : Date.now()
-  const filtered = filings
-    .filter((filing) => {
-      const time = new Date(filing.published_at).getTime()
-      return time >= from && time <= to
+  function updateReview(ids: string[], value: boolean) {
+    if (!ids.length) return
+    setRead((previous) => {
+      const changed = new Set(ids)
+      const next = value
+        ? [...new Set([...previous, ...ids])]
+        : previous.filter((id) => !changed.has(id))
+      try {
+        localStorage.setItem('finn-read-v1', JSON.stringify(next))
+      } catch {
+        /* Session-only review state. */
+      }
+      return next
     })
-    .sort(
-      (a, b) => b.priority - a.priority || +new Date(b.published_at) - +new Date(a.published_at),
-    )
-  const important = filtered.filter((filing) => filing.priority > 0)
-  const routine = filtered.filter((filing) => filing.priority === 0)
+  }
   const alerts = prices.filter(
     (price) =>
       !price.error &&
@@ -208,51 +164,42 @@ export default function BriefingApp({
   const researchLink = (symbol: string, refresh = false) =>
     `/?view=research&symbol=${encodeURIComponent(symbol)}${refresh ? '&refresh=1' : ''}`
 
-  function filingCard(filing: Filing) {
-    return (
-      <article
-        className={`filing-card ${read.includes(filing.id) ? 'is-read' : ''}`}
-        key={filing.id}
-      >
-        <div className="filing-meta">
-          <span className="ticker-badge">{filing.symbol}</span>
-          <span className={`event-category priority-${filing.priority}`}>
-            {label(filing.category)}
-          </span>
-          <time dateTime={filing.published_at}>{dateTime(filing.published_at)}</time>
-        </div>
-        <h3>{filing.title}</h3>
-        <p className="filing-description">{filing.description.split('|SUBJECT:')[0]}</p>
-        <p className="review-reason">{filing.review_reason}</p>
-        <div className="filing-actions">
-          {filing.category === 'results' && (
-            <a
-              href={`?view=research&symbol=${encodeURIComponent(filing.symbol)}&analysis=results`}
-              className="investigate-link"
-            >
-              Compare quarters ↗
-            </a>
-          )}
-          <a href={researchLink(filing.symbol)} className="investigate-link">
-            Investigate ↗
-          </a>
-          <a href={filing.source_url} target="_blank" rel="noopener noreferrer">
-            Original filing ↗
-          </a>
-          <button
-            aria-label={
-              read.includes(filing.id)
-                ? `Mark ${filing.symbol} unread`
-                : `Mark ${filing.symbol} reviewed`
-            }
-            onClick={() => markRead(filing.id)}
-          >
-            {read.includes(filing.id) ? 'Reviewed ✓' : 'Mark reviewed'}
-          </button>
-        </div>
-      </article>
-    )
-  }
+  const alertSettings = (
+    <section
+      className="settings-panel"
+      id={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
+      aria-label="Alert settings"
+    >
+      <div>
+        <h2>Alert thresholds</h2>
+        <p>Applied to the latest completed session. Saved in this browser.</p>
+      </div>
+      <label>
+        Daily move: &plusmn;{priceThreshold}%
+        <input
+          aria-label="Daily price move threshold"
+          type="range"
+          min="1"
+          max="15"
+          step="0.5"
+          value={priceThreshold}
+          onChange={(event) => setPriceThreshold(Number(event.target.value))}
+        />
+      </label>
+      <label>
+        Volume: {volumeThreshold}&times; prior 20-session average
+        <input
+          aria-label="Volume threshold"
+          type="range"
+          min="1"
+          max="5"
+          step="0.25"
+          value={volumeThreshold}
+          onChange={(event) => setVolumeThreshold(Number(event.target.value))}
+        />
+      </label>
+    </section>
+  )
 
   return (
     <main
@@ -263,52 +210,19 @@ export default function BriefingApp({
       <PageHeading
         title={portfolio ? 'Your Portfolio' : 'Your Briefing'}
         actions={
-          <button
-            className="text-button"
-            aria-expanded={showSettings}
-            aria-controls={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
-            onClick={() => setShowSettings(!showSettings)}
-          >
-            Alert settings
-          </button>
+          portfolio ? (
+            <button
+              className="text-button"
+              aria-expanded={showSettings}
+              aria-controls={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              Alert settings
+            </button>
+          ) : undefined
         }
       />
-      {showSettings && (
-        <section
-          className="settings-panel"
-          id={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
-          aria-label="Alert settings"
-        >
-          <div>
-            <h2>Alert thresholds</h2>
-            <p>Applied to the latest completed session. Saved in this browser.</p>
-          </div>
-          <label>
-            Daily move: ±{priceThreshold}%
-            <input
-              aria-label="Daily price move threshold"
-              type="range"
-              min="1"
-              max="15"
-              step="0.5"
-              value={priceThreshold}
-              onChange={(event) => setPriceThreshold(Number(event.target.value))}
-            />
-          </label>
-          <label>
-            Volume: {volumeThreshold}× prior 20-session mean
-            <input
-              aria-label="Volume threshold"
-              type="range"
-              min="1"
-              max="5"
-              step="0.25"
-              value={volumeThreshold}
-              onChange={(event) => setVolumeThreshold(Number(event.target.value))}
-            />
-          </label>
-        </section>
-      )}
+      {portfolio && showSettings && alertSettings}
       {error && (
         <div className="research-error" role="alert">
           {error}
@@ -400,122 +314,18 @@ export default function BriefingApp({
               })}
             </section>
           ) : (
-            <>
-              {alerts.length > 0 && (
-                <section className="signals-section">
-                  <div className="section-heading">
-                    <h2>Unusual, by your rules.</h2>
-                    <span>{alerts.length} signals · Latest completed session</span>
-                  </div>
-                  <div className="signal-grid">
-                    {alerts.map((price) => (
-                      <article className="signal-card" key={price.symbol}>
-                        <div>
-                          <span className="ticker-badge">{price.symbol}</span>
-                          <span className="signal-date">{price.data!.last_session} · EOD</span>
-                        </div>
-                        <h3>
-                          {price.data!.price_change_pct !== null &&
-                          Math.abs(price.data!.price_change_pct) >= priceThreshold
-                            ? `${price.data!.price_change_pct > 0 ? '+' : ''}${price.data!.price_change_pct.toFixed(2)}% daily move`
-                            : `${price.data!.volume_ratio!.toFixed(2)}× normal volume`}
-                        </h3>
-                        <p>
-                          {price.data!.volume_ratio !== null
-                            ? `Volume ${price.data!.volume_ratio.toFixed(2)}× the previous 20 sessions’ average.`
-                            : 'Volume comparison unavailable.'}
-                        </p>
-                        <a href={researchLink(price.symbol)} className="investigate-link">
-                          Research the business ↗
-                        </a>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              )}
-              <section className="filings-section" aria-labelledby="filings-heading">
-                <div className="section-heading">
-                  <h2 id="filings-heading">
-                    Your portfolio, filtered.{' '}
-                    <small className="context-count">{important.length} to review</small>
-                  </h2>
-                  <div className="window-options" aria-label="Filing time window">
-                    {[
-                      ['24h', '24 hours'],
-                      ['7d', '7 days'],
-                      ['custom', 'Custom'],
-                    ].map(([value, text]) => (
-                      <button
-                        key={value}
-                        aria-pressed={windowSize === value}
-                        onClick={() => setWindowSize(value)}
-                      >
-                        {text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {windowSize === 'custom' && (
-                  <div className="custom-window">
-                    <label>
-                      From (IST)
-                      <input
-                        type="datetime-local"
-                        value={customStart}
-                        onChange={(event) => setCustomStart(event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      To (IST)
-                      <input
-                        type="datetime-local"
-                        value={customEnd}
-                        onChange={(event) => setCustomEnd(event.target.value)}
-                      />
-                    </label>
-                  </div>
-                )}
-                {from > to ? (
-                  <p className="coverage-warning">Choose an end time after the start time.</p>
-                ) : important.length ? (
-                  important.map(filingCard)
-                ) : (
-                  <div className="quiet-state">
-                    <span aria-hidden="true">✓</span>
-                    <h3>
-                      {filingsSync?.last_success_at
-                        ? 'A quieter window.'
-                        : 'The first scan is still pending.'}
-                    </h3>
-                    <p>
-                      {filingsSync?.last_success_at
-                        ? 'No non-routine filings were captured in this period. Expand routine items or choose a wider window.'
-                        : 'A missing scan does not mean nothing happened. No announcements have been invented.'}
-                    </p>
-                    {filingsSync?.last_success_at && windowSize !== '7d' && (
-                      <button className="text-button" onClick={() => setWindowSize('7d')}>
-                        Review the last 7 days
-                      </button>
-                    )}
-                  </div>
-                )}
-                {routine.length > 0 && (
-                  <div className="routine-section">
-                    <button
-                      className="routine-toggle"
-                      aria-expanded={routineOpen}
-                      onClick={() => setRoutineOpen(!routineOpen)}
-                    >
-                      <span>
-                        {routine.length} routine {routine.length === 1 ? 'filing' : 'filings'}
-                      </span>
-                      <span>{routineOpen ? 'Collapse −' : 'Expand +'}</span>
-                    </button>
-                    {routineOpen && routine.map(filingCard)}
-                  </div>
-                )}
-              </section>
-            </>
+            <BriefingWorkspace
+              filings={filings}
+              companies={companies}
+              read={read}
+              onReview={updateReview}
+              signals={alerts}
+              settings={alertSettings}
+              settingsOpen={showSettings}
+              onSettings={() => setShowSettings(!showSettings)}
+              priceThreshold={priceThreshold}
+              volumeThreshold={volumeThreshold}
+            />
           )}
           <div className="coverage-footnote">
             <strong>Know the coverage.</strong>

@@ -32,7 +32,7 @@ try {
       throw error
     }
     await page.locator('.freshness').waitFor({ timeout: 20000 })
-    if ((await page.locator('.filing-card').count()) < 1)
+    if ((await page.locator('.company-group').count()) < 1)
       throw new Error('No actual portfolio filings loaded.')
     await page.getByRole('button', { name: '7 days', exact: true }).click()
     await page.getByRole('button', { name: 'Custom', exact: true }).click()
@@ -41,14 +41,19 @@ try {
     await page.getByLabel('From (IST)').fill('2030-01-01T00:00')
     await page.getByLabel('To (IST)').fill('2030-01-02T00:00')
     await page.getByRole('button', { name: 'Review the last 7 days', exact: true }).click()
-    if ((await page.locator('.filing-card').count()) < 1)
+    if ((await page.locator('.company-group').count()) < 1)
       throw new Error('Empty window did not recover through the explicit seven-day action.')
     await page.getByRole('button', { name: '24 hours', exact: true }).click()
-    const routine = page.locator('.routine-toggle')
-    if (await routine.count()) {
-      await routine.click()
-      if ((await routine.getAttribute('aria-expanded')) !== 'true')
-        throw new Error('Routine filings did not expand.')
+    const routineGroup = page
+      .locator('.company-group')
+      .filter({ has: page.locator('.routine-section') })
+      .first()
+    if (await routineGroup.count()) {
+      await routineGroup.locator(':scope > summary').click()
+      const routine = routineGroup.locator('.routine-section').first()
+      await routine.locator(':scope > summary').click()
+      if (!(await routine.evaluate((el) => el.open)))
+        throw new Error('Routine disclosures did not expand.')
     }
     await page.getByRole('button', { name: /Alert settings/ }).click()
     await page.getByLabel('Daily price move threshold').fill('3')
@@ -126,7 +131,7 @@ try {
   await offline.route('**/rest/v1/**', (route) => route.abort('failed'))
   await offline.goto(base, { waitUntil: 'networkidle' })
   await offline.getByText(/Recorded demo snapshot/).waitFor({ timeout: 20000 })
-  if ((await offline.locator('.filing-card').count()) < 1)
+  if ((await offline.locator('.company-group').count()) < 1)
     throw new Error('Recorded snapshot failed to render saved filings.')
   await offline.screenshot({ path: `${output}/mobile-recorded.png`, fullPage: true })
   await offline

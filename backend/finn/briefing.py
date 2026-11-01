@@ -37,6 +37,14 @@ def classify_filing(description: str) -> tuple[str, int, str]:
         )
     if re.search(r"board meeting.*intimat|intimat.*board meeting|notice.*board meeting", text):
         return "meeting_notice", 1, "A scheduled board meeting; this is not the results themselves."
+    if re.search(
+        r"audio recording|video recording|link of recording|transcript|investor presentation", text
+    ):
+        return (
+            "earnings_call",
+            1,
+            "Call material or presentation; not the financial-results statement.",
+        )
     if re.search(r"financial results|quarterly results|audited results|unaudited results", text):
         return (
             "results",
@@ -49,6 +57,16 @@ def classify_filing(description: str) -> tuple[str, int, str]:
             3,
             "A potential change in the business or ownership structure deserves review.",
         )
+    if (
+        re.search(r"complet\w*.{0,45}(?:term|tenure)|(?:term|tenure).{0,25}complet", text)
+        and re.search(r"independent\s+director", text)
+        and not re.search(r"\bresign(?:ed|ation)?\b", text)
+    ):
+        return "management_change", 1, "Scheduled independent-director term completion."
+    if re.search(r"operational.{0,15}financial snapshot", text):
+        return "business_update", 2, "Quarterly operational and financial snapshot."
+    if re.search(r"security cover|regulation 52|utili[sz]ation of issue proceeds", text):
+        return "capital", 1, "Periodic debt-security disclosure."
     if re.search(r"resignation|appointment|cessation|retirement", text) and re.search(
         r"director|chief|ceo|cfo|management|officer", text
     ):
@@ -89,6 +107,8 @@ def classify_filing(description: str) -> tuple[str, int, str]:
             if re.search(r"transcript|recording", text)
             else "Call-related disclosure; inspect whether it is a notice, recording or transcript.",
         )
+    if re.search(r"audio recording|video recording|link of recording", text):
+        return "earnings_call", 1, "Recording disclosure; no transcript analysis is implied."
     if re.search(r"investor.*meet|analyst.*meet|investor conference", text):
         return (
             "investor_meeting",
@@ -183,6 +203,9 @@ def sync_filings(store, companies: list[dict], *, origin: str = "local_manual") 
             )
         if filings:
             store.upsert("finn_filings", filings)
+        from finn.filing_details import enrich_filings
+
+        detail_coverage = enrich_filings(store, limit=6)
         errors, warnings = feed.get("parse_errors", []), feed.get("warnings", [])
         issues = warnings + (
             ["Some feed items had unrecognised timestamps and were excluded."] if errors else []
@@ -199,6 +222,7 @@ def sync_filings(store, companies: list[dict], *, origin: str = "local_manual") 
                 "feed_items": len(feed["items"]),
                 "portfolio_filings": len(filings),
                 "invalid_timestamps": len(errors),
+                "filing_details": detail_coverage,
                 "coverage": "Recent NSE RSS plus filings captured since monitoring started. Earlier history may be incomplete.",
             },
         }

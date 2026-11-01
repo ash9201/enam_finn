@@ -1,5 +1,11 @@
 # Working-prototype acceptance
 
+**Briefing redesign (1 November, latest):** 209 backend and 12 frontend model tests
+pass. Four targeted desktop/mobile Light/Dark scenes verify company/event/source
+grouping, combined filters, review/undo, chronology, independent EOD thresholds and
+keyboard/overflow behavior. Cached official-source detail and explicit headline-only
+limits replace repeated advice. [Actual source cases and limits](BRIEFING_REDESIGN.md).
+
 **Shared layout, phase 1 (1 November):** compact header/mobile navigation, functional
 titles, shared spacing and System Status. Desktop/mobile Light/Dark checks cover retained
 section state/history, company links, figure evidence, keyboard access and reserved

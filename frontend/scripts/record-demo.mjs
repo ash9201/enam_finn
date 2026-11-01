@@ -15,9 +15,9 @@ const base = process.env.FINN_BROWSER_URL || 'http://localhost:5173'
 const pause = () => page.waitForTimeout(2500)
 try {
   await page.goto(base, { waitUntil: 'networkidle' })
-  await page.locator('.filing-card').first().waitFor({ timeout: 20000 })
+  await page.locator('.company-group').first().waitFor({ timeout: 20000 })
   await pause()
-  await page.locator('.filing-card').first().scrollIntoViewIfNeeded()
+  await page.locator('.company-group').first().scrollIntoViewIfNeeded()
   await pause()
   await page.getByRole('button', { name: '7 days', exact: true }).click()
   await pause()
