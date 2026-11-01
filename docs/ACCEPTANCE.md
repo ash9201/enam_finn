@@ -1,6 +1,6 @@
 # Working-prototype acceptance
 
-**Investor QA (1 November, latest):** 189 backend tests pass, production build and
+**Investor QA (1 November, latest):** 190 backend tests pass, production build and
 bundle credential scan pass. Reproduced and fixed duplicate cached NTPC results;
 four affected browser scenes verify one financial section, both bases, reserved
 navigation space, SUNPHARMA's working figures and interpretations, evidence controls,

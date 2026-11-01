@@ -17,6 +17,31 @@ def test_company_name_products_is_not_an_extra_requested_topic():
         "What affects CCL Products' profitability and what has management said about demand, production capacity and future growth?"
     )
     assert [p["id"] for p in plan] == ["profitability", "demand", "capacity", "growth"]
+    assert [
+        p["id"]
+        for p in plan_question(
+            "Explain profitability drivers, current customer demand, production capacity and growth outlook."
+        )
+    ] == ["profitability", "demand", "capacity", "growth"]
+    assert [
+        p["id"] for p in plan_question("Who are its customers, and what is customer demand?")
+    ] == ["customers", "demand"]
+
+
+def test_returning_contracts_are_demand_evidence_but_contract_types_are_not():
+    plan = plan_question("What is customer demand?")
+    supported = {
+        "statement": "Lower prices have led to a return of many medium and long-term contracts.",
+        "citation": {
+            "quote": "We are seeing many more medium and long-term contracts coming back."
+        },
+    }
+    commercial = {
+        "statement": "The company supplies coffee under contracts with clients.",
+        "citation": {"quote": "Our contracts with clients are fixed-price contracts."},
+    }
+    assert assess_coverage(plan, [supported], [])[0]["status"] == "covered"
+    assert assess_coverage(plan, [commercial], [])[0]["status"] == "missing"
 
 
 def test_volume_guidance_does_not_satisfy_a_demand_question():
@@ -108,6 +133,11 @@ def test_planned_search_keeps_metadata_scope_and_does_not_add_embeddings(monkeyp
         and c["kinds"] == ["transcript"]
         for c in calls
     )
+    calls.clear()
+    question = "Explain profitability, current customer demand, production capacity and growth."
+    retrieve_planned(None, "TEST", question, {"evidence": []}, plan_question(question))
+    assert calls[1]["kinds"] == ["transcript"]
+    assert all(c.get("kinds") is None for i, c in enumerate(calls) if i != 1)
 
 
 def financial():

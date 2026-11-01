@@ -2,7 +2,7 @@
 
 Latest: [investor QA fixes](docs/INVESTOR_QA.md) address repeated quarterly views,
 basis switching, navigation overlap, question coverage, concrete management figures
-and brief financial interpretation. Final backend regression: **189 tests pass**.
+and brief financial interpretation. Final backend regression: **190 tests pass**.
 
 A mobile-first investor attention inbox and primary-source company research prototype
 for the ENAM AI Engineer challenge. The first working release includes **Push and Pull**

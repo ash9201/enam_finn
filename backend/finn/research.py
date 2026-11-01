@@ -21,7 +21,7 @@ from finn.retrieval import profile_identity, retrieval_profile, retrieve_with_di
 from finn.services import DependencyError, MissingConfiguration, require_ok
 from finn.timing import timed
 
-PROMPT_VERSION = "grounded-analysis-v5.7-intent-coverage"
+PROMPT_VERSION = "grounded-analysis-v5.8-intent-coverage"
 DEFAULT_QUESTION = "Explain the core business and its main services or products."
 
 

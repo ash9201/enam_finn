@@ -40,7 +40,7 @@ FACETS = {
     ),
     "demand": (
         "Demand and orders",
-        r"\b(demand|orders?|offtake|consumption|orderbook)\b",
+        r"\b(demand|orders?|offtake|consumption|orderbook|(?:more|new|return|returning|resum\w*).{0,80}contracts?|contracts?.{0,35}(?:back|return|resum\w*))\b",
         'demand orders "order book" offtake consumption',
     ),
     "capacity": (
@@ -66,7 +66,10 @@ def plan_question(question):
         q,
     ):
         keys.append("offering")
-    if business or re.search(r"customers?|clients?|who.*buy", q):
+    # Customer demand is one demand question, not an additional request for a
+    # customer profile. Preserve separately requested customers in the same text.
+    customer_question = re.sub(r"\b(?:customers?'?|clients?'?)\s+demand\b", "demand", q)
+    if business or re.search(r"customers?|clients?|who.*buy", customer_question):
         keys.append("customers")
     if business or re.search(r"generat\w* revenue|revenue streams?|how.*(?:earn|sell)", q):
         keys.append("commercial")
@@ -170,7 +173,11 @@ def retrieve_planned(store, symbol, question, base, plan, **filters):
         scope = dict(filters)
         if (
             not scope.get("kinds")
-            and "management" in question.casefold()
+            and (
+                "management" in question.casefold()
+                or p["id"] == "demand"
+                and re.search(r"\b(current|latest|recent)\b", question, re.I)
+            )
             and p["id"] in ["demand", "growth", "capacity", "profitability"]
         ):
             scope["kinds"] = ["transcript"]

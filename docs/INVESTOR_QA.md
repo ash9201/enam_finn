@@ -27,7 +27,7 @@ the content/navigation bounds at the top, middle and end of scrolling.
 
 ## Answer intent and evidence selection
 
-`grounded-analysis-v5.7-intent-coverage` adds deterministic investor-aspect detection
+`grounded-analysis-v5.8-intent-coverage` adds deterministic investor-aspect detection
 and at most four focused keyword searches. The original company/document/date/metadata
 filters are forwarded. The main hybrid query, embedding model and evaluated RRF
 settings (k=10, semantic weight=2) are unchanged. Selection reserves evidence across
@@ -48,6 +48,15 @@ Revenue recognition, principal/agent tests and unbilled-accounting sentences do 
 replace an explanation of how customers pay. Recognition as an industry leader is
 not mistakenly classified as accounting.
 
+Customer demand stays one demand topic rather than adding an unrequested customer
+profile. Direct evidence of returning or additional contracts can establish demand;
+contract types alone cannot. This small correction followed a fresh production
+request and invalidates older answer-plan caches through the prompt version.
+Current-demand supplements prefer transcripts when no source-kind filter was supplied;
+the main retrieval still includes reports. Explicit source filters remain in force.
+As with other questions, a requested aspect can remain unverified after the bounded
+repair; the UI reports that limitation rather than marking coverage as complete.
+
 Coverage checks distinguish customer sectors from services offered, volume guidance
 from demand evidence, and EBITDA guidance from profitability drivers. These are
 bounded relevance checks, not a proof of semantic entailment. Primary quotes and
@@ -61,7 +70,7 @@ financial-table guards remain necessary; the reviewed cases were inspected manua
 | CCL profitability, demand, capacity and future growth | Two points, with demand and growth effectively omitted | Five points cover cost-plus/mix, demand preferences, capacity headroom and management guidance. All four aspects covered; 18.23 s prepared generation including bounded repair where needed. |
 | M&M segments and contributions | Qualitative segment descriptions without a contribution limitation | Group segments and operating/holding roles remain explained. Numeric segment contributions were searched but not verified with compatible period/basis. The answer states this gap explicitly. 9.86 s prepared generation. |
 
-These are individual local live-source observations with prepared corpora, not a
+These initial v5.7 observations use prepared corpora, not a
 statistical latency benchmark. One malformed model response was rejected during
 development. Intermediate candidates were not published; no historical answer was
 silently substituted for a failed request. M&M numerical segment contributions remain
@@ -111,7 +120,7 @@ categories, scans or unavailable text leave a clear unverified-cause caveat.
 
 ## Verification and operations
 
-- **189 backend tests passed** in the final regression. Targeted tests were used during
+- **190 backend tests passed** in the final regression. Targeted tests were used during
   implementation; unrelated backend tests were not repeated per theme.
 - TypeScript/Vite production build and privileged-credential bundle scan passed.
 - Four affected browser scenes cover NTPC phone/light and desktop/dark, SUNPHARMA

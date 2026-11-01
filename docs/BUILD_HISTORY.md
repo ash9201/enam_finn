@@ -13,7 +13,7 @@
   primary-source figures while explicitly preserving unit/period uncertainty.
 - Added deterministic quarterly observations and preserved missing financial notes
   additively. SUNPHARMA's current-quarter disclosures are cited without inventing a
-  complete earnings bridge. Final regression: 189 pass; build/bundle checks and four
+  complete earnings bridge. Final regression: 190 pass; build/bundle checks and four
   targeted viewport/theme scenes pass. [Detailed report](INVESTOR_QA.md).
 
 ### Research experience improvements (31 October, latest)
