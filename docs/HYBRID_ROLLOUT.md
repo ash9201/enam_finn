@@ -42,9 +42,71 @@ The inventory RPC reports database size so future index growth can be monitored.
 
 ## Verification and current coverage
 
-The refreshed production report below is completed after deployment. Detailed local
-passages and diagnostic output stay in ignored `artifacts/hybrid-rollout` and
-`artifacts/retrieval`; credentials are never included.
+Measured 2026-11-01T23:11:40.292233+00:00 (2 November IST): **2,488 / 18,698
+chunks**, **14 / 70 fully indexed current documents**, across
+**20 companies with collected documents**. Three companies have complete eligible
+indexes; 17 remain keyword-only. The database measures 160.4 MB.
+Counts describe current search scope, not all retained extraction versions.
+
+| Company | Indexed / current chunks | Complete / current documents |
+| --- | ---: | ---: |
+| CCL | 707 / 707 | 4 / 4 |
+| GOKEX | 711 / 711 | 3 / 3 |
+| V2RETAIL | 25 / 25 | 1 / 1 |
+| INFY | 877 / 1,160 | 2 / 4 |
+| POLYCAB | 168 / 2,628 | 4 / 8 |
+
+- Deployed application revision `1154a2d` and its parent `c86fcf9` passed CI,
+  including the full unit suite, frontend build/model checks and secret scan.
+  Focused retrieval, evidence, financial and directory checks also passed locally.
+  No unrelated source ingestion or LLM benchmark sweep was run.
+- A new production CCL question returned a cited hybrid answer. Existing CCL/GOKEX
+  indexes passed live retrieval, query-vector reuse, answer caching, incomplete-index
+  fallback, simulated provider/vector-RPC failures and flag-off rollback checks.
+- Previously uncollected **V2RETAIL**, outside the watchlist, was resolved from the
+  verified directory, discovered and ingested through the generic quarterly workflow,
+  and indexed automatically on Render: one primary filing / 25 chunks. Its evidence
+  follow-up returned three cited hybrid claims about group entities, business segment
+  and review limitations. All three citations matched original PDF pages 9, 12 and 10.
+  The first financial result retained nine verified Revenue/PBT/PAT cells; EBITDA
+  remained missing. This is a financial-only collected corpus, not a preloaded annual
+  report/transcript corpus; requesting those documents extends its index normally.
+- Repeating its financial request completed from cache in 2.18 seconds, with unchanged
+  document versions and zero embedding reservations. Repeating its hybrid follow-up
+  also reused the answer with zero new embedding reservations.
+- **COLPAL** resolved correctly but its public index exposed no primary quarterly
+  links. The job reported that specific failure; no substitute data was returned.
+- Publishable access to the private view/inventory was denied with permission code
+  42501 while ordinary public company reads succeeded. A mismatched body-hash batch
+  wrote zero rows. CCL/GOKEX source passages/pages and new V2RETAIL pages were checked.
+- Current frozen-setting relevance/latency results are in [the evaluation report](HYBRID_EVALUATION.md):
+  matched keyword Recall@5/10 **0.5714 / 0.8571** versus hybrid **0.9286 / 0.9286**;
+  warm retrieval medians **688 / 1,881 ms** (27 samples per method, no provider calls).
+  These are small reference-page checks, not a general answer-quality claim.
+
+## Remaining operational limits and owner actions
+
+**No further migration or Render environment change is required for this rollout.**
+Keep the server-side Gemini key, model and enabled flag above. No frontend/GitHub
+variable changes are needed; the existing Actions secret/enable variable are configured.
+The standard-runner daily backfill remains at 08:45 UTC / 14:15 IST, after Pacific
+midnight in both DST seasons. Its latest scheduled run succeeded; the updated
+maintenance entry point was also run against production and resumed INFY to 877
+chunks before stopping explicitly at the shared daily budget.
+
+The remaining 16,210 chunks cannot fit in one confirmed free daily allowance.
+At roughly 800 completed vectors/day after reservation overhead, full current coverage
+needs around 20 further daily allowances, subject to research usage, retries and new
+filings. Keyword research remains available meanwhile. New companies acquire only
+requested documents and join this same resumable pipeline; a large new annual corpus
+can therefore remain keyword-only across multiple resets. Missing/scanned/inaccessible
+sources retain existing coverage limits. No OCR, model-provider, quota tier or billing
+upgrade was introduced.
+
+For rollback, set only `FINN_ENABLE_SEMANTIC_SEARCH=false` on the active API and
+redeploy. Existing keyword retrieval/citations continue; vectors remain stored.
+Private detailed diagnostics stay in ignored `artifacts/hybrid-rollout` and
+`artifacts/retrieval`. Public evaluation summaries contain no credentials.
 
 ---
 

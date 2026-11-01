@@ -1,4 +1,34 @@
-# Retrieval evaluation — 31 October 2026
+# Retrieval evaluation ? current rollout and historical studies
+
+## 2 November production-scope verification
+
+Frozen settings were rerun against current source versions; no weight search or
+LLM answer-quality evaluation was repeated. Seven answerable reference-page cases
+cover CCL and GOKEX annual reports/transcripts. Two unsupported questions were
+retrieved but are excluded from Recall; this is not a new abstention-quality score.
+
+| Retrieval | Recall@5 | Recall@10 | Warm median |
+| --- | ---: | ---: | ---: |
+| Matched keyword | 0.5714 | 0.8571 | 688 ms |
+| Hybrid | 0.9286 | 0.9286 | 1,881 ms |
+
+Latency: 27 measurements per method (9 questions ? 3 alternating-order repeats),
+with stored query embeddings and zero embedding-provider calls. Measurements include
+workspace-to-Supabase round trips, not generation or a Render latency SLA. Some
+individual held-out questions gain no Recall@10; the small set supports retaining
+existing settings, not a claim of universal superiority or better generated answers.
+In the CCL private-label case the fused top ten contain eight keyword/semantic
+consensus passages and two semantic-only passages; keyword ranks boost consensus.
+
+Real production checks separately cover first-time V2RETAIL quarterly discovery,
+25/25 indexed chunks, a three-claim hybrid evidence follow-up, repeat answer/vector
+reuse, and original PDF pages 9/10/12. That filing is not added to the scored reference
+set after viewing its answer. CCL/GOKEX citation passages were checked against saved
+source chunks and representative original PDF pages. Full live outcomes and current
+counts are in [the rollout report](HYBRID_ROLLOUT.md).
+
+## Historical evaluation (31 October; original snapshots below)
+
 
 This report preserves the evaluation snapshots and decisions at their original stages.
 The subsequent [production rollout](HYBRID_ROLLOUT.md) is now enabled for complete

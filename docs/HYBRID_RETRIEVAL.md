@@ -48,7 +48,7 @@ Measure before adding HNSW or changing chunking.
   smaller batches when needed, and no silent input truncation. Completed embeddings
   are cached before chunk updates. Retries reuse those vectors after a connection loss.
 - Shared database reservations count **individual embedded texts**, including those in
-  batches: 80 input units/minute, 800/day for bulk backfill, up to 900/day for foreground
+  batches: 80 input units/minute, 850/day for bulk backfill, up to 900/day for foreground
   questions, and 27,000 reserved tokens/minute. These are below the owner's stated
   100/1,000/30,000 limits. Token-count HTTP calls conservatively reserve one unit too;
   token counts are reused within
@@ -59,8 +59,8 @@ Measure before adding HNSW or changing chunking.
   and `RetryInfo` distinguish a daily stop from a short throttle. Cached query vectors
   remain usable during a provider cooldown. No paid capacity is enabled.
 
-Activate a complete primary-document manifest first; then the generic ingestion path
-schedules indexing for that company. Reused corpora also resume missing embeddings.
+After primary-document activation the generic ingestion path schedules indexing for
+that company. Quarterly ingestion and cached financial research also schedule it. Reused corpora also resume missing embeddings.
 One background I/O worker per API process handles these tasks. Completed chunk state
 survives restarts; another company request or the CLI resumes unfinished work. A free
 Render instance can sleep before a large backfill finishes. Use the CLI for the initial
@@ -81,8 +81,9 @@ ready corpora, not archived document versions.
 
 1. Apply `supabase/migrations/0006_hybrid_retrieval.sql` with RLS enabled. The owner
    applied it successfully. Apply `0007_embedding_input_quota.sql` too; the owner has
-   now applied and verified it. It corrects quota accounting after the observed live
-   daily limit. Original keyword RPCs remain available.
+   now applied and verified it. Apply remaining migrations through 0011 in order;
+   0011 supplies the shared current-document scope, batch writes and private inventory.
+   The current production project has applied these. Original keyword RPCs remain available.
    Run `python scripts/verify_embedding_quota.py` to verify input accounting with isolated,
    promptly removed audit reservations; it never calls Gemini.
 2. Backfill and inspect status, then run the evaluation below. For a new deployment,

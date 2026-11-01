@@ -536,5 +536,36 @@
       "ready": 0,
       "total": 1378
     }
+  },
+  "production_rollout_2026_11_02": {
+    "checked_at": "2026-11-01T23:11:40.292233+00:00",
+    "retrieval_version": "hybrid-rrf-v2-primary-scope",
+    "selected_settings": {
+      "candidates": 30,
+      "limit": 10,
+      "rrf_k": 10,
+      "semantic_weight": 2.0,
+      "page_cap": 2,
+      "document_cap": 4,
+      "adaptive_document_cap": true
+    },
+    "selection": "Frozen settings, no retuning",
+    "positive_cases": 7,
+    "ranking_only_negative_cases": 2,
+    "keyword_matched": {
+      "recall_at_5": 0.5714,
+      "recall_at_10": 0.8571
+    },
+    "hybrid": {
+      "recall_at_5": 0.9286,
+      "recall_at_10": 0.9286
+    },
+    "median_warm_retrieval_ms": {
+      "keyword": 687.89,
+      "hybrid": 1880.84
+    },
+    "latency_samples_per_method": 27,
+    "fresh_answer_quality_rerun": false,
+    "scope": "Annual report/transcript reference pages; quarterly evidence tested separately through first-time V2RETAIL production research and cited follow-up."
   }
 }
