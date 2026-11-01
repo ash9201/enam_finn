@@ -80,11 +80,11 @@ async function audit(page, scene) {
     return {
       text_nodes: count,
       failures,
-      // Financial figures deliberately scroll inside their own region; audit the
-      // outer page containers rather than the table's scrollable descendants.
-      overflow: [document.body, ...document.querySelectorAll('.app-view:not([hidden])')].some(
-        (element) => element.scrollWidth > element.clientWidth + 1,
-      ),
+      overflow:
+        document.documentElement.scrollWidth > innerWidth + 1 ||
+        [...document.querySelectorAll('.app-view:not([hidden])')].some(
+          (element) => element.scrollWidth > element.clientWidth + 1,
+        ),
     }
   })
   if (result.overflow || result.failures.length) {

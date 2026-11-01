@@ -1,5 +1,72 @@
 # Working-prototype acceptance
 
+## Final integrated UI review — 2 November 2026
+
+The shared layout, Briefing, Research, Portfolio and charcoal/blue dark palette
+were reviewed together using the running application and actual saved company
+data. The only application change needed was **quarterly-table containment**:
+sticky metric cells could widen the root page to 529px on a 390px screen, allowing
+139px of accidental page panning. Making the existing table scroller its positioning
+container fixes this without clipping evidence controls or removing local table scrolling.
+Strict document-width checks and an actual attempted window pan now guard this case.
+
+### Verified journeys and states
+
+- **Cross-page journey:** an NTPC Briefing results event opens its cached financial
+  research; a figure opens exact evidence and a contextual draft. Portfolio sorting
+  and expansion, the company's seven-day Briefing link, and returning to Research
+  preserve the selected company, evidence context, draft and standalone basis.
+  Review/undo restores the original filing IDs and both official source links remain.
+- **Navigation/layout:** desktop top and mobile bottom navigation, Back/Forward,
+  filters/drafts/scroll retention, deliberate company links, keyboard focus/skip
+  navigation and System Status return work. Header/navigation bounds leave content
+  unobscured. Functional page titles and quiet status access replace the old setup UI.
+- **Briefing:** all original captured source identities, NTPC results/dividend/debt
+  separation, KPIT tenure information, Reliance recording grouping, combined filters,
+  chronological view, persisted event reviews/undo and independent EOD thresholds pass.
+  Incomplete source text remains explicitly limited, without fabricated extra detail.
+- **Research:** names, prefixes, symbols, aliases, historical names and minor typos;
+  explicit ambiguous selection; the vertical watchlist; all four one-click actions;
+  source evidence/context; preserved workspaces; and one financial section with
+  compatible basis controls pass. Real archived single-basis data, missing figures,
+  delayed overview responses, in-flight jobs and failed refreshes remain explicit.
+- **Portfolio:** 15 actual watchlist companies, saved close/change values, genuine
+  configured signals, grouped recent-event counts, sorting/expansion, original price
+  links, shared methodology/date, local freshness warnings and persisted preferences
+  pass. No holdings, invented investment returns or new financial calculations.
+- **States/themes:** empty/invalid filing windows, loading, dated recorded fallback,
+  cached research, partial/unavailable financial figures, API/source failures and
+  retries stay in context. Both themes retain readable financial signs, selected
+  states, focus indication and evidence overlays. All 56 theme scenes pass with
+  strict page-width checks restored.
+
+Coverage: **1440×1000 and 390×844 in light/dark**, plus 320px and short-landscape
+geometry. Existing targeted suites passed: `test:layout` (four matrices plus an
+async-state guard), `test:briefing` (four), `test:research-redesign` (four plus guard
+cases), `test:portfolio` (four plus failure/persistence cases), and `test:theme` (56).
+The complete frontend model regression has **27 passing tests**. Production build,
+credential scanning and whitespace checks pass. Screenshots and structured results
+remain in the existing ignored `artifacts/` folders; no duplicate acceptance report.
+
+### Evidence and testing limits
+
+Native saved-data/evidence requests and read-only relays exercise actual published
+sources. All-four-action interaction tests reuse unchanged real recorded answers,
+including previously reviewed CCL outlook/risk answers; their reports explicitly
+say `live_actions: false`. Transport failures and delayed jobs are labelled test
+simulations. This review does **not** claim fresh LLM evaluation, new source ingestion,
+or current-market data: saved closes retain their actual 30 October session and
+answers retain their source/report dates. Backend/retrieval/calculation code is unchanged.
+
+Automated mobile coverage is Chromium emulation, not a physical iOS/Safari test.
+Free-service cold starts, source restrictions and incomplete reporting coverage
+still apply; unsupported figures remain unavailable. Source link identity/page
+targets are checked, without exhaustively downloading every linked exchange PDF.
+Deployment verification compares the final built JS/CSS and public theme asset
+against Render, then repeats native cross-page checks without model generation.
+
+The phase records below are historical, with their original test counts and scope.
+
 **Briefing redesign (1 November, latest):** 209 backend and 12 frontend model tests
 pass. Four targeted desktop/mobile Light/Dark scenes verify company/event/source
 grouping, combined filters, review/undo, chronology, independent EOD thresholds and

@@ -1,12 +1,16 @@
 # FINN
 
+The [final integrated UI review](docs/ACCEPTANCE.md) covers cross-page investor
+journeys, both themes and desktop/mobile behavior, including the final financial
+table containment fix. The current frontend regression has 27 model tests.
+
 The [Portfolio redesign](docs/PORTFOLIO_REDESIGN.md) adds a sortable desktop
 watchlist and compact mobile rows, genuine activity flags, company Briefing links,
 and central EOD/source metadata. Price calculations and watchlist membership are unchanged.
 
 The [Briefing redesign](docs/BRIEFING_REDESIGN.md) groups source-backed developments
 by company/event, adds combined filters and clear local review states, and separates
-filing windows from EOD thresholds. Latest regression: **209 backend + 12 frontend model tests pass**.
+filing windows from EOD thresholds. That phase passed **209 backend + 12 frontend model tests**.
 
 The [shared layout redesign](docs/SHARED_LAYOUT.md) adds compact desktop/mobile
 navigation, retained section state and System Status. Page-specific redesigns follow separately.

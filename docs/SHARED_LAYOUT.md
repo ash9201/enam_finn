@@ -1,5 +1,9 @@
 # Shared application layout - phase 1
 
+This is the historical shared-layout phase record. Page-specific redesigns are
+complete; the [final integrated review](ACCEPTANCE.md) records the current combined
+acceptance and the quarterly-table scroll-containment fix.
+
 The first redesign phase replaces application chrome, page introductions and shared
 spacing. Briefing cards, the research composer/results, financial tables, evidence
 drawers and portfolio cards retain their existing contents and interactions.
@@ -73,4 +77,5 @@ blocked-storage check also passed for shared session thresholds and theme switch
 
 TypeScript/Vite build and privileged-credential asset scan pass. No backend, ingestion,
 retrieval, financial arithmetic, schema or model settings changed; unrelated backend
-tests were not rerun for each theme. Page-specific redesign work remains for later phases.
+tests were not rerun for each theme. Later page-specific work and final integrated
+acceptance are recorded in the linked current report above.

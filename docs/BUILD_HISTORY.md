@@ -1,5 +1,20 @@
 # Build history summary
 
+### Final integrated UI acceptance (2 November)
+
+- Reviewed the actual shared layout, Briefing, Research and Portfolio together in
+  both themes at desktop/mobile sizes. Found and fixed sticky quarterly-table cells
+  escaping the horizontal scroller and widening the mobile page. Local table
+  scrolling, figure evidence, all data and financial safeguards are preserved.
+- Added a real saved-data event → figures → evidence → Portfolio → company Briefing
+  → retained Research journey to the existing layout checks, alongside attempted
+  global-pan regression checks. Restored strict page-width auditing in theme tests.
+- All targeted UI suites pass, including four theme/viewport matrices, search,
+  review/undo, source identities, one-click actions, basis handling, unavailable
+  figures, loading/empty/error states and 56 theme scenes. The 27 frontend model
+  checks, build and credential scan pass. No ingestion, new model evaluations or
+  backend/AI changes. [Scope, evidence and limits](ACCEPTANCE.md).
+
 ### Charcoal / blue dark palette (2 November)
 
 - Refreshed shared dark tokens with near-black canvas, charcoal/slate surfaces,

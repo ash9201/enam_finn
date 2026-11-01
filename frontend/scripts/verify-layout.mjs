@@ -37,6 +37,69 @@ async function geometry(page, mobile) {
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(1)
 }
 
+async function investigationJourney(page, nav, viewport) {
+  await nav('Briefing').click()
+  await page.getByRole('button', { name: 'Reset filters', exact: true }).click()
+  await page.getByRole('button', { name: '7 days', exact: true }).click()
+  await page.getByRole('combobox', { name: 'Company', exact: true }).selectOption('NTPC')
+  const group = page.locator('.company-group[data-symbol="NTPC"]')
+  if ((await group.getAttribute('open')) === null) await group.locator(':scope > summary').click()
+  const result = group.locator('.filing-event').filter({
+    has: page.locator('.filing-primary-action[href*="analysis=results"]'),
+  })
+  if ((await result.locator('.event-details').getAttribute('open')) === null)
+    await result.locator('.event-summary').click()
+  const before = await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1') || '[]'))
+  await result.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
+  await expect(result).toHaveClass(/is-reviewed/)
+  await result.getByRole('button', { name: /Reviewed.*Undo/ }).click()
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1')))).toEqual(
+    before,
+  )
+  await expect(result.locator('.original-filing')).toHaveCount(2)
+  await result.locator('.filing-primary-action').click()
+  await expect(page.getByLabel('Selected company')).toContainText('NTPC')
+  await expect(page.locator('.financial-results')).toHaveCount(1)
+  await page.getByRole('button', { name: 'Standalone', exact: true }).click()
+  await page.locator('.financial-number').first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.getByRole('button', { name: 'Ask about this evidence' }).click()
+  await expect(page.getByLabel('Active evidence context')).toContainText('NTPC')
+  await page.getByLabel('Your question').fill('Does later evidence support this reported figure?')
+  await nav('Portfolio').click()
+  await page.getByRole('combobox', { name: 'Sort watchlist' }).selectOption('name:asc')
+  const company = page.locator('.portfolio-row[data-symbol="NTPC"]')
+  await company.locator('.portfolio-company-toggle').click()
+  await expect(company.locator('.portfolio-source')).toHaveAttribute('href', /^https:\/\//)
+  await company.locator('.portfolio-event-link').click()
+  await expect(page.getByRole('combobox', { name: 'Company', exact: true })).toHaveValue('NTPC')
+  await expect(page.getByRole('button', { name: '7 days', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await expect(group).toHaveAttribute('open', '')
+  await nav('Research').click()
+  await expect(page.getByLabel('Selected company')).toContainText('NTPC')
+  await expect(page.getByLabel('Active evidence context')).toContainText('NTPC')
+  await expect(page.getByLabel('Your question')).toHaveValue(
+    'Does later evidence support this reported figure?',
+  )
+  await expect(page.locator('.financial-results')).toHaveAttribute('data-basis', 'standalone')
+  await page.getByRole('button', { name: 'Remove evidence context' }).click()
+  await page.getByRole('button', { name: 'Change company', exact: true }).click()
+  const input = page.getByRole('combobox', { name: 'Find a company' })
+  for (const [query, symbol] of [
+    ['Infosys', 'INFY'],
+    ['infsys', 'INFY'],
+    ['HUL', 'HINDUNILVR'],
+  ]) {
+    await input.fill(query)
+    await expect(page.locator('.company-suggestions [role="option"]').first()).toContainText(symbol)
+  }
+  await input.press('Escape')
+  await geometry(page, viewport.width < 768)
+}
+
 try {
   for (const viewport of [
     { width: 390, height: 844 },
@@ -177,6 +240,18 @@ try {
         )
         await geometry(page, viewport.width < 768)
       }
+      if (viewport.width < 768) {
+        // The table may scroll; its sticky metric cells must never widen the page.
+        const figures = page.locator('.financial-table-wrap')
+        const maximum = await figures.evaluate((el) => el.scrollWidth - el.clientWidth)
+        expect(maximum).toBeGreaterThan(0)
+        for (const left of [maximum, 0]) {
+          await figures.evaluate((el, value) => (el.scrollLeft = value), left)
+          await page.evaluate(() => window.scrollTo(1000, 0))
+          expect(await page.evaluate(() => window.scrollX)).toBe(0)
+          await geometry(page, true)
+        }
+      }
       if (viewport.width === 390 && theme === 'light') {
         await page.locator('.financial-number').first().click()
         await expect(page.getByRole('dialog')).toBeVisible()
@@ -202,6 +277,7 @@ try {
       await page.getByRole('link', { name: 'Skip to content' }).focus()
       await page.keyboard.press('Enter')
       await expect(page.getByRole('main')).toBeFocused()
+      await investigationJourney(page, nav, viewport)
       if (viewport.width === 390) {
         await page.setViewportSize({ width: 320, height: 740 })
         await geometry(page, true)
@@ -219,6 +295,7 @@ try {
         status_return: true,
         content_unobscured: true,
         keyboard: true,
+        briefing_to_figures_to_evidence_to_portfolio_and_back: true,
         page_errors: errors,
       })
       console.log(`PASS: ${viewport.width}px ${theme} shared layout`)

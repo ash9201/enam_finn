@@ -277,6 +277,8 @@
   padding: 8px 0;
 }
 .financial-table-wrap {
+  /* Keep sticky metric cells inside this scroller, not the page viewport. */
+  position: relative;
   overflow-x: auto;
   max-width: 100%;
 }
