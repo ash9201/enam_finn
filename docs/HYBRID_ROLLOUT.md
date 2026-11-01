@@ -1,3 +1,55 @@
+# Production hybrid rollout ? 2 November 2026
+
+The owner applied `0011_production_hybrid_scope.sql` and enabled the active Singapore
+Render API with `FINN_ENABLE_SEMANTIC_SEARCH=true` and
+`GEMINI_EMBEDDING_MODEL=gemini-embedding-001`. The embedding API was verified live.
+The publishable key cannot read the search-document view or invoke the inventory RPC.
+A stale-body batch write was rejected without changing a chunk.
+
+## Implementation
+
+- One private scope for both retrieval branches and incremental backfill: current
+  annual reports/transcripts plus current quarterly-result PDFs. Original source,
+  page/chunk identities and superseded versions are preserved.
+- Complete-company eligibility is retained. Incomplete companies use keyword
+  retrieval and report actual saved progress/worker state. No partial prefix of an
+  annual report is represented as a complete semantic index.
+- RRF settings remain 30 candidates per branch, 10 results, k=10, semantic weight 2,
+  two chunks per page and adaptive document diversity. Keyword retrieval remains
+  PostgreSQL full-text search; metadata filters match the semantic branch.
+- 768-dimensional L2-normalized Gemini vectors use RETRIEVAL_DOCUMENT and
+  RETRIEVAL_QUERY, with separate task/model/version/hash cache keys.
+- Atomic writes persist up to 32 vectors in one RPC; conditional body hashes protect
+  against stale writes. Interrupted storage retries reuse the persistent vector cache.
+- Budget preflight avoids repeatedly spending count-token calls after exhaustion.
+  Small batches use the remaining allowance. Daily bulk accounting is now **850**,
+  foreground query accounting **900**, below the confirmed 1,000/day provider limit.
+  This retains 50 reserved foreground units and 100 units of provider safety margin;
+  token-count calls are conservatively counted too. RPM80 / TPM27000 stay unchanged.
+- Daily maintenance prioritizes nearly complete watchlist corpora, then other
+  companies already collected on demand. Quarterly-only companies are included;
+  it never walks or embeds the whole NSE directory. Existing scheduling is retained.
+- A new document-scope fingerprint invalidates stale keyword answers without
+  invalidating them after every partial embedding batch. Empty semantic results do
+  not get labelled hybrid. Numeric statement claims remain gated through the
+  validated financial-results workflow; embeddings do not validate financial cells.
+
+Exact cosine similarity is retained **after company/document filtering**, using
+existing chunk/document indexes and a new source-version lookup index. At these
+per-company sizes, a global approximate vector index would add storage and risk
+losing company matches through post-filtering; no ANN tuning or new service was added.
+The inventory RPC reports database size so future index growth can be monitored.
+
+## Verification and current coverage
+
+The refreshed production report below is completed after deployment. Detailed local
+passages and diagnostic output stay in ignored `artifacts/hybrid-rollout` and
+`artifacts/retrieval`; credentials are never included.
+
+---
+
+## Historical rollout record (31 October; counts and quota budget superseded above)
+
 # Production hybrid rollout — 31 October 2026
 
 **Later research-experience update:** migrations 0009 and a daily indexing-maintenance

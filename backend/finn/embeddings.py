@@ -24,6 +24,8 @@ from finn.timing import timed
 
 DIMENSIONS = 768
 VERSION = "gemini-retrieval-body-v1"
+DOCUMENT_DAILY_LIMIT = 850
+QUERY_DAILY_LIMIT = 900
 _pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="finn-embeddings")
 _scheduled: set[str] = set()
 _lock = Lock()
@@ -247,7 +249,9 @@ class EmbeddingClient:
             raise ValueError("Invalid embedding batch/task.")
         if any(not text.strip() for text in texts):
             raise ValueError("Empty text cannot be embedded.")
-        self.daily_limit = 800 if task == "RETRIEVAL_DOCUMENT" else 900
+        self.daily_limit = (
+            DOCUMENT_DAILY_LIMIT if task == "RETRIEVAL_DOCUMENT" else QUERY_DAILY_LIMIT
+        )
         hashes = [text_hash(text) for text in texts]
         unique = dict(zip(hashes, texts))
         cached = self.store.rows(
@@ -268,6 +272,11 @@ class EmbeddingClient:
                 pass  # A corrupt cache entry is regenerated, never used for search.
         missing = [(digest, text) for digest, text in unique.items() if digest not in vectors]
         if missing:
+            budget = self.store.rpc(
+                "finn_embedding_budget", {"p_model": self.model, "p_rpd": self.daily_limit}
+            )
+            if budget["remaining"] < len(missing) + 1:
+                raise EmbeddingUnavailable("daily_budget", 86400)
             token_count = self.token_count([text for _, text in missing])
             # Byte fallback bounds small inputs. Count longer Unicode inputs individually
             # rather than silently accepting the model's 2,048-token truncation.
@@ -362,20 +371,23 @@ def backfill(
                 if not pending:
                     break
                 vectors = client.embed([row["body"] for row in pending], "RETRIEVAL_DOCUMENT")
-                for row, vector in zip(pending, vectors):
-                    # Conditional update rejects a stale response after rechunking.
-                    updated += bool(
-                        store.rpc(
-                            "finn_store_chunk_embedding",
+                # One atomic write instead of one database round trip per vector.
+                # Conditional hashes still reject responses for changed chunk bodies.
+                updated += store.rpc(
+                    "finn_store_chunk_embeddings",
+                    {
+                        "p_rows": [
                             {
-                                "p_chunk_id": row["chunk_id"],
-                                "p_input_hash": row["body_hash"],
-                                "p_embedding": vector,
-                                "p_model": model_name(),
-                                "p_version": VERSION,
-                            },
-                        )
-                    )
+                                "chunk_id": row["chunk_id"],
+                                "body_hash": row["body_hash"],
+                                "embedding": vector,
+                            }
+                            for row, vector in zip(pending, vectors)
+                        ],
+                        "p_model": model_name(),
+                        "p_version": VERSION,
+                    },
+                )
                 progress(
                     {
                         "symbol": symbol,
@@ -394,6 +406,10 @@ def backfill(
                 )
             except EmbeddingUnavailable as exc:
                 reason = exc.reason
+                if reason == "daily_budget" and batch_limit > 1:
+                    # Use a small remaining allowance rather than requiring a full batch.
+                    batch_limit = max(1, batch_limit // 2)
+                    continue
                 if reason == "batch_too_large" and batch_limit > 1:
                     batch_limit = max(1, batch_limit // 2)
                     continue

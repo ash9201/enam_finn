@@ -1,5 +1,16 @@
 # Build history summary
 
+### Production hybrid scope and rollout (2 November)
+
+- Verified production flag was disabled and Gemini embedding access worked; owner
+  enabled the flag and applied private migration 0011.
+- Extended existing indexing/search to quarterly filings, atomic conditional batch
+  writes, scope-aware cache invalidation and quota-aware incremental resume.
+- Preserved complete-index eligibility, frozen RRF settings, original citations,
+  financial validation and the persistent NSE-directory fallback.
+- Added focused tests; refreshed primary-page recall/latency without retuning or
+  rerunning source ingestion broadly. Live outcomes are in HYBRID_ROLLOUT.md.
+
 ### Event-based review and focused workflow controls (2 November)
 
 - Added independent unusual-activity prioritisation plus transparent Portfolio sorts;

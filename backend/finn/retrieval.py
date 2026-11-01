@@ -93,7 +93,7 @@ class RetrievalSettings:
 
 
 SETTINGS = RetrievalSettings()
-RETRIEVAL_VERSION = "hybrid-rrf-v1"
+RETRIEVAL_VERSION = "hybrid-rrf-v2-primary-scope"
 
 
 def retrieval_profile(store, symbol: str, *, strategy=None, settings=SETTINGS) -> dict:
@@ -132,6 +132,10 @@ def profile_identity(profile: dict) -> dict | None:
     if profile["state"] == "disabled":
         return None  # Keep the original keyword answer cache usable after rollback.
     result = {key: value for key, value in profile.items() if key not in ["index", "activity"]}
+    if profile.get("index", {}).get("scope_fingerprint"):
+        # New quarterly PDFs change keyword evidence even while vectors are pending.
+        # Completed embedding batches alone do not invalidate keyword answer caches.
+        result["scope_fingerprint"] = profile["index"]["scope_fingerprint"]
     if profile["mode"] == "keyword":
         result["state"] = "keyword_fallback"
     if profile["mode"] == "hybrid":
@@ -220,11 +224,10 @@ def retrieve_with_diagnostics(
         "p_reporting_period": reporting_period,
         "p_metadata": metadata_filter,
     }
-    extended = any(value is not None for value in extra.values())
     keyword = (
         store.rpc(
-            "finn_keyword_search_v2" if extended else "finn_keyword_search",
-            {**base, **(extra if extended else {}), "p_query": query},
+            "finn_keyword_search_v2",
+            {**base, **extra, "p_query": query},
         )
         if query
         else []
@@ -247,7 +250,10 @@ def retrieve_with_diagnostics(
                     "p_version": embeddings.VERSION,
                 },
             )
-            mode = "hybrid"
+            if semantic:
+                mode = "hybrid"
+            else:
+                reason = "semantic_no_matches"
         except embeddings.EmbeddingUnavailable as exc:
             reason, semantic_error = "semantic_unavailable", exc.reason
         except (

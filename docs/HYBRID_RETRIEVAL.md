@@ -1,9 +1,9 @@
 # Hybrid retrieval
 
-**Production rollout:** enabled and verified on 31 October. Complete CCL/GOKEX indexes
-use hybrid; incomplete INFY/POLYCAB and other companies use keyword fallback. Bulk
-resumes currently stop at the daily budget. See [coverage, exact Render settings,
-verification and reset/resume instructions](HYBRID_ROLLOUT.md).
+**Current rollout (2 November):** production uses the existing semantic flag and
+`gemini-embedding-001` / 768 dimensions. Migration 0011 extends the same private
+index/search scope to current quarterly filings as well as the active annual-report
+and transcript manifest. See [live coverage and verification](HYBRID_ROLLOUT.md).
 
 The implementation stays in FastAPI and Supabase. Gemini `gemini-embedding-001`
 embeds text; PostgreSQL full-text search and pgvector cosine search retrieve primary
@@ -12,8 +12,9 @@ Rank Fusion (RRF). No embedding SDK, additional database, or RAG framework was a
 
 ## Evidence and filtering
 
-Both branches restrict results to the requested NSE company, its active document
-manifest, and ready documents. Optional filters cover document kind, explicit document
+Both branches restrict results to the requested NSE company, its ready `finn_search_documents` scope: active manifest documents plus the
+latest ready extraction per quarterly source URL. Superseded documents remain intact
+for existing citations; they are not silently mixed into current search. Optional filters cover document kind, explicit document
 IDs, verified publication-date bounds, reporting period, and JSON metadata containment.
 Unknown publication dates cannot satisfy date filters. Discovery labels remain separate
 from verified dates. Metadata does not become more trustworthy because a passage has

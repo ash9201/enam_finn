@@ -16,17 +16,24 @@ def main():
     if not 1 <= args.max_batches <= 60:
         raise ValueError("Use between 1 and 60 bounded batches.")
     with open_store() as store:
-        companies = store.rows(
-            "finn_companies", select="symbol,manifest,portfolio", order="portfolio.desc,symbol"
+        inventory = store.rpc(
+            "finn_embedding_inventory",
+            {"p_model": embeddings.model_name(), "p_version": embeddings.VERSION},
         )
-        available = [c["symbol"] for c in companies if c.get("manifest")]
-        symbols = list(
-            dict.fromkeys([s for s in ["INFY", "POLYCAB", "CCL", *available] if s in available])
+        pending = [c for c in inventory["companies"] if c["total"] > c["ready"]]
+        # Finish nearly complete watchlist indexes first; then other requested
+        # companies. Includes quarterly-only corpora, without indexing the NSE universe.
+        pending.sort(
+            key=lambda c: (not c["portfolio"], -c["ready"] / c["total"], c["total"], c["symbol"])
         )
-        for symbol in symbols:
-            status = embeddings.status(store, symbol)
-            if status["total"] == status["ready"]:
-                continue
+        print(
+            json.dumps(
+                {"pending_companies": len(pending), "database_bytes": inventory["database_bytes"]}
+            ),
+            flush=True,
+        )
+        for company in pending:
+            symbol = company["symbol"]
             result = embeddings.backfill(store, symbol, max_batches=args.max_batches, wait=True)
             print(
                 json.dumps(

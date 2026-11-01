@@ -78,7 +78,11 @@ def collect(cases, symbols):
         for case in cases:
             if symbols and case["symbol"] not in symbols:
                 continue
-            if case["id"] in records:
+            if (
+                case["id"] in records
+                and records[case["id"]].get("profile", {}).get("version")
+                == retrieval.RETRIEVAL_VERSION
+            ):
                 continue
             index = embeddings.status(store, case["symbol"])
             if index["ready"] != index["total"] or not index["total"]:

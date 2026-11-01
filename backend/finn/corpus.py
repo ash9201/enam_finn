@@ -139,6 +139,8 @@ def ingest_document(
     store.delete("finn_research_chunks", document_id="eq." + document_id)
     store.upsert("finn_research_chunks", chunks)
     store.patch("finn_documents", {"state": "ready"}, id="eq." + document_id)
+    if document["kind"] == "quarterly_results":
+        embeddings.schedule_backfill(company["symbol"])
     return {**record, "state": "ready", "chunks": len(chunks), "reused_extraction": False}
 
 
@@ -162,6 +164,7 @@ def ensure_corpus(
             "history_requested", False
         )
         if current_index and history_ready:
+            embeddings.schedule_backfill(symbol)
             return {**existing[0], "reused_corpus": True}
     progress("discovery")
     with public_client() as client:

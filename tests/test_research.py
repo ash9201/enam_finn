@@ -79,13 +79,14 @@ def test_unsupported_claims_are_withheld(statement, quote, evidence_id):
     assert not claims and withheld == 1
 
 
-def test_annual_report_numbers_are_gated_until_figures_validated():
+@pytest.mark.parametrize("kind", ["annual_report", "quarterly_results"])
+def test_statement_numbers_are_gated_until_figures_validated(kind):
     claims, withheld = validate_answer(
         draft(
             "Revenue was INR 100 crore.",
             "Management reported revenue of INR 100 crore for the quarter.",
         ),
-        [evidence("annual_report")],
+        [evidence(kind)],
     )
     assert claims == [] and withheld == 1
 

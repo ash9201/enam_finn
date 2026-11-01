@@ -53,11 +53,10 @@ def main():
             )
             again = answer_from_current_index(store, symbol, question)
             assert again["cached"] and again["id"] == answer["id"]
-            allowed = set(
-                store.rows("finn_companies", symbol="eq." + symbol, select="manifest")[0][
-                    "manifest"
-                ]
-            )
+            allowed = {
+                row["id"]
+                for row in store.rows("finn_search_documents", symbol="eq." + symbol, select="id")
+            }
             assert all(
                 c["citation"]["document_id"] in allowed and c["citation"]["quote"]
                 for c in answer["claims"]
@@ -78,7 +77,7 @@ def main():
 
         for symbol in ["INFY", "POLYCAB"]:
             profile = retrieval.retrieval_profile(store, symbol)
-            assert profile["state"] == "indexing" and profile["mode"] == "keyword"
+            assert profile["state"] != "ready" and profile["mode"] == "keyword"
             result = retrieval.retrieve_with_diagnostics(
                 store, symbol, "Explain the core business and its main services or products."
             )

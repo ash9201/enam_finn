@@ -162,7 +162,7 @@ def validate_answer(
                 invalid = True
                 break
             if financial_number(claim.statement) and (
-                source["kind"] == "annual_report"
+                source["kind"] in ["annual_report", "quarterly_results"]
                 or source["metadata"].get("contains_table_candidates")
             ):
                 invalid = True
@@ -769,6 +769,8 @@ def research_company(
         notes.append(
             "Semantic search's daily free-tier allowance is unavailable. This answer uses keyword search."
         )
+    elif retrieval["fallback_reason"] == "semantic_no_matches":
+        notes.append("No matching semantic passages were found. This answer uses keyword search.")
     elif retrieval["fallback_reason"] and retrieval["fallback_reason"] != "index_incomplete":
         notes.append("Semantic search is temporarily unavailable. This answer uses keyword search.")
     if corpus["coverage"]["transcripts"] < 2:

@@ -634,6 +634,11 @@ def build_result(company, documents, facts, rejected, usage):
 
 def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lambda stage: None):
     from finn.financial_insights import with_performance
+    from finn import embeddings
+
+    # Cached financial results also resume indexing of their saved primary PDFs.
+    # Numerical extraction and comparison continue independently of semantic search.
+    embeddings.schedule_backfill(symbol)
 
     cached = store.rows(
         "finn_research_cache",

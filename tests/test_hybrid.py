@@ -60,6 +60,8 @@ class Store:
             return True
         if name == "finn_reserve_embedding_request":
             return self.reservation
+        if name == "finn_embedding_budget":
+            return {"remaining": 900}
         if name == "finn_embedding_status":
             return self.index
         if name in ["finn_keyword_search", "finn_keyword_search_v2"]:
@@ -165,7 +167,7 @@ def test_feature_off_makes_no_semantic_or_embedding_calls():
     store = Store()
     result = retrieval.retrieve_with_diagnostics(store, "CCL", "coffee products")
     assert result["mode"] == "keyword" and result["fallback_reason"] is None
-    assert [name for name, _ in store.calls] == ["finn_keyword_search"]
+    assert [name for name, _ in store.calls] == ["finn_keyword_search_v2"]
 
 
 def test_partial_index_falls_back_without_query_embedding(monkeypatch):
@@ -248,6 +250,101 @@ def test_embedding_failure_preserves_keyword_answer_path(monkeypatch):
     assert [r["chunk_id"] for r in result["evidence"]] == ["keyword", "both"]
 
 
+def test_empty_semantic_search_does_not_claim_hybrid(monkeypatch):
+    monkeypatch.setenv("FINN_ENABLE_SEMANTIC_SEARCH", "true")
+    store = Store()
+    store.semantic = []
+    with pytest.MonkeyPatch.context() as patcher:
+
+        class QueryClient:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def embed(self, texts, task):
+                return [[1.0] + [0.0] * 767]
+
+            def close(self):
+                pass
+
+        patcher.setattr(embeddings, "EmbeddingClient", QueryClient)
+        result = retrieval.retrieve_with_diagnostics(store, "CCL", "coffee products")
+    assert "finn_semantic_search" in [name for name, _ in store.calls]
+    assert result["mode"] == "keyword"
+    assert result["fallback_reason"] == "semantic_no_matches"
+    assert result["evidence"] == store.keyword
+
+
+def test_daily_exhaustion_skips_provider_but_reuses_persisted_vectors():
+    store = Store()
+    store.rpc = lambda name, values: {"remaining": 0}
+    text = "Stored source text"
+    store.cache.append(
+        {
+            "model": embeddings.model_name(),
+            "dimensions": 768,
+            "task_type": "RETRIEVAL_DOCUMENT",
+            "version": embeddings.VERSION,
+            "input_hash": embeddings.text_hash(text),
+            "embedding": [1.0] + [0.0] * 767,
+        }
+    )
+    model = client(store, lambda req: pytest.fail("Exhausted allowance called Gemini"))
+    try:
+        assert model.embed([text], "RETRIEVAL_DOCUMENT") == [[1.0] + [0.0] * 767]
+        with pytest.raises(embeddings.EmbeddingUnavailable, match="daily_budget"):
+            model.embed(["Uncached text"], "RETRIEVAL_DOCUMENT")
+        assert model.calls == 0
+    finally:
+        model.close()
+
+
+def test_new_primary_document_invalidates_keyword_cache_but_embedding_progress_does_not(
+    monkeypatch,
+):
+    monkeypatch.setenv("FINN_ENABLE_SEMANTIC_SEARCH", "true")
+    store = Store()
+    store.index.update(ready=1, total=5, scope_fingerprint="annual-and-results-v1")
+    first = retrieval.profile_identity(retrieval.retrieval_profile(store, "CCL"))
+    store.index.update(ready=2, fingerprint="more-vectors")
+    assert first == retrieval.profile_identity(retrieval.retrieval_profile(store, "CCL"))
+    store.index["scope_fingerprint"] = "new-results-pdf"
+    assert first != retrieval.profile_identity(retrieval.retrieval_profile(store, "CCL"))
+
+
+def test_daily_maintenance_includes_quarterly_only_and_generic_companies(monkeypatch):
+    import sys
+    from contextlib import nullcontext
+
+    from finn import embedding_maintenance as maintenance
+
+    class InventoryStore:
+        def rpc(self, name, params):
+            assert name == "finn_embedding_inventory"
+            return {
+                "database_bytes": 123,
+                "companies": [
+                    {"symbol": "NEWNSE", "portfolio": False, "ready": 0, "total": 12},
+                    {"symbol": "RESULTSONLY", "portfolio": True, "ready": 0, "total": 9},
+                    {"symbol": "ALMOST", "portfolio": True, "ready": 9, "total": 10},
+                    {"symbol": "EMPTY", "portfolio": True, "ready": 0, "total": 0},
+                    {"symbol": "DONE", "portfolio": True, "ready": 10, "total": 10},
+                ],
+            }
+
+    visited = []
+
+    def backfill(store, symbol, **kwargs):
+        visited.append(symbol)
+        return {"ready": 10, "total": 10, "reason": None, "provider_calls": 0}
+
+    monkeypatch.setattr(sys, "argv", ["maintenance"])
+    monkeypatch.setattr(maintenance, "load_local_env", lambda: None)
+    monkeypatch.setattr(maintenance, "open_store", lambda: nullcontext(InventoryStore()))
+    monkeypatch.setattr(embeddings, "backfill", backfill)
+    maintenance.main()
+    assert visited == ["ALMOST", "RESULTSONLY", "NEWNSE"]
+
+
 def test_ready_index_identity_changes_with_model_or_content(monkeypatch):
     monkeypatch.setenv("FINN_ENABLE_SEMANTIC_SEARCH", "true")
     store = Store()
@@ -275,12 +372,12 @@ def test_backfill_resumes_stored_vectors_after_database_disconnect(monkeypatch):
                 return {**self.index, "ready": len(self.completed), "total": len(self.items)}
             if name == "finn_pending_embeddings":
                 return [dict(r) for r in self.items if r["chunk_id"] not in self.completed]
-            if name == "finn_store_chunk_embedding":
-                if len(self.completed) == 1 and self.disconnect:
+            if name == "finn_store_chunk_embeddings":
+                if self.disconnect:
                     self.disconnect = False
                     raise httpx.RemoteProtocolError("Simulated connection drop")
-                self.completed.add(values["p_chunk_id"])
-                return True
+                self.completed.update(row["chunk_id"] for row in values["p_rows"])
+                return len(values["p_rows"])
             return super().rpc(name, values)
 
     store = BackfillStore()
@@ -306,11 +403,11 @@ def test_backfill_resumes_stored_vectors_after_database_disconnect(monkeypatch):
 
     monkeypatch.setattr(embeddings, "EmbeddingClient", factory)
     interrupted = embeddings.backfill(store, "ARBITRARY", max_batches=1, wait=False)
-    assert interrupted["state"] == "pending" and interrupted["ready"] == 1
+    assert interrupted["state"] == "pending" and interrupted["ready"] == 0
     assert interrupted["reason"] == "storage_unavailable"
     resumed = embeddings.backfill(store, "ARBITRARY", max_batches=2, wait=False)
     assert resumed["state"] == "completed" and resumed["ready"] == 3
-    assert resumed["provider_calls"] == 0 and resumed["cache_hits"] == 2
+    assert resumed["provider_calls"] == 0 and resumed["cache_hits"] == 3
     assert len(providers) == 2  # One count and embedding batch; no paid duplicate work.
 
 
@@ -405,7 +502,11 @@ def test_generic_ingestion_only_schedules_embeddings_after_manifest_activation(
     monkeypatch.setattr(
         corpus,
         "resolve_company",
-        lambda client, symbol, **kwargs: {"symbol": symbol, "name": "Unprepared Issuer", "isin": "TEST"},
+        lambda client, symbol, **kwargs: {
+            "symbol": symbol,
+            "name": "Unprepared Issuer",
+            "isin": "TEST",
+        },
     )
     monkeypatch.setattr(
         corpus,
@@ -492,7 +593,7 @@ def test_provider_daily_quota_uses_retry_metadata_and_does_not_retry_network():
         assert error.value.reason == "provider_daily_budget"
         assert error.value.retry_after == 3600
         assert all(
-            values["p_rpd"] == 800
+            values["p_rpd"] == embeddings.DOCUMENT_DAILY_LIMIT
             for name, values in store.calls
             if name == "finn_reserve_embedding_request"
         )
