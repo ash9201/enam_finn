@@ -86,7 +86,7 @@ async function investigationJourney(page, nav, viewport) {
   )
   await expect(page.locator('.financial-results')).toHaveAttribute('data-basis', 'standalone')
   await page.getByRole('button', { name: 'Remove evidence context' }).click()
-  await page.getByRole('button', { name: 'Change company', exact: true }).click()
+  await page.getByRole('button', { name: 'Find company', exact: true }).click()
   const input = page.getByRole('combobox', { name: 'Find a company' })
   for (const [query, symbol] of [
     ['Infosys', 'INFY'],

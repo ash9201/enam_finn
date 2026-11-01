@@ -1,5 +1,21 @@
 # Build history summary
 
+### Reliable company identity and focused UI fixes (2 November)
+
+- Replaced the live-on-resolution NSE CSV dependency with a verified persistent
+  Supabase reference snapshot, the existing bundled capture and trusted prior company
+  identities. Exact symbols and ISIN conflicts remain guarded. Successful live
+  refresh: 2,620 listings, 19 existing stored identities checked; anonymous writes denied.
+- Added daily bounded official-directory refresh to existing portfolio automation,
+  preserving the last good snapshot on 403, malformed/truncated data or storage failure.
+  Metadata retains actual source/check dates. No SQL migration or model calls needed.
+- Moved Find company beside the selected identity, clarified watchlist labels, kept
+  recents and autocomplete, and moved directory provenance to secondary details.
+  Removed the generic coverage caption. Moved generic split methodology out of rows;
+  actual per-company suppression notes and financial calculations remain intact.
+- Focused resolution/pipeline and split-guard tests, company-search/portfolio model
+  checks and four themed viewport UI checks plus a reference-store 403 fallback pass.
+  See [research reliability](RESEARCH_REDESIGN.md) for actual behavior and limits.
 ### Final integrated UI acceptance (2 November)
 
 - Reviewed the actual shared layout, Briefing, Research and Portfolio together in

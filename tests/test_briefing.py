@@ -145,9 +145,12 @@ def test_split_inside_baseline_suppresses_misleading_volume_alert(monkeypatch):
     result = price_fixture(monkeypatch, split_index=10)
     assert result["volume_ratio"] is None
     assert result["price_change_pct"] == pytest.approx(5)
+    assert result["price_change_note"] is None
+    assert "split" in result["volume_note"]
 
 
 def test_split_today_suppresses_price_and_volume_comparisons(monkeypatch):
     result = price_fixture(monkeypatch, split_index=24)
     assert result["price_change_pct"] is None
     assert result["volume_ratio"] is None
+    assert "split" in result["price_change_note"]

@@ -114,16 +114,47 @@ export function createCompanySearch(companies: DirectoryCompany[]) {
 let directoryRequest: Promise<Directory> | null = null
 export function loadCompanyDirectory() {
   if (!directoryRequest)
-    directoryRequest = fetch('/company-directory.json')
-      .then(async (response) => {
-        if (!response.ok) throw new Error('The company directory could not be loaded.')
-        const directory = (await response.json()) as Directory
-        if (!directory.companies?.length) throw new Error('The company directory is empty.')
-        return directory
-      })
-      .catch((error) => {
-        directoryRequest = null
-        throw error
-      })
+    directoryRequest = (async () => {
+      const project = (import.meta.env?.VITE_SUPABASE_URL || '').replace(/\/$/, '')
+      if (project) {
+        try {
+          return await readDirectory(
+            `${project}/storage/v1/object/public/finn-reference/company-directory.json`,
+          )
+        } catch {
+          // The dated, official bundled capture survives CDN/storage outages.
+        }
+      }
+      return readDirectory('/company-directory.json')
+    })().catch((error) => {
+      directoryRequest = null
+      throw error
+    })
   return directoryRequest
+}
+async function readDirectory(url: string): Promise<Directory> {
+  return fetch(url, { signal: AbortSignal.timeout(4000) }).then(async (response) => {
+    if (!response.ok) throw new Error('The company directory could not be loaded.')
+    const directory = (await response.json()) as Directory
+    if (
+      !Number.isFinite(Date.parse(directory.checked_at)) ||
+      !directory.sources?.some((source) =>
+        /^https:\/\/(?:nsearchives|archives)\.nseindia\.com\/content\/equities\/EQUITY_L\.csv$/.test(
+          source,
+        ),
+      ) ||
+      !Array.isArray(directory.companies) ||
+      directory.companies.length < 1000 ||
+      directory.companies.some(
+        (company) =>
+          !/^[A-Z0-9&-]{1,30}$/.test(company.symbol) ||
+          !company.name ||
+          !/^IN[A-Z0-9]{9}[0-9]$/.test(company.isin || ''),
+      ) ||
+      new Set(directory.companies.map((company) => company.symbol)).size !==
+        directory.companies.length
+    )
+      throw new Error('The company directory is invalid or incomplete.')
+    return directory
+  })
 }

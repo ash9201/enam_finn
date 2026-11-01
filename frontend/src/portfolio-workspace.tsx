@@ -156,7 +156,9 @@ export default function PortfolioWorkspace({
           </p>
           <p>
             Last close is the price of one share at the end of the reported session. 1D change is
-            its close-to-close price movement. These are not investment values or portfolio returns.
+            its close-to-close price movement. These are not investment values or portfolio returns.{' '}
+            Prices use unadjusted closes; comparisons are withheld when a split affects the relevant
+            window.
           </p>
           <p>
             Price-move indicators use your ±{priceThreshold}% threshold; volume indicators use{' '}
@@ -367,8 +369,13 @@ export default function PortfolioWorkspace({
                             </p>
                           )}
                           {data?.volume_note && <p>{data.volume_note}</p>}
+                          {data?.price_change_note && <p>{data.price_change_note}</p>}
                           {alternate && <p>{data!.source_note}</p>}
-                          {data?.adjustment && <p>{data.adjustment}</p>}
+                          {data?.adjustment &&
+                            ![
+                              'Unadjusted closes.',
+                              'Unadjusted closes; split-affected daily comparison suppressed.',
+                            ].includes(data.adjustment) && <p>{data.adjustment}</p>}
                           <a href={companyBriefing(company.symbol)}>Open company Briefing ↗</a>
                         </section>
                       </td>

@@ -9,12 +9,34 @@
 }
 .selected-company {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
   align-items: center;
   gap: var(--space-4);
 }
 .selected-company > div {
   min-width: 0;
+}
+.selected-company > button {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+.directory-details {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.directory-details summary {
+  cursor: pointer;
+  min-height: 32px;
+  align-content: center;
+}
+.directory-details a {
+  display: inline-block;
+  margin: 6px 12px 0 0;
+  color: var(--accent-strong);
 }
 .field-label {
   display: block;
@@ -240,6 +262,9 @@
   .selected-company strong {
     font-size: 15px;
   }
+  .selected-company > button {
+    margin-top: 0;
+  }
 }
 .question-gaps {
   border-left: 2px solid var(--warning-border);
@@ -307,6 +332,9 @@
   justify-content: space-between;
   gap: 16px;
   margin-top: 16px;
+}
+.form-bottom > button {
+  margin-left: auto;
 }
 .form-bottom p {
   font-size: 11px;

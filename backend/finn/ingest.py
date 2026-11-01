@@ -59,7 +59,7 @@ def main():
                 )
             with public_client() as client:
                 for symbol, sector in PORTFOLIO.items():
-                    company = resolve_company(client, symbol)
+                    company = resolve_company(client, symbol, store=store)
                     existing = store.rows("finn_companies", symbol="eq." + symbol, limit=1)
                     values = {
                         "symbol": symbol,

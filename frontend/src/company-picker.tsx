@@ -103,7 +103,7 @@ export default function CompanyPicker({
           onClick={() => edit(!editing)}
           aria-expanded={editing}
         >
-          {editing ? 'Cancel change' : 'Change company'}
+          {editing ? 'Cancel' : 'Find company'}
         </button>
       </div>
       {editing && (
@@ -170,7 +170,9 @@ export default function CompanyPicker({
           )}
           {query && !matches.length && (
             <p className="company-search-note" role="status">
-              No matching listing found. Try a shorter name or check the spelling.
+              {!directory && !error
+                ? 'Loading company search…'
+                : 'No matching listing found. Try a shorter name or check the spelling.'}
             </p>
           )}
           {hint && (
@@ -187,14 +189,23 @@ export default function CompanyPicker({
             </p>
           )}
           {directory && (
-            <small className="directory-date">
-              NSE directory ·{' '}
-              {new Date(directory.checked_at).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </small>
+            <details className="directory-details">
+              <summary>Company directory sources</summary>
+              <small>
+                Official NSE snapshot checked{' '}
+                {new Date(directory.checked_at).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+                . Search uses verified names, symbols and connected historical names.
+              </small>
+              {directory.sources.map((source) => (
+                <a key={source} href={source} target="_blank" rel="noopener noreferrer">
+                  {source.split('/').at(-1)} ↗
+                </a>
+              ))}
+            </details>
           )}
         </div>
       )}
@@ -206,7 +217,7 @@ export default function CompanyPicker({
           disabled={disabled || !watchlist.length}
           onClick={() => setAllWatchlist(!allWatchlist)}
         >
-          Watchlist · {allWatchlist ? 'Hide companies' : `View all ${watchlist.length || 15}`}
+          {allWatchlist ? 'Hide companies' : `View all ${watchlist.length} companies`}
         </button>
         {editing &&
           !query &&

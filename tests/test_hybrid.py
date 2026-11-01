@@ -405,7 +405,7 @@ def test_generic_ingestion_only_schedules_embeddings_after_manifest_activation(
     monkeypatch.setattr(
         corpus,
         "resolve_company",
-        lambda client, symbol: {"symbol": symbol, "name": "Unprepared Issuer", "isin": "TEST"},
+        lambda client, symbol, **kwargs: {"symbol": symbol, "name": "Unprepared Issuer", "isin": "TEST"},
     )
     monkeypatch.setattr(
         corpus,

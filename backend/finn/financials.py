@@ -657,7 +657,7 @@ def analyse_results(store, symbol, *, refresh=False, publish=False, progress=lam
     progress("discovery")
     facts, documents, rejected, usage = [], [], [], []
     with public_client() as client:
-        company = resolve_company(client, symbol)
+        company = resolve_company(client, symbol, store=store)
         old = store.rows("finn_companies", symbol="eq." + symbol, limit=1)
         if not old:
             store.upsert(

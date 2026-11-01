@@ -13,6 +13,7 @@ export type Price = {
     source_url?: string | null
     provider?: string
     adjustment?: string
+    price_change_note?: string | null
   } | null
   error: string | null
   last_success_at: string | null

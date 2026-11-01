@@ -1,9 +1,7 @@
-"""Small, generic live-source probes. No seed-company shortcuts or cached fallbacks."""
+"""Generic source discovery and verified company resolution. No invented issuer identities."""
 
 from __future__ import annotations
 
-import csv
-import io
 import ipaddress
 import math
 import re
@@ -12,7 +10,6 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from threading import Lock
 from urllib.parse import parse_qs, quote, urljoin, urlparse
 
 import httpx
@@ -23,8 +20,7 @@ from finn.timing import timed
 
 USER_AGENT = "Mozilla/5.0 (compatible; FINN/0.1; public financial document research)"
 IST = timezone(timedelta(hours=5, minutes=30))
-_directory_cache: tuple[float, list[dict]] = (0, [])
-_directory_lock = Lock()
+from finn.company_directory import directory_snapshot, resolve_identity
 
 
 def public_client() -> httpx.Client:
@@ -55,43 +51,15 @@ def source_get(client: httpx.Client, url: str, service: str, *, allow_not_found=
     raise ValueError(f"{service} is unavailable.")
 
 
-def company_directory(client: httpx.Client) -> list[dict]:
-    global _directory_cache
-    with _directory_lock:
-        if _directory_cache[1] and time.monotonic() - _directory_cache[0] < 900:
-            return _directory_cache[1]
-        response = source_get(
-            client,
-            "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
-            "The NSE company directory",
-        )
-        rows = []
-        for original in csv.DictReader(io.StringIO(response.text.lstrip("\ufeff"))):
-            row = {key.strip(): value.strip() for key, value in original.items() if key}
-            if row.get("SYMBOL"):
-                rows.append(
-                    {
-                        "symbol": row["SYMBOL"],
-                        "name": row["NAME OF COMPANY"],
-                        "isin": row.get("ISIN NUMBER"),
-                        "directory_url": str(response.url),
-                    }
-                )
-        if not rows:
-            raise ValueError("The live NSE directory was empty; no company was invented.")
-        _directory_cache = (time.monotonic(), rows)
-        return rows
+def company_directory(client: httpx.Client, *, store=None) -> list[dict]:
+    return directory_snapshot(store)["companies"]
 
 
 @timed("company_resolution")
-def resolve_company(client: httpx.Client, symbol: str) -> dict:
-    symbol = symbol.upper().removesuffix(".NS")
-    if not re.fullmatch(r"[A-Z0-9&-]{1,30}", symbol):
-        raise ValueError("Supply a valid NSE symbol, not a company URL.")
-    for row in company_directory(client):
-        if row["symbol"] == symbol:
-            return row
-    raise ValueError(f"NSE symbol {symbol} was not found in the live company directory.")
+def resolve_company(client: httpx.Client, symbol: str, *, store=None, known=None) -> dict:
+    # Public document access remains live; issuer identity does not depend on NSE's
+    # anti-bot responses, process memory or the model's company knowledge.
+    return resolve_identity(symbol, store=store, known=known)
 
 
 @timed("discovery")
@@ -415,7 +383,10 @@ def price_probe(company: dict) -> dict:
             (current["Close"] / (primary["previous_close"] if primary else previous["Close"]) - 1)
             * 100
         ),
-        "adjustment": "Unadjusted closes; split-affected daily comparison suppressed.",
+        "adjustment": "Unadjusted closes.",
+        "price_change_note": "Daily comparison suppressed because a split affects its comparison window."
+        if corporate_actions
+        else None,
         "volume_note": "Volume ratio suppressed because a split affects the comparison window."
         if split_in_baseline
         else None,

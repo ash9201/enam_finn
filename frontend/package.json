@@ -14,6 +14,7 @@
     "test:briefing": "node scripts/verify-briefing.mjs",
     "test:briefing:model": "node --test scripts/briefing-model.test.mjs",
     "test:company-search": "node --test scripts/company-search.test.mjs",
+    "test:company-selection": "node scripts/verify-company-selection.mjs",
     "test:portfolio:model": "node --test scripts/portfolio-model.test.mjs",
     "test:portfolio": "node scripts/verify-portfolio.mjs",
     "test:research-redesign": "node scripts/verify-research-redesign.mjs",

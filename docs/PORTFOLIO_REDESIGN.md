@@ -46,6 +46,14 @@ close; missing data never becomes zero. The common absolute date and shared sync
 warnings remain visible. No new holiday calendar or live-market claim is introduced.
 Existing labelled recorded-snapshot recovery is unchanged.
 
+The 2 November follow-up moves unadjusted-close/split methodology into the shared
+Methodology disclosure. The old sentence was emitted for every company, regardless
+of an actual split. Rows now retain only recorded `price_change_note`, `volume_note`,
+or other specific adjustment details. New snapshots attach a daily-suppression note
+only when the existing split guard actually suppressed the daily comparison.
+Legacy generic captions are hidden without inferring that a split occurred. Price
+and volume calculations, thresholds, source links, sorting and row expansion are unchanged.
+
 ## Targeted verification
 
 ```powershell

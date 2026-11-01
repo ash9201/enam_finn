@@ -27,14 +27,68 @@ Ambiguous matches require explicit selection. Enter commits an active option or
 a unique suggestion; it never automatically chooses among ambiguous matches.
 Only the canonical symbol is passed into the existing research workflow.
 
-The selected full name/ticker and Change company action remain visible. A compact
+The selected full name/ticker and adjacent **Find company** action remain visible. A compact
 watchlist disclosure opens the 15 full-name entries; it is collapsed normally.
-Recent choices appear within discovery. The search shows its directory date and
-can fall back, visibly, to the existing watchlist if the asset is unavailable.
+It reads **View all 15 companies / Hide companies**. Recent choices appear within
+discovery. Directory date and original URLs are available under **Company directory
+sources**, collapsed by default, rather than adding helper copy to the main form.
+The main form also omits the generic company-coverage caption. It can fall back to
+the existing watchlist if both verified directory copies are unavailable.
 This is the same equity-directory universe used by the backend resolver; it is
 not a new source of company research facts or an assertion of instant listing updates.
 
-Refresh the committed directory deliberately; deployment does not contact NSE:
+### Persistent identity reliability (2 November)
+
+Previously, rebuilding annual-report/transcript or financial research called a
+live NSE CSV after a 15-minute in-memory cache expired. Its HTTP 403 stopped even
+previously verified watchlist companies. Research now resolves exact symbols from
+the same verified directory used by search, without any live NSE directory request.
+
+- `finn-reference/company-directory.json` in Supabase Storage is the durable public
+  official-data snapshot. It contains current names/symbols, ISINs, aliases, series,
+  listing-date metadata, official URLs, and actual verification/source-check dates.
+  Only server credentials can publish it; anonymous writes were tested denied.
+  This bucket contains no private research/PDFs and requires no SQL migration.
+- The API reads it with a bounded timeout and a short process cache. The committed
+  2,620-company capture is a verified fallback, including after a backend restart.
+  An expired memory cache also retains its newer last-known-good copy during storage
+  failure. Dates are never changed merely because a snapshot was loaded again.
+- Exact stored company identities from the original verified resolver remain usable
+  if absent from a directory snapshot; their original verification date is explicitly
+  unknown when legacy metadata did not record it. Names/ISINs must be well formed.
+  A current-directory versus stored ISIN conflict stops resolution rather than mixing
+  company identities. Backend resolution never chooses a fuzzy or similarly named issuer.
+- Browser search prefers the same persistent snapshot and falls back to the bundled
+  official capture on timeout, HTTP 403 or malformed data. Search still requires explicit
+  selection for ambiguous names; only its canonical NSE symbol enters research.
+- The existing portfolio-sync workflow runs `python -m finn.company_directory`.
+  It refreshes at most once per day, from the official archives/nsearchives equity
+  CSVs. Failed attempts are also bounded to once daily. HTTP failures, malformed
+  CSVs, duplicates or an unexpectedly truncated list cannot replace the good snapshot.
+  Directory failure does not block portfolio sync. A separate refresh-status JSON
+  records actual attempt time/error while the original good snapshot keeps its date.
+- Operator-only `GET /internal/company-directory?symbol=...` exposes the active
+  verification date, official source checks and exact identity without starting
+  discovery, source ingestion or model work. It reuses existing operator authentication.
+- Histories are carried forward only across the same verified ISIN. This daily step
+  refreshes current equity identities; the existing manual command below refreshes
+  the full committed equity/name/symbol-history capture. New history aliases are not
+  guessed from similar names.
+
+A live refresh succeeded with **2,620** records; all **19** existing stored company
+identities resolved against it. Mocked 403 tests cover watchlist/unprepared symbols,
+process restarts, retained snapshots and graceful unknown-symbol failure. Focused
+desktop/mobile Light/Dark checks cover selection, recents, provenance disclosure,
+new-company search and the reference-store 403 fallback, without model calls.
+
+Force a deliberate live refresh, or run the normal daily due check:
+
+```powershell
+python -m finn.company_directory --force
+python -m finn.company_directory
+```
+
+Refresh the full committed directory deliberately; deployment itself does not contact NSE:
 
 ```powershell
 python scripts/update_company_directory.py

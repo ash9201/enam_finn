@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -21,6 +22,41 @@ class Store:
         if not url or not secret:
             raise MissingConfiguration("Server storage is not configured.")
         self.client = supabase_client(secret)
+        self.directory_cache_key = url.rstrip("/")
+
+    def get_reference_snapshot(self, path):
+        try:
+            response = self.client.get(f"storage/v1/object/finn-reference/{path}", timeout=3)
+        except httpx.HTTPError:
+            raise DependencyError("Reference storage could not be reached.") from None
+        if response.status_code in (400, 404):
+            return None
+        require_ok(response, "Reference directory read")
+        return response.json()
+
+    def put_reference_snapshot(self, path, value):
+        # Official public reference data only. No anon write policies are granted.
+        bucket = self.client.get("storage/v1/bucket/finn-reference")
+        if bucket.status_code in (400, 404):
+            created = self.client.post(
+                "storage/v1/bucket",
+                json={
+                    "id": "finn-reference",
+                    "name": "finn-reference",
+                    "public": True,
+                    "file_size_limit": 2 * 1024 * 1024,
+                    "allowed_mime_types": ["application/json"],
+                },
+            )
+            require_ok(created, "Public reference bucket creation")
+        else:
+            require_ok(bucket, "Reference bucket check")
+        response = self.client.post(
+            f"storage/v1/object/finn-reference/{path}",
+            content=json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode(),
+            headers={"Content-Type": "application/json", "x-upsert": "true"},
+        )
+        require_ok(response, "Verified directory publication")
 
     def close(self):
         self.client.close()

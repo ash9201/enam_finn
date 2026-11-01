@@ -20,7 +20,7 @@ const browser = await chromium.launch()
 const checks = []
 let lastPage
 async function selectCompany(page, symbol) {
-  await page.getByRole('button', { name: 'Change company', exact: true }).click()
+  await page.getByRole('button', { name: 'Find company', exact: true }).click()
   const input = page.getByRole('combobox', { name: 'Find a company' })
   await input.fill(symbol)
   await page
@@ -95,7 +95,7 @@ try {
     const live = process.env.FINN_VERIFY_LIVE_ACTIONS === '1' && width === 1440 && theme === 'light'
     page.on('pageerror', (error) => errors.push(error.message))
     page.on('request', (request) => {
-      if (new URL(request.url()).pathname === '/company-directory.json') directoryRequests++
+      if (new URL(request.url()).pathname.endsWith('/company-directory.json')) directoryRequests++
     })
     await page.route('**/*', async (route) => {
       const request = route.request(),
@@ -176,7 +176,7 @@ try {
     await expect(page.getByLabel('Active evidence context')).toContainText('NTPC')
     await page.getByRole('button', { name: 'Remove evidence context' }).click()
     await expect(page.getByLabel('Active evidence context')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Change company', exact: true }).click()
+    await page.getByRole('button', { name: 'Find company', exact: true }).click()
     const input = page.getByRole('combobox', { name: 'Find a company' })
     await input.fill('Jindal')
     await expect(page.getByRole('option').filter({ hasText: 'JINDALSTEL' })).toBeVisible()
@@ -243,11 +243,10 @@ try {
       )
       await expect(page.locator('.financial-results')).toHaveCount(1, { timeout: 30000 })
     }
-    await expect(page.getByRole('button', { name: /Watchlist/ })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    )
-    await page.getByRole('button', { name: /Watchlist/ }).click()
+    await expect(
+      page.getByRole('button', { name: /View all.*companies|Hide companies/ }),
+    ).toHaveAttribute('aria-expanded', 'false')
+    await page.getByRole('button', { name: /View all.*companies|Hide companies/ }).click()
     await expect(page.getByLabel('Watchlist companies').getByRole('button')).toHaveCount(15)
     await page
       .getByLabel('Watchlist companies')
@@ -281,14 +280,15 @@ try {
     if ((width === 1440 && theme === 'light') || (width === 390 && theme === 'dark')) {
       await page.locator('.answer-panel').scrollIntoViewIfNeeded()
       await page.screenshot({ path: `${out}/${width}-${theme}-comparison.png` })
-      await page.getByRole('button', { name: 'Change company', exact: true }).click()
+      await page.getByRole('button', { name: 'Find company', exact: true }).click()
       await page.getByRole('combobox', { name: 'Find a company' }).fill('Jindal')
       await page.screenshot({ path: `${out}/${width}-${theme}-search.png` })
       await page.keyboard.press('Escape')
     }
     if (width < 600) await page.setViewportSize({ width: 320, height: 740 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    expect(directoryRequests).toBe(pageLoads)
+    expect(directoryRequests).toBeGreaterThanOrEqual(pageLoads)
+    expect(directoryRequests).toBeLessThanOrEqual(pageLoads * 2) // persistent read + optional bundled fallback
     expect(errors).toEqual([])
     checks.push({
       theme,

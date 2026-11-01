@@ -29,6 +29,33 @@ def require_sync_operator(key: str | None):
         raise HTTPException(403, "Server operator access required.")
 
 
+@router.get("/internal/company-directory", include_in_schema=False)
+def company_directory_status(
+    symbol: str | None = Query(default=None, max_length=40),
+    x_finn_sync_key: str | None = Header(default=None),
+):
+    """Read-only identity/provenance check; never starts discovery or model work."""
+    require_sync_operator(x_finn_sync_key)
+    from finn.company_directory import directory_snapshot, resolve_identity
+
+    try:
+        with open_store() as store:
+            snapshot = directory_snapshot(store)
+            result = {
+                "checked_at": snapshot["checked_at"],
+                "companies": len(snapshot["companies"]),
+                "sources": snapshot["sources"],
+                "source_checks": snapshot.get("source_checks", {}),
+            }
+            if symbol:
+                result["company"] = resolve_identity(symbol, store=store)
+            return result
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
+    except (DependencyError, MissingConfiguration) as exc:
+        raise HTTPException(503, str(exc)) from None
+
+
 class SourceSyncRequest(BaseModel):
     mode: Literal["all", "filings", "prices"] = "all"
     trigger: Literal["operator", "cron"] = "operator"

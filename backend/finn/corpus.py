@@ -165,7 +165,7 @@ def ensure_corpus(
             return {**existing[0], "reused_corpus": True}
     progress("discovery")
     with public_client() as client:
-        company = resolve_company(client, symbol)
+        company = resolve_company(client, symbol, store=store)
         previous = existing[0] if existing else {}
         store.upsert(
             "finn_companies",

@@ -101,7 +101,7 @@ try {
         .waitFor({ state: 'detached', timeout: 120000 })
       if (await page.getByRole('alert').count())
         throw new Error(await page.getByRole('alert').innerText())
-      await page.getByRole('button', { name: 'Change company', exact: true }).click()
+      await page.getByRole('button', { name: 'Find company', exact: true }).click()
       await page.getByRole('combobox', { name: 'Find a company' }).fill('ZZZFINN42')
       await page.getByText('No matching listing found.', { exact: false }).waitFor()
       if (!(await page.getByRole('button', { name: 'Investigate', exact: true }).isDisabled()))

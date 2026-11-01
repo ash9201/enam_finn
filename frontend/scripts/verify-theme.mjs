@@ -194,7 +194,7 @@ try {
       await page.getByRole('button', { name: 'Close evidence' }).click()
       if (size === 'desktop')
         await page.screenshot({ path: `${output}/${choice}-financial-table.png` })
-      await page.getByRole('button', { name: 'Change company', exact: true }).click()
+      await page.getByRole('button', { name: 'Find company', exact: true }).click()
       await page.getByRole('combobox', { name: 'Find a company' }).fill('NTPC')
       await page.locator('.company-suggestions [role="option"]').first().waitFor()
       await page.getByRole('combobox', { name: 'Find a company' }).press('ArrowDown')
