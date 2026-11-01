@@ -1,5 +1,57 @@
 # Briefing redesign - 1 November 2026
 
+## Event review and ordering follow-up — 2 November
+
+The current UI uses **Grouped by company / Chronological**, secondary company
+ordering (most recent update, A–Z, most events) and newest/oldest chronology.
+Review state is not part of either comparator. Equal dates/counts use full company
+name/ticker or a stable event key, so marking reviewed cannot reshuffle the list.
+
+Review counts, company indicators, filters and notifications now count **distinct
+events**, regardless of supporting filings. File identities, original URLs and
+page evidence are unchanged. Company headers show event count and a small outstanding
+event indicator; source counts and exchange metadata do not occupy collapsed summaries.
+The publication timestamp sits to the right of the title, wrapping on small screens.
+
+`finn-event-reviews-v2` stores event receipts keyed by the existing stable relationship
+key and the meaningful source content/version seen at review. Legacy `finn-read-v1`
+is left intact and imported once for currently captured events: complete source reviews
+remain reviewed; partial reviews with unseen evidence become **Updated since review**.
+Review/Undo operates on a whole event and can restore a prior partial/updated receipt.
+Unreviewed filters include updated events, with a separate updated-only option.
+Identical duplicate evidence and rescan times do not invalidate a review; new or
+changed supporting content does. Removed duplicate sources alone do not create new
+information. Legacy flags cannot reconstruct source versions from before migration.
+If browser storage fails, an explicit session-only warning is shown.
+
+Date/category/company/significance/review filters operate on complete events.
+An event matches the date window when one of its original filings matches; all its
+associated sources remain available and the review applies to the complete event.
+Explicit verified results and dividend references in the same filing can create
+separate developments sharing the original file, each with an independent receipt.
+Unstructured mixed headings are not speculatively split or merged.
+
+**Significant** uses the existing priority 2/3 source classification; **Routine**
+covers priority 0/1 informational, scheduled and administrative records;
+**Unclassified** remains explicit regardless of its provisional priority. Categories
+remain separate. A collapsed Review & significance disclosure explains the rules,
+local persistence, date behavior and independent EOD thresholds. These labels do not
+assert regulatory materiality or supply investment recommendations. Existing verified
+event-specific summaries/additional details remain the explanation; no generic
+"why it matters" paragraphs or new unsupported interpretations were generated.
+
+Focused model/UI checks cover legacy migration, partial undo, stable order, all-source
+retention, changed/new/duplicate evidence, combined filters, both chronology directions,
+company sorts, empty windows and unchanged EOD rules across four viewport/theme scenes.
+New-evidence transport replays are explicitly test-only and never write source records.
+No backend, ingestion, retrieval, price calculations or model settings changed.
+
+## Original phase record (historical)
+
+The filing-based review model and ordering described below were superseded by the
+follow-up above. The earlier NTPC grouping was also split into eight distinct events
+in later source-review work; original dated observations are retained as history.
+
 Briefing now monitors company developments rather than rendering a large card for
 every exchange record. The shared header/navigation, Research, Portfolio, financial
 calculations and hybrid-retrieval settings remain in use.

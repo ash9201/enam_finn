@@ -56,11 +56,11 @@ try {
       if (!(await routine.evaluate((el) => el.open)))
         throw new Error('Routine disclosures did not expand.')
     }
-    await page.getByRole('button', { name: /Alert settings/ }).click()
+    await page.getByRole('button', { name: /Alert thresholds/ }).click()
     await page.getByLabel('Daily price move threshold').fill('3')
     await page.getByLabel('Volume threshold').fill('1.5')
     await page.reload({ waitUntil: 'networkidle' })
-    await page.getByRole('button', { name: /Alert settings/ }).click()
+    await page.getByRole('button', { name: /Alert thresholds/ }).click()
     if ((await page.getByLabel('Daily price move threshold').inputValue()) !== '3')
       throw new Error('Alert preferences were not preserved.')
     await page.screenshot({ path: `${output}/${name}-briefing.png`, fullPage: true })

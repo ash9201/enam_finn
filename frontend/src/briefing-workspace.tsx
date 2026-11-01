@@ -1,6 +1,15 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import './briefing-workspace.css'
 import BriefingEvidence from './briefing-evidence'
+import {
+  eventReceipt,
+  orderEvents,
+  reviewState,
+  selectEvents,
+  type EventReviews,
+  type EventReceipt,
+  type ReviewChanges,
+} from './event-reviews'
 import {
   CATEGORIES,
   companyPreview,
@@ -13,7 +22,6 @@ import {
   groupEvents,
   presentation,
   primaryAction,
-  selectFilings,
   type Company,
   type Filing,
   type FilingEvent,
@@ -41,7 +49,8 @@ const research = (symbol: string) => `/?view=research&symbol=${encodeURIComponen
 export default function BriefingWorkspace({
   filings,
   companies,
-  read,
+  reviews,
+  reviewStorageWarning,
   onReview,
   signals,
   settings,
@@ -54,8 +63,9 @@ export default function BriefingWorkspace({
 }: {
   filings: Filing[]
   companies: Company[]
-  read: string[]
-  onReview: (ids: string[], reviewed: boolean) => void
+  reviews: EventReviews
+  reviewStorageWarning: boolean
+  onReview: (changes: ReviewChanges) => void
   signals: Signal[]
   settings: ReactNode
   settingsOpen: boolean
@@ -74,6 +84,8 @@ export default function BriefingWorkspace({
     end: '',
   })
   const [view, setView] = useState('company')
+  const [companySort, setCompanySort] = useState('recent')
+  const [chronology, setChronology] = useState('desc')
   const [includeRoutine, setIncludeRoutine] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   useEffect(() => {
@@ -91,16 +103,17 @@ export default function BriefingWorkspace({
     setView('company')
     setExpanded((previous) => new Set([...previous, `main:${company}`]))
   }, [entryUrl, entryKey])
-  const [undo, setUndo] = useState<{
-    ids: string[]
-    previous: Set<string>
-  } | null>(null)
-  const eventReviews = useRef(new Map<string, { ids: string[]; previous: Set<string> }>())
-  const reviewed = new Set(read)
-  const matching = selectFilings(filings, filters, reviewed)
-  const events = groupEvents(matching)
+  const [undo, setUndo] = useState<{ previous: ReviewChanges; count: number } | null>(null)
+  const eventReviews = useRef(new Map<string, EventReceipt | null>())
+  const allEvents = useMemo(() => groupEvents(filings), [filings])
+  const events = selectEvents(allEvents, filters, reviews)
   const routine = events.filter((event) => event.priority === 0)
-  const unreviewed = matching.filter((filing) => !reviewed.has(filing.id)).length
+  const showRoutine = includeRoutine || filters.significance === 'routine' || !!filters.category
+  const displayedEvents =
+    view === 'company' ? events : events.filter((event) => showRoutine || event.priority > 0)
+  const unreviewed = displayedEvents.filter(
+    (event) => reviewState(event, reviews) !== 'reviewed',
+  ).length
   const visibleExpanded = events.some((event) => expanded.has(`main:${event.symbol}`))
   const bounds = dateBounds(filters)
   const companyName = (symbol: string) =>
@@ -109,60 +122,33 @@ export default function BriefingWorkspace({
     symbol
   const updateFilter = (key: keyof FilingFilters, value: string) =>
     setFilters((previous) => ({ ...previous, [key]: value }))
-  function changeReview(ids: string[], value: boolean) {
-    setUndo({ ids, previous: new Set(read) })
-    onReview(ids, value)
+  function changeReview(changes: ReviewChanges) {
+    setUndo({
+      previous: Object.fromEntries(
+        Object.keys(changes).map((key) => [key, reviews.receipts[key] || null]),
+      ),
+      count: Object.keys(changes).length,
+    })
+    onReview(changes)
   }
   function undoReview() {
     if (!undo) return
-    onReview(
-      undo.ids.filter((id) => undo.previous.has(id)),
-      true,
-    )
-    onReview(
-      undo.ids.filter((id) => !undo.previous.has(id)),
-      false,
-    )
+    onReview(undo.previous)
     setUndo(null)
   }
-
-  function reviewEvent(event: FilingEvent, outstanding: number) {
-    const ids = event.filings.map((filing) => filing.id)
-    if (outstanding) {
-      eventReviews.current.set(event.key, { ids, previous: new Set(read) })
-      changeReview(ids, true)
-      return
-    }
-    const saved = eventReviews.current.get(event.key)
-    if (!saved) {
-      changeReview(ids, false)
-      return
-    }
-    // Restore this event's last action, even after another event was reviewed.
-    // Retain its original scope if review filters previously hid some sources.
-    const scope = saved.ids.filter((id) => ids.includes(id))
-    setUndo({ ids: scope, previous: new Set(read) })
-    onReview(
-      scope.filter((id) => saved.previous.has(id)),
-      true,
-    )
-    onReview(
-      scope.filter((id) => !saved.previous.has(id)),
-      false,
-    )
+  function reviewEvent(event: FilingEvent) {
+    if (reviewState(event, reviews) !== 'reviewed') {
+      eventReviews.current.set(event.key, reviews.receipts[event.key] || null)
+      changeReview({ [event.key]: eventReceipt(event) })
+    } else changeReview({ [event.key]: eventReviews.current.get(event.key) || null })
   }
 
   function sourceRow(filing: Filing) {
-    const detail = presentation(filing),
-      isReviewed = reviewed.has(filing.id)
+    const detail = presentation(filing)
     const page = detail.evidence.find((e) => e.pdf_page)?.pdf_page
     const label = sourceLabel(filing)
     return (
-      <li
-        className={`filing-source ${isReviewed ? 'is-reviewed' : ''}`}
-        key={filing.id}
-        data-filing-id={filing.id}
-      >
+      <li className="filing-source" key={filing.id} data-filing-id={filing.id}>
         <div className="filing-source-link">
           {filing.source_url.startsWith('https://') ? (
             <a
@@ -193,7 +179,8 @@ export default function BriefingWorkspace({
   }
 
   function eventRow(event: FilingEvent, withCompany = false) {
-    const outstanding = event.filings.filter((f) => !reviewed.has(f.id)).length
+    const state = reviewState(event, reviews),
+      outstanding = state !== 'reviewed'
     const tone = eventTone(event),
       action = primaryAction(event)
     const explanation = eventExplanation(event)
@@ -216,21 +203,33 @@ export default function BriefingWorkspace({
                   {companyName(event.symbol)} <small>{event.symbol}</small>
                 </span>
               )}
-              <span className="event-title">{event.title}</span>
+              <span className="event-title-line">
+                <span className="event-title">{event.title}</span>
+                <time className="event-timestamp" dateTime={event.newest}>
+                  {stamp(event.newest)}
+                </time>
+              </span>
               <span className="event-meta">
                 <span className="event-category">{eventCategory(event)}</span>
-                <time dateTime={effective || event.newest}>
-                  {effective
-                    ? `Effective ${new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(effective + 'T00:00:00+05:30'))}`
-                    : stamp(event.newest)}
-                </time>
                 <span className={`event-priority ${tone.key}`}>{tone.label}</span>
-                <span>
-                  {event.filings.length} {event.filings.length === 1 ? 'source' : 'sources'}
+                <span className={`review-state ${state}`}>
+                  {state === 'updated'
+                    ? 'Updated since review'
+                    : outstanding
+                      ? 'Unreviewed'
+                      : '\u2713 Reviewed'}
                 </span>
-                <span className="review-state">
-                  {outstanding ? `${outstanding} unreviewed` : '\u2713 Reviewed'}
-                </span>
+                {effective && (
+                  <span className="event-effective">
+                    Effective{' '}
+                    {new Intl.DateTimeFormat('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                      timeZone: 'Asia/Kolkata',
+                    }).format(new Date(effective + 'T00:00:00+05:30'))}
+                  </span>
+                )}
               </span>
               <span className="event-snippet">
                 {explanation || 'Headline only · verified event details are not yet available.'}
@@ -265,7 +264,7 @@ export default function BriefingWorkspace({
               <button
                 className="review-toggle"
                 aria-pressed={!outstanding}
-                onClick={() => reviewEvent(event, outstanding)}
+                onClick={() => reviewEvent(event)}
               >
                 {outstanding ? 'Mark reviewed' : '✓ Reviewed · Undo'}
               </button>
@@ -287,25 +286,24 @@ export default function BriefingWorkspace({
     const groups = new Map<string, FilingEvent[]>()
     for (const event of items)
       groups.set(event.symbol, [...(groups.get(event.symbol) || []), event])
-    const score = (items: FilingEvent[]) =>
-      Math.max(
-        0,
-        ...items.filter((e) => e.filings.some((f) => !reviewed.has(f.id))).map((e) => e.priority),
-      )
+    const alphabetical = (a: [string, FilingEvent[]], b: [string, FilingEvent[]]) =>
+      companyName(a[0]).localeCompare(companyName(b[0]), 'en-IN') || a[0].localeCompare(b[0])
     return [...groups]
-      .sort(
-        (a, b) =>
-          score(b[1]) - score(a[1]) ||
-          Math.max(...b[1].map((e) => Date.parse(e.newest))) -
-            Math.max(...a[1].map((e) => Date.parse(e.newest))),
-      )
+      .sort((a, b) => {
+        if (companySort === 'count') return b[1].length - a[1].length || alphabetical(a, b)
+        if (companySort === 'recent')
+          return (
+            Math.max(...b[1].map((event) => Date.parse(event.newest))) -
+              Math.max(...a[1].map((event) => Date.parse(event.newest))) || alphabetical(a, b)
+          )
+        return alphabetical(a, b)
+      })
       .map(([symbol, companyEvents]) => {
         const key = `${idPrefix}:${symbol}`
-        const sources = companyEvents.flatMap((e) => e.filings),
-          remaining = sources.filter((f) => !reviewed.has(f.id)).length
-        const ordered = [...companyEvents].sort(
-          (a, b) => b.priority - a.priority || Date.parse(b.newest) - Date.parse(a.newest),
-        )
+        const remaining = companyEvents.filter(
+          (event) => reviewState(event, reviews) !== 'reviewed',
+        ).length
+        const ordered = orderEvents(companyEvents)
         return (
           <details
             className={`company-group ${remaining ? '' : 'is-reviewed'}`}
@@ -336,28 +334,22 @@ export default function BriefingWorkspace({
                 </span>
               </span>
               <span className="company-counts">
-                <span>{remaining ? `${remaining} unreviewed` : '✓ All reviewed'}</span>
-                <small>
-                  {companyEvents.length} {companyEvents.length === 1 ? 'event' : 'events'} ·{' '}
-                  {sources.length} filings
-                </small>
+                <span>
+                  {companyEvents.length} {companyEvents.length === 1 ? 'event' : 'events'}
+                </span>
+                {remaining > 0 && <small>{remaining} unreviewed</small>}
               </span>
             </summary>
             <div className="company-events">
-              {ordered.filter((event) => event.priority > 0).map((event) => eventRow(event))}
-              {ordered.some((event) => event.priority === 0) && (
+              {ordered
+                .filter((event) => showRoutine || event.priority > 0)
+                .map((event) => eventRow(event))}
+              {!showRoutine && ordered.some((event) => event.priority === 0) && (
                 <details className="routine-section">
                   <summary className="routine-toggle">
                     <span>
-                      Routine disclosures{' '}
-                      <small>
-                        {
-                          ordered
-                            .filter((event) => event.priority === 0)
-                            .flatMap((event) => event.filings).length
-                        }{' '}
-                        filings
-                      </small>
+                      Additional routine events{' '}
+                      <small>{ordered.filter((event) => event.priority === 0).length} events</small>
                     </span>
                     <span aria-hidden="true">＋</span>
                   </summary>
@@ -376,20 +368,46 @@ export default function BriefingWorkspace({
         <div className="filing-controls-heading">
           <div>
             <h2 id="filings-heading">Company updates</h2>
-            <p className="filing-count" role="status">
-              {matching.length} matching {matching.length === 1 ? 'filing' : 'filings'} ·{' '}
-              {unreviewed} unreviewed
+            <p className="sr-only" role="status">
+              {displayedEvents.length} events in this view; {unreviewed} unreviewed.
             </p>
           </div>
-          <div className="view-options" role="group" aria-label="Announcement view">
-            {[
-              ['company', 'By company'],
-              ['latest', 'Latest activity'],
-            ].map(([value, title]) => (
-              <button key={value} aria-pressed={view === value} onClick={() => setView(value)}>
-                {title}
-              </button>
-            ))}
+          <div className="briefing-display-controls">
+            <div className="view-options" role="group" aria-label="Announcement view">
+              {[
+                ['company', 'Grouped by company'],
+                ['latest', 'Chronological'],
+              ].map(([value, title]) => (
+                <button key={value} aria-pressed={view === value} onClick={() => setView(value)}>
+                  {title}
+                </button>
+              ))}
+            </div>
+            <div className="briefing-order">
+              <label>
+                {view === 'company' ? 'Company order' : 'Event order'}
+                {view === 'company' ? (
+                  <select
+                    aria-label="Company order"
+                    value={companySort}
+                    onChange={(event) => setCompanySort(event.target.value)}
+                  >
+                    <option value="recent">Most recent update</option>
+                    <option value="name">Company A-Z</option>
+                    <option value="count">Most events</option>
+                  </select>
+                ) : (
+                  <select
+                    aria-label="Event order"
+                    value={chronology}
+                    onChange={(event) => setChronology(event.target.value)}
+                  >
+                    <option value="desc">Newest first</option>
+                    <option value="asc">Oldest first</option>
+                  </select>
+                )}
+              </label>
+            </div>
           </div>
         </div>
         <div className="filing-filters">
@@ -427,6 +445,19 @@ export default function BriefingWorkspace({
               <option value="all">All</option>
               <option value="unreviewed">Unreviewed</option>
               <option value="reviewed">Reviewed</option>
+              <option value="updated">Updated since review</option>
+            </select>
+          </label>
+          <label>
+            Significance
+            <select
+              value={filters.significance || ''}
+              onChange={(event) => updateFilter('significance', event.target.value)}
+            >
+              <option value="">All significance</option>
+              <option value="significant">Significant</option>
+              <option value="routine">Routine</option>
+              <option value="unclassified">Unclassified</option>
             </select>
           </label>
         </div>
@@ -453,6 +484,7 @@ export default function BriefingWorkspace({
               setFilters({
                 company: '',
                 category: '',
+                significance: '',
                 review: 'all',
                 window: '24h',
                 start: '',
@@ -491,15 +523,38 @@ export default function BriefingWorkspace({
         <a className="market-jump" href="#signals-heading">
           Unusual activity &amp; thresholds &darr;
         </a>
-        <p className="review-local-note">
-          Review state is saved in this browser only. Counts reflect these filing filters.
-        </p>
+        <details className="briefing-method">
+          <summary>Review &amp; significance</summary>
+          <p>
+            Each distinct event is one reviewable item, regardless of its sources. Reviews and alert
+            thresholds are saved in this browser. Date filters match captured filings; included
+            events retain all their sources. New or changed supporting evidence is marked Updated
+            since review and remains in Unreviewed.
+          </p>
+          <p>
+            Significant means the existing classification assigns priority 2 or 3 (for example
+            reported results or consequential business developments). Routine covers scheduled,
+            informational and administrative disclosures at priority 0 or 1. Unclassified means
+            classification is still pending. These labels do not establish regulatory materiality or
+            investment advice.
+          </p>
+          <p>
+            Companies use the selected order; events within each company use newest update first.
+            Equal dates or counts use company name, then ticker; equal event times use a stable
+            event key. Reviewing an event does not change its sort position. EOD alerts use
+            completed sessions independently of filing-date filters.
+          </p>
+        </details>
+        {reviewStorageWarning && (
+          <p className="coverage-warning" role="status">
+            Review changes are kept for this session because browser storage is unavailable.
+          </p>
+        )}
       </section>
       {undo && (
         <div className="review-feedback" role="status">
           <span>
-            Review state updated for {undo.ids.length}{' '}
-            {undo.ids.length === 1 ? 'filing' : 'filings'}.
+            Review state updated for {undo.count} {undo.count === 1 ? 'event' : 'events'}.
           </span>
           <button className="text-button" onClick={undoReview}>
             Undo last change
@@ -543,23 +598,20 @@ export default function BriefingWorkspace({
                     checked={includeRoutine}
                     onChange={(e) => setIncludeRoutine(e.target.checked)}
                   />
-                  Include {routine.flatMap((e) => e.filings).length} routine filings
+                  Include {routine.length} additional routine events
                 </label>
               )
             )}
           </div>
           {view === 'company'
             ? companyGroups(events, 'main')
-            : [...events]
-                .filter((event) => includeRoutine || event.priority > 0)
-                .sort((a, b) => Date.parse(b.newest) - Date.parse(a.newest))
-                .map((event) => eventRow(event, true))}
+            : orderEvents(displayedEvents, chronology).map((event) => eventRow(event, true))}
           {bounds.valid &&
             (view === 'company'
               ? !events.length
-              : !matching.some((f) => includeRoutine || presentation(f).priority > 0)) && (
+              : !events.some((event) => showRoutine || event.priority > 0)) && (
               <div className="briefing-empty">
-                <h3>No filings match this view</h3>
+                <h3>No events match this view</h3>
                 <p>
                   This reflects captured announcements, not proof that no event occurred. Include
                   routine items, change the filters or widen the date range.
@@ -583,7 +635,7 @@ export default function BriefingWorkspace({
               aria-controls="briefing-settings"
               onClick={onSettings}
             >
-              Alert settings
+              Alert thresholds
             </button>
           </div>
           <p className="market-clock">Completed sessions · whole watchlist</p>

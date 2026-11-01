@@ -49,13 +49,15 @@ async function investigationJourney(page, nav, viewport) {
   })
   if ((await result.locator('.event-details').getAttribute('open')) === null)
     await result.locator('.event-summary').click()
-  const before = await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1') || '[]'))
+  const before = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('finn-event-reviews-v2') || 'null'),
+  )
   await result.getByRole('button', { name: 'Mark reviewed', exact: true }).click()
   await expect(result).toHaveClass(/is-reviewed/)
   await result.getByRole('button', { name: /Reviewed.*Undo/ }).click()
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('finn-read-v1')))).toEqual(
-    before,
-  )
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem('finn-event-reviews-v2'))),
+  ).toEqual(before)
   await expect(result.locator('.original-filing')).toHaveCount(2)
   await result.locator('.filing-primary-action').click()
   await expect(page.getByLabel('Selected company')).toContainText('NTPC')
@@ -164,9 +166,9 @@ try {
       await page.getByRole('button', { name: 'Custom', exact: true }).click()
       await page.getByLabel('From (IST)').fill('2026-10-01T00:00')
       await page.getByLabel('To (IST)').fill('2026-10-31T23:59')
-      await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+      await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
       await page.getByRole('slider', { name: 'Daily price move threshold' }).fill('3')
-      await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+      await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
       await activeView().evaluate((el) => (el.scrollTop = 320))
       const briefingScroll = await activeView().evaluate((el) => el.scrollTop)
 
@@ -209,11 +211,11 @@ try {
         'aria-pressed',
         'true',
       )
-      await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+      await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
       await expect(page.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue(
         '3',
       )
-      await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+      await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
       await activeView().evaluate((el) => (el.scrollTop = 0))
       await page.screenshot({ path: `${output}/${viewport.width}-${theme}-briefing.png` })
       await nav('Portfolio').click()
@@ -347,10 +349,10 @@ try {
       .getByRole('navigation', { name: 'Main navigation' })
       .getByRole('link', { name, exact: true })
   await page.goto(base)
-  await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+  await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
   await page.getByRole('slider', { name: 'Daily price move threshold' }).fill('3.5')
   await nav('Portfolio').click()
-  await page.getByRole('button', { name: 'Alert settings', exact: true }).click()
+  await page.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
   await expect(page.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue('3.5')
   await page.getByRole('slider', { name: 'Daily price move threshold' }).fill('4.5')
   await nav('Briefing').click()

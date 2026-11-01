@@ -20,10 +20,15 @@ Company-name buttons expand trading volume, volume ratio and source limitations.
 - Recent-event counts use the existing Briefing grouping of non-routine captured
   filings within seven days. These count events rather than individual PDFs,
   exclude future records, and retain all source identities/review state in Briefing.
-- Attention first orders by number of triggered price/volume thresholds, then
-  recent-event count, then company name. Other sorting supports signed 1D change
-  in either direction and full-name ordering. Missing changes sort last in either
-  direction. There is no added investment score or recommendation.
+- **Prioritize unusual activity** is a separate checkbox, enabled by default.
+  Companies crossing either configured threshold form the first group; one versus
+  two triggers does not add an implicit ranking. The selected sort applies within
+  both groups. With the checkbox off, it applies across all companies.
+- Default sort is most recent captured activity. Other choices include oldest
+  activity, company A–Z/Z–A, daily gain/decline and event count. Missing values sort
+  last in either direction; ties use company name A–Z and ticker. There is no added
+  investment score or recommendation. Alert thresholds sits beside these controls;
+  browser-local persistence is explained in Methodology instead of repeated captions.
 - Event links open the company's seven-day Briefing with its group expanded.
   Explicit links reset retained filters; normal section switching preserves them.
   Research links continue using canonical symbols, including encoded `M&M`.

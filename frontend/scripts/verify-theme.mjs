@@ -122,7 +122,7 @@ try {
       releaseData()
       await page.getByRole('button', { name: '7 days', exact: true }).click()
       await page.locator('.company-group').first().waitFor()
-      await page.getByRole('button', { name: /Alert settings/ }).click()
+      await page.getByRole('button', { name: /Alert thresholds/ }).click()
       await page.getByLabel('Daily price move threshold').fill('3')
       await page.getByLabel('Volume threshold').fill('1.5')
       await page.getByRole('button', { name: 'Custom', exact: true }).click()

@@ -42,6 +42,19 @@
   font-size: 11px;
   color: var(--text-secondary);
 }
+.portfolio-controls .portfolio-prioritize {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.portfolio-prioritize input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
 .portfolio-controls select {
   font: inherit;
   font-size: 12px;

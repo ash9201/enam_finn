@@ -117,7 +117,7 @@ try {
     const expected = watchRows(companies, prices, filings, 4, 2)
     const identities = () => rows.evaluateAll((nodes) => nodes.map((n) => n.dataset.symbol))
     expect(await identities()).toEqual(
-      sortWatchRows(expected, 'activity', 'desc').map((r) => r.company.symbol),
+      sortWatchRows(expected, 'recent', 'desc', true).map((r) => r.company.symbol),
     )
     for (const company of companies) {
       const row = root.locator(`.portfolio-row[data-symbol="${company.symbol}"]`),
@@ -150,6 +150,7 @@ try {
       expect(await row.innerText()).not.toContain('Prior 20 sessions: Yahoo Finance.')
     }
     const select = root.getByRole('combobox', { name: 'Sort watchlist' })
+    await root.getByRole('checkbox', { name: 'Prioritize unusual activity' }).uncheck()
     for (const direction of ['desc', 'asc']) {
       if (width > 850) await root.getByRole('button', { name: 'Sort by 1d change' }).click()
       else await select.selectOption(`change:${direction}`)
@@ -177,7 +178,7 @@ try {
     )
     await root.locator('.portfolio-method summary').click()
     // Same real dataset, investor thresholds changed through the existing controls.
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     await root.getByRole('slider', { name: 'Daily price move threshold' }).fill('1')
     await root.getByRole('slider', { name: 'Volume threshold' }).fill('1')
     for (const e of watchRows(companies, prices, filings, 1, 1))
@@ -188,7 +189,14 @@ try {
       price: 1,
       volume: 1,
     })
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('checkbox', { name: 'Prioritize unusual activity' }).check()
+    expect(await identities()).toEqual(
+      sortWatchRows(watchRows(companies, prices, filings, 1, 1), 'name', 'asc', true).map(
+        (row) => row.company.symbol,
+      ),
+    )
+    await root.getByRole('checkbox', { name: 'Prioritize unusual activity' }).uncheck()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     const eventRow = expected.find((r) => r.events > 0),
       eventLink = root.locator(
         `.portfolio-row[data-symbol="${eventRow.company.symbol}"] .portfolio-event-link`,
@@ -222,9 +230,9 @@ try {
     await page.locator('a[data-section="portfolio"]:visible').click()
     await expect(select).toHaveValue('name:asc')
     await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     await expect(root.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue('1')
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     await toggle.click()
     const overflow = await root.evaluate((node) =>
       [node, ...node.querySelectorAll('*')]
@@ -307,10 +315,10 @@ try {
     )
     await audit(root.locator('.portfolio-workspace'))
     // Preferences survive a page reload, not merely section switching.
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     await root.getByRole('slider', { name: 'Daily price move threshold' }).fill('1')
     await page.reload()
-    await root.getByRole('button', { name: 'Alert settings', exact: true }).click()
+    await root.getByRole('button', { name: 'Alert thresholds', exact: true }).click()
     await expect(root.getByRole('slider', { name: 'Daily price move threshold' })).toHaveValue('1')
     checks.push({
       theme,

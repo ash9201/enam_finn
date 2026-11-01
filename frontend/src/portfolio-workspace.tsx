@@ -1,4 +1,4 @@
-import { Fragment, useId, useState } from 'react'
+import { Fragment, useId, useState, type ReactNode } from 'react'
 import type { Company, Filing } from './briefing-model'
 import {
   commonSession,
@@ -47,6 +47,9 @@ export default function PortfolioWorkspace({
   pricesCheckedAt,
   filingsCheckedAt,
   capturedSince,
+  settings,
+  settingsOpen,
+  onSettings,
 }: {
   companies: Company[]
   prices: Price[]
@@ -57,18 +60,22 @@ export default function PortfolioWorkspace({
   pricesCheckedAt?: string | null
   filingsCheckedAt?: string | null
   capturedSince?: string | null
+  settings: ReactNode
+  settingsOpen: boolean
+  onSettings: () => void
 }) {
   const [sort, setSort] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({
-    key: 'activity',
+    key: 'recent',
     direction: 'desc',
   })
+  const [prioritize, setPrioritize] = useState(true)
   const [expanded, setExpanded] = useState(new Set<string>())
   const prefix = useId()
   const rows = watchRows(companies, prices, filings, priceThreshold, volumeThreshold)
   const scopedPrices = rows.flatMap((row) => (row.price ? [row.price] : []))
   const session = commonSession(scopedPrices),
     method = commonSourceNote(scopedPrices)
-  const sorted = sortWatchRows(rows, sort.key, sort.direction)
+  const sorted = sortWatchRows(rows, sort.key, sort.direction, prioritize)
   function toggleSort(key: SortKey) {
     setSort((previous) => ({
       key,
@@ -124,6 +131,14 @@ export default function PortfolioWorkspace({
           </p>
         </div>
         <div className="portfolio-controls">
+          <label className="portfolio-prioritize">
+            <input
+              type="checkbox"
+              checked={prioritize}
+              onChange={(event) => setPrioritize(event.target.checked)}
+            />
+            Prioritize unusual activity
+          </label>
           <label>
             Sort by
             <select
@@ -134,19 +149,30 @@ export default function PortfolioWorkspace({
                 setSort({ key: key as SortKey, direction: direction as 'asc' | 'desc' })
               }}
             >
-              <option value="activity:desc">Attention first</option>
-              <option value="activity:asc">Activity: low to high</option>
+              <option value="recent:desc">Most recent activity</option>
+              <option value="recent:asc">Oldest recent activity</option>
+              <option value="events:desc">Most events</option>
+              <option value="events:asc">Fewest events</option>
               <option value="name:asc">Company: A–Z</option>
               <option value="name:desc">Company: Z–A</option>
-              <option value="change:desc">1D change: high to low</option>
-              <option value="change:asc">1D change: low to high</option>
+              <option value="change:desc">Daily gain: high to low</option>
+              <option value="change:asc">Daily decline: low to high</option>
             </select>
           </label>
+          <button
+            className="text-button"
+            aria-expanded={settingsOpen}
+            aria-controls="portfolio-settings"
+            onClick={onSettings}
+          >
+            Alert thresholds
+          </button>
           <button className="text-button" onClick={onReload}>
             Reload saved updates ↻
           </button>
         </div>
       </div>
+      {settings}
       <details className="portfolio-method">
         <summary>Data sources / Methodology</summary>
         <div>
@@ -172,8 +198,11 @@ export default function PortfolioWorkspace({
             be incomplete.
           </p>
           <p>
-            Attention first sorts by the number of triggered EOD thresholds, then captured event
-            count, then company name. Indicators describe saved data, not recommendations.
+            Prioritize unusual activity places companies crossing either configured EOD threshold
+            first. The chosen sort applies within both groups. With it off, the sort applies to all
+            companies. Recent activity uses captured events from the last seven days; missing
+            changes or dates sort last. Ties use company name A-Z, then ticker. Alert thresholds are
+            saved in this browser. Indicators describe saved data, not recommendations.
           </p>
           <p className="portfolio-checks">
             EOD checked {pricesCheckedAt ? stamp(pricesCheckedAt) : 'not yet verified'} · Filings
@@ -202,7 +231,7 @@ export default function PortfolioWorkspace({
                 Last close
               </th>
               {sortHeader('change', '1D change')}
-              {sortHeader('activity', 'Activity')}
+              {sortHeader('events', 'Activity')}
               <th scope="col">Actions</th>
             </tr>
           </thead>

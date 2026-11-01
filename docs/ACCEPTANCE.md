@@ -1,5 +1,30 @@
 # Working-prototype acceptance
 
+## Focused event-review and ordering follow-up — 2 November
+
+Briefing now uses event-level receipts/counts, stable company/chronology orders,
+significance filtering and compact title/category/significance/date/review metadata.
+Portfolio separates unusual-activity priority from its selected sort and places
+Alert thresholds beside those controls. Research's existing Investigate action is
+left-aligned directly below the question, with quick actions and company search retained.
+
+The focused frontend regression passes **34 model tests**, four themed viewport
+scenes each for event reviews/sorts/filters and Portfolio, legacy migration/new-evidence
+replays, the existing navigation/workspace checks, affected Research alignment checks
+and 56 theme/contrast scenes. New source replays are test-only; original saved
+source identities, links, prices and calculations are not changed. No backend,
+source ingestion, retrieval or LLM evaluation was run for these frontend changes.
+
+Migration preserves currently captured legacy reviews where possible, leaves the
+old filing-ID storage intact, and cannot reconstruct content versions predating
+the new receipts. Updates are detected when changed evidence reaches the application;
+the frontend does not independently re-download every original PDF. Verified
+results/dividend references can be separate events in the same file; broad mixed
+headings are not split speculatively. Reviews remain browser-local.
+See the existing [Briefing](BRIEFING_REDESIGN.md) and [Portfolio](PORTFOLIO_REDESIGN.md)
+reports for current sorting, significance and persistence rules. Earlier sections
+below retain their original phase-specific scope and test counts.
+
 ## Final integrated UI review — 2 November 2026
 
 The shared layout, Briefing, Research, Portfolio and charcoal/blue dark palette

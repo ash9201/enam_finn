@@ -1,5 +1,21 @@
 # Build history summary
 
+### Event-based review and focused workflow controls (2 November)
+
+- Added independent unusual-activity prioritisation plus transparent Portfolio sorts;
+  moved Alert thresholds beside them and kept existing calculations/preferences.
+- Added stable Briefing company and chronology orders, significance filtering and
+  clear Significant/Routine/Unclassified labels with a secondary rules disclosure.
+  Compacted summaries, moved publication time beside titles and removed filing-based
+  headline counters. Original sources/evidence and event-specific facts remain.
+- Introduced versioned event receipts with one-time legacy review migration,
+  event-level counts/undo and Updated since review for new/changed evidence. Verified
+  multi-development references can share a file without sharing review state;
+  identical duplicate evidence does not create a false update.
+- Left-aligned Investigate beneath the question, preserving behavior and prompts.
+  Focused pure-model and four-scene UI tests cover sorting, migration, updates,
+  persistence, filters, source identities, both themes and responsive layouts.
+  No backend/source/model pipeline changes. See the existing Briefing/Portfolio reports.
 ### Reliable company identity and focused UI fixes (2 November)
 
 - Replaced the live-on-resolution NSE CSV dependency with a verified persistent

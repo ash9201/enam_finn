@@ -329,12 +329,13 @@
 .form-bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   gap: 16px;
   margin-top: 16px;
 }
 .form-bottom > button {
-  margin-left: auto;
+  margin-left: 0;
 }
 .form-bottom p {
   font-size: 11px;

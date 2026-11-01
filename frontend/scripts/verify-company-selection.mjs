@@ -26,6 +26,12 @@ try {
     })
     await page.goto(base + '/?view=research&symbol=INFY')
     await expect(page.locator('.answer-panel')).toBeVisible({ timeout: 25000 })
+    const questionBox = await page.getByLabel('Your question').boundingBox()
+    const investigateBox = await page
+      .getByRole('button', { name: 'Investigate', exact: true })
+      .boundingBox()
+    expect(Math.abs(investigateBox.x - questionBox.x)).toBeLessThan(2)
+    expect(investigateBox.y).toBeGreaterThanOrEqual(questionBox.y + questionBox.height)
     const selected = page.getByLabel('Selected company'),
       find = page.getByRole('button', { name: 'Find company', exact: true })
     await expect(selected).toContainText('Infosys')

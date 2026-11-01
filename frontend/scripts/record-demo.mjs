@@ -21,7 +21,7 @@ try {
   await pause()
   await page.getByRole('button', { name: '7 days', exact: true }).click()
   await pause()
-  await page.getByRole('button', { name: /Alert settings/ }).click()
+  await page.getByRole('button', { name: /Alert thresholds/ }).click()
   await page.getByLabel('Daily price move threshold').scrollIntoViewIfNeeded()
   await page.getByLabel('Daily price move threshold').fill('3')
   await pause()

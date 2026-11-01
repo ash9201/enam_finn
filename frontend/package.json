@@ -12,7 +12,7 @@
     "test:browser": "node scripts/verify-foundation.mjs",
     "test:layout": "node scripts/verify-layout.mjs",
     "test:briefing": "node scripts/verify-briefing.mjs",
-    "test:briefing:model": "node --test scripts/briefing-model.test.mjs",
+    "test:briefing:model": "node --test scripts/briefing-model.test.mjs scripts/event-reviews.test.mjs",
     "test:company-search": "node --test scripts/company-search.test.mjs",
     "test:company-selection": "node scripts/verify-company-selection.mjs",
     "test:portfolio:model": "node --test scripts/portfolio-model.test.mjs",

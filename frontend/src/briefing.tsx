@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { publicRead } from './data'
 import { AppFooter, PageHeading } from './layout'
 import BriefingWorkspace from './briefing-workspace'
-import type { Filing } from './briefing-model'
+import { groupEvents, type Filing } from './briefing-model'
+import {
+  emptyReviews,
+  isEventReviews,
+  migrateReviews,
+  type EventReviews,
+  type ReviewChanges,
+} from './event-reviews'
 import PortfolioWorkspace from './portfolio-workspace'
 import { priceSignals, type Price } from './portfolio-model'
 
@@ -38,12 +45,22 @@ function savedPreferences(): { price?: number; volume?: number } {
     return sessionPreferences
   }
 }
-function savedRead(): string[] {
+let sessionReviews: EventReviews | null = null
+function savedReviews(filings: Filing[]): EventReviews {
   try {
-    const value = JSON.parse(localStorage.getItem('finn-read-v1') || '[]')
-    return Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
+    const saved = JSON.parse(localStorage.getItem('finn-event-reviews-v2') || 'null')
+    if (isEventReviews(saved)) return saved
   } catch {
-    return []
+    // A damaged newer slot must not discard the original per-filing reviews.
+  }
+  try {
+    const old = JSON.parse(localStorage.getItem('finn-read-v1') || '[]')
+    return migrateReviews(
+      groupEvents(filings),
+      Array.isArray(old) ? old.filter((id) => typeof id === 'string') : [],
+    )
+  } catch {
+    return sessionReviews || emptyReviews()
   }
 }
 
@@ -65,7 +82,8 @@ export default function BriefingApp({
   const [priceThreshold, setPriceThreshold] = useState(Number(savedPreferences().price) || 4)
   const [volumeThreshold, setVolumeThreshold] = useState(Number(savedPreferences().volume) || 2)
   const [showSettings, setShowSettings] = useState(false)
-  const [read, setRead] = useState<string[]>(savedRead)
+  const [reviews, setReviews] = useState<EventReviews | null>(null)
+  const [reviewStorageWarning, setReviewStorageWarning] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [lastLoaded, setLastLoaded] = useState('')
@@ -84,6 +102,7 @@ export default function BriefingApp({
       ])
       setCompanies(companyRows)
       setFilings(filingRows)
+      if (!portfolio) setReviews((previous) => previous || savedReviews(filingRows))
       setPrices(priceRows)
       setSyncs(syncRows)
       setError('')
@@ -119,21 +138,27 @@ export default function BriefingApp({
       /* Preferences still apply in this session. */
     }
   }, [priceThreshold, volumeThreshold])
-  function updateReview(ids: string[], value: boolean) {
-    if (!ids.length) return
-    setRead((previous) => {
-      const changed = new Set(ids)
-      const next = value
-        ? [...new Set([...previous, ...ids])]
-        : previous.filter((id) => !changed.has(id))
-      try {
-        localStorage.setItem('finn-read-v1', JSON.stringify(next))
-      } catch {
-        /* Session-only review state. */
+  useEffect(() => {
+    if (!reviews || portfolio) return
+    sessionReviews = reviews
+    try {
+      localStorage.setItem('finn-event-reviews-v2', JSON.stringify(reviews))
+      setReviewStorageWarning(false)
+    } catch {
+      setReviewStorageWarning(true)
+    }
+  }, [reviews, portfolio])
+  function updateReview(changes: ReviewChanges) {
+    setReviews((previous) => {
+      const next = { ...(previous || emptyReviews()), receipts: { ...(previous?.receipts || {}) } }
+      for (const [key, receipt] of Object.entries(changes)) {
+        if (receipt) next.receipts[key] = receipt
+        else delete next.receipts[key]
       }
       return next
     })
   }
+
   const alerts = prices.filter((price) => {
     const signals = priceSignals(price, priceThreshold, volumeThreshold)
     return signals.price || signals.volume
@@ -150,7 +175,6 @@ export default function BriefingApp({
     >
       <div>
         <h2>Alert thresholds</h2>
-        <p>Applied to the latest completed session. Saved in this browser.</p>
       </div>
       <label>
         Daily move: &plusmn;{priceThreshold}%
@@ -185,22 +209,7 @@ export default function BriefingApp({
       id={portfolio ? 'portfolio-content' : 'briefing-content'}
       tabIndex={-1}
     >
-      <PageHeading
-        title={portfolio ? 'Your Portfolio' : 'Your Briefing'}
-        actions={
-          portfolio ? (
-            <button
-              className="text-button"
-              aria-expanded={showSettings}
-              aria-controls={`${portfolio ? 'portfolio' : 'briefing'}-settings`}
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              Alert settings
-            </button>
-          ) : undefined
-        }
-      />
-      {portfolio && showSettings && alertSettings}
+      <PageHeading title={portfolio ? 'Your Portfolio' : 'Your Briefing'} />
       {error && (
         <div className="research-error" role="alert">
           {error}
@@ -248,6 +257,9 @@ export default function BriefingApp({
           {portfolio ? (
             <PortfolioWorkspace
               companies={companies}
+              settings={showSettings ? alertSettings : null}
+              settingsOpen={showSettings}
+              onSettings={() => setShowSettings(!showSettings)}
               prices={prices}
               filings={filings}
               priceThreshold={priceThreshold}
@@ -263,7 +275,8 @@ export default function BriefingApp({
               entryKey={entryKey}
               filings={filings}
               companies={companies}
-              read={read}
+              reviews={reviews || emptyReviews()}
+              reviewStorageWarning={reviewStorageWarning}
               onReview={updateReview}
               signals={alerts}
               settings={alertSettings}

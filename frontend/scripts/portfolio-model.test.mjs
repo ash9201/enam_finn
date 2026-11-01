@@ -82,16 +82,14 @@ test('real recorded filing counts reuse Briefing grouping; routine, future and o
   const rows = watchRows(companies, prices, [...filings, ...invalid], 4, 2, now)
   for (const row of rows)
     assert.equal(row.events, expected.filter((e) => e.symbol === row.company.symbol).length)
-  const sorted = sortWatchRows(rows, 'activity', 'desc')
-  for (let i = 1; i < sorted.length; i++) {
-    const count = (r) => Number(r.signals.price) + Number(r.signals.volume)
-    assert.ok(count(sorted[i - 1]) >= count(sorted[i]))
-    if (count(sorted[i - 1]) === count(sorted[i]))
-      assert.ok(sorted[i - 1].events >= sorted[i].events)
-  }
 })
-test('activity uses signal count before events, with company-name tie break', () => {
-  const row = (name, signals, events) => ({ company: { name, symbol: name }, signals, events })
+test('unusual priority is binary, with the selected sort applied inside both groups', () => {
+  const row = (name, signals, events, latestEvent = null) => ({
+    company: { name, symbol: name },
+    signals,
+    events,
+    latestEvent,
+  })
   const rows = [
     row('C', { price: false, volume: false }, 12),
     row('B', { price: true, volume: true }, 0),
@@ -99,10 +97,35 @@ test('activity uses signal count before events, with company-name tie break', ()
     row('D', { price: true, volume: false }, 5),
   ]
   assert.deepEqual(
-    sortWatchRows(rows, 'activity', 'desc').map((r) => r.company.name),
-    ['B', 'A', 'D', 'C'],
+    sortWatchRows(rows, 'name', 'asc', true).map((r) => r.company.name),
+    ['A', 'B', 'D', 'C'],
+  )
+  assert.deepEqual(
+    sortWatchRows(rows, 'events', 'desc', true).map((r) => r.company.name),
+    ['A', 'D', 'B', 'C'],
+  )
+  assert.deepEqual(
+    sortWatchRows(rows, 'events', 'desc', false).map((r) => r.company.name),
+    ['C', 'A', 'D', 'B'],
+  )
+  assert.deepEqual(
+    sortWatchRows(
+      [row('C', {}, 0), row('B', {}, 1, '2026-10-30'), row('A', {}, 2, '2026-10-31')],
+      'recent',
+      'desc',
+    ).map((r) => r.company.name),
+    ['A', 'B', 'C'],
+  )
+  assert.deepEqual(
+    sortWatchRows(
+      [row('C', {}, 0), row('B', {}, 1, '2026-10-30'), row('A', {}, 2, '2026-10-31')],
+      'recent',
+      'asc',
+    ).map((r) => r.company.name),
+    ['B', 'A', 'C'],
   )
 })
+
 test('common session validates dates and preserves saved-data dates without guessing trading calendars', () => {
   const withDate = (value) => ({ ...price(), data: { ...price().data, last_session: value } })
   assert.equal(

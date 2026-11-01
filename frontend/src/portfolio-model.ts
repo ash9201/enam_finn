@@ -18,7 +18,7 @@ export type Price = {
   error: string | null
   last_success_at: string | null
 }
-export type SortKey = 'name' | 'change' | 'activity'
+export type SortKey = 'name' | 'change' | 'recent' | 'events'
 export type WatchRow = {
   company: Company
   price?: Price
@@ -89,31 +89,47 @@ export function watchRows(
       latestEvent:
         companyEvents
           .map((event) => event.newest)
-          .sort()
+          .sort((a, b) => Date.parse(a) - Date.parse(b))
           .at(-1) || null,
     }
   })
 }
-export function sortWatchRows(rows: WatchRow[], key: SortKey, direction: 'asc' | 'desc') {
+export function sortWatchRows(
+  rows: WatchRow[],
+  key: SortKey,
+  direction: 'asc' | 'desc',
+  prioritize = false,
+) {
+  const name = (a: WatchRow, b: WatchRow) =>
+    a.company.name.localeCompare(b.company.name, 'en-IN') ||
+    a.company.symbol.localeCompare(b.company.symbol)
   return [...rows].sort((a, b) => {
+    if (prioritize) {
+      const flagged = (row: WatchRow) => Number(row.signals.price || row.signals.volume)
+      const group = flagged(b) - flagged(a)
+      if (group) return group
+    }
     let compared = 0
     if (key === 'name') compared = a.company.name.localeCompare(b.company.name, 'en-IN')
-    else if (key === 'change') {
-      const av = a.price?.data?.price_change_pct,
-        bv = b.price?.data?.price_change_pct
-      if (!finite(av)) return !finite(bv) ? a.company.name.localeCompare(b.company.name) : 1
+    else {
+      const value = (row: WatchRow) =>
+        key === 'change'
+          ? row.price?.data?.price_change_pct
+          : key === 'events'
+            ? row.events
+            : row.latestEvent
+              ? Date.parse(row.latestEvent)
+              : null
+      const av = value(a),
+        bv = value(b)
+      if (!finite(av)) return !finite(bv) ? name(a, b) : 1
       if (!finite(bv)) return -1
       compared = av - bv
-    } else {
-      const count = (row: WatchRow) => Number(row.signals.price) + Number(row.signals.volume)
-      compared = count(a) - count(b) || a.events - b.events
     }
-    return (
-      (direction === 'desc' ? -compared : compared) ||
-      a.company.name.localeCompare(b.company.name, 'en-IN')
-    )
+    return (direction === 'desc' ? -compared : compared) || name(a, b)
   })
 }
+
 export function sourceLink(price?: Price) {
   const value = price?.data?.source_url
   if (!value) return null

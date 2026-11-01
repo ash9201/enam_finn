@@ -1130,11 +1130,11 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
             </label>
           </div>
           <div className="form-bottom">
-            {context && <p>Searching {context.symbol} across company documents.</p>}
             <button type="submit" disabled={busy || pickingCompany}>
               {busy ? 'Investigating…' : 'Investigate'}
               <span aria-hidden="true">↗</span>
             </button>
+            {context && <p>Searching {context.symbol} across company documents.</p>}
           </div>
         </form>
         {context && (

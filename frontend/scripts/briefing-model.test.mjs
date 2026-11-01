@@ -76,7 +76,7 @@ test('leadership tenure fallback is neutral, informative, and hides DIN from sum
   assert.equal(info.priority, 1)
   assert.match(info.summary, /Rajiv Lal/)
   assert.doesNotMatch(info.summary, /09360601/)
-  assert.equal(eventTone(makeEvent([record], 'a')).label, 'Update')
+  assert.equal(eventTone(makeEvent([record], 'a')).label, 'Routine')
 })
 test('generic financial headlines do not manufacture detail or enable comparisons', () => {
   const record = row('a'),
@@ -143,7 +143,7 @@ test('custom end includes the displayed minute; invalid windows are explicit', (
 })
 test('unclassified disclosures remain visible with an explicit uncertainty label', () => {
   const event = makeEvent([row('a', { category: 'unclassified', priority: 2 })], 'a')
-  assert.equal(eventTone(event).key, 'uncertain')
+  assert.equal(eventTone(event).key, 'unclassified')
   assert.equal(selectFilings(event.filings, defaults, new Set(), now).length, 1)
 })
 test('every original filing appears once across grouped events', () => {

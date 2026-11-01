@@ -65,6 +65,7 @@ export type FilingFilters = {
   window: string
   start: string
   end: string
+  significance?: string
 }
 export const CATEGORIES: Record<string, string> = {
   results: 'Results',
@@ -175,7 +176,8 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
   const ordered = [...filings].sort(
     (a, b) =>
       presentation(b).priority - presentation(a).priority ||
-      Date.parse(b.published_at) - Date.parse(a.published_at),
+      Date.parse(b.published_at) - Date.parse(a.published_at) ||
+      a.id.localeCompare(b.id),
   )
   const lead =
     ordered.find((f) => presentation(f).actual_results && presentation(f).category === 'results') ||
@@ -186,7 +188,9 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
   return {
     key,
     symbol: lead.symbol,
-    filings: [...filings].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)),
+    filings: [...filings].sort(
+      (a, b) => Date.parse(b.published_at) - Date.parse(a.published_at) || a.id.localeCompare(b.id),
+    ),
     title: detail.headline,
     summary: detail.summary,
     priority: Math.max(...filings.map((f) => presentation(f).priority)),
@@ -199,7 +203,7 @@ export function makeEvent(filings: Filing[], key: string): FilingEvent {
       (f) => presentation(f).actual_results && presentation(f).category === 'results',
     ),
     newest: filings.reduce(
-      (latest, f) => (f.published_at > latest ? f.published_at : latest),
+      (latest, f) => (Date.parse(f.published_at) > Date.parse(latest) ? f.published_at : latest),
       filings[0].published_at,
     ),
   }
@@ -211,6 +215,28 @@ export function groupEvents(filings: Filing[]): FilingEvent[] {
     // Only explicit source-backed relationships. No same-day/company deduplication.
     const key = `${filing.symbol}:${presentation(filing).event_key || filing.id}`
     groups.set(key, [...(groups.get(key) || []), filing])
+    const detail = presentation(filing),
+      dividend = detail.dividend_reference
+    // Separate only an explicit, verified second development, never inferred
+    // merely from a broad exchange heading. Both events keep the original source.
+    if (detail.actual_results && dividend && dividend.event_key !== detail.event_key) {
+      const facet = {
+        ...filing,
+        enrichment: {
+          ...detail,
+          event_key: dividend.event_key,
+          event_kind: 'dividend',
+          category: 'corporate_action',
+          headline: 'Dividend & record date',
+          summary: null,
+          additional_details: [],
+          actual_results: false,
+          priority: 2,
+        },
+      }
+      const dividendKey = `${filing.symbol}:${dividend.event_key}`
+      groups.set(dividendKey, [...(groups.get(dividendKey) || []), facet])
+    }
   }
   return [...groups].map(([key, items]) => makeEvent(items, key))
 }
@@ -318,11 +344,9 @@ export function eventSources(event: FilingEvent) {
 }
 
 export function eventTone(event: FilingEvent) {
-  if (event.category === 'unclassified')
-    return { key: 'uncertain', label: 'Classification pending' }
-  if (event.priority === 0) return { key: 'routine', label: 'Routine' }
-  if (event.priority >= 3) return { key: 'material', label: 'Material' }
-  return { key: 'update', label: 'Update' }
+  if (event.category === 'unclassified') return { key: 'unclassified', label: 'Unclassified' }
+  if (event.priority >= 2) return { key: 'significant', label: 'Significant' }
+  return { key: 'routine', label: 'Routine' }
 }
 
 export function primaryAction(event: FilingEvent) {

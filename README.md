@@ -2,7 +2,9 @@
 
 The [final integrated UI review](docs/ACCEPTANCE.md) covers cross-page investor
 journeys, both themes and desktop/mobile behavior, including the final financial
-table containment fix. The current frontend regression has 27 model tests.
+table containment fix. The [event review follow-up](docs/BRIEFING_REDESIGN.md)
+adds stable ordering, event-level review receipts and independent Portfolio priority.
+The current frontend regression has 34 model tests.
 
 The [Portfolio redesign](docs/PORTFOLIO_REDESIGN.md) adds a sortable desktop
 watchlist and compact mobile rows, genuine activity flags, company Briefing links,
