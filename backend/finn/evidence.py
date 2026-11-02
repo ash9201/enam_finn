@@ -8,15 +8,25 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID, uuid5
 
+import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
 from finn.documents import resolve_source_quote
 from finn.retrieval import diversify, reciprocal_rank_fusion, retrieve_with_diagnostics
+from finn.services import DependencyError
 
 VERSION = "evidence-followup-v5"
 DOCUMENT_FIELDS = (
     "id,kind,source_url,final_url,discovery_label,published_at,reporting_period,fetched_at"
 )
+
+
+class EvidenceValidationError(ValueError):
+    """A permanent citation validation failure, distinct from a storage outage."""
+
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
 
 
 class EvidenceReference(BaseModel):
@@ -127,8 +137,9 @@ def resolve_context(store, symbol, reference):
         "finn_research_cache", id="eq." + ref["research_id"], symbol="eq." + symbol, limit=1
     )
     if not records or records[0]["result"].get("symbol") != symbol:
-        raise ValueError(
-            "This evidence is no longer available for this company. Open a current answer and select its evidence again."
+        raise EvidenceValidationError(
+            "company_reference_invalid",
+            "This evidence is no longer available for this company. Open a current answer and select its evidence again.",
         )
     answer = records[0]["result"]
     claims = list(answer.get("claims", []))
@@ -142,23 +153,55 @@ def resolve_context(store, symbol, reference):
     if "claim_index" in ref:
         matches = [(index, c) for index, c in matches if index == ref["claim_index"]]
     if not matches:
-        raise ValueError("The selected citation does not belong to this research answer.")
+        raise EvidenceValidationError(
+            "citation_invalid", "The selected citation does not belong to this research answer."
+        )
     if len(matches) != 1:
-        raise ValueError(
-            "This passage supports multiple claims. Reopen the claim to select its exact evidence context."
+        raise EvidenceValidationError(
+            "claim_ambiguous",
+            "This passage supports multiple claims. Reopen the claim to select its exact evidence context.",
         )
     claim_index, claim = matches[0]
     citation = next(
         c for c in claim.get("citations", [claim["citation"]]) if c["id"] == ref["citation_id"]
     )
+    try:
+        UUID(citation.get("document_id", ""))
+        if (
+            type(citation.get("pdf_page")) is not int
+            or citation["pdf_page"] < 1
+            or not isinstance(citation.get("quote"), str)
+            or not citation["quote"].strip()
+        ):
+            raise ValueError
+    except (ValueError, TypeError, AttributeError):
+        raise EvidenceValidationError(
+            "citation_invalid",
+            "The stored citation has invalid document, page or passage information.",
+        ) from None
     documents = store.rows(
         "finn_documents",
         id="eq." + citation["document_id"],
         symbol="eq." + symbol,
         state="eq.ready",
-        select=DOCUMENT_FIELDS,
+        select=DOCUMENT_FIELDS + ",sha256",
         limit=1,
     )
+    if not documents:
+        raise EvidenceValidationError(
+            "document_missing",
+            "The original evidence document is missing or is no longer ready. Open a current company answer.",
+        )
+    document_hash = (citation.get("metric_evidence") or {}).get("document_sha256")
+    if document_hash and document_hash != documents[0].get("sha256"):
+        raise EvidenceValidationError(
+            "source_version_mismatch",
+            "The original evidence document version has changed. Select evidence from a current answer.",
+        )
+    if citation.get("kind") and citation["kind"] != documents[0]["kind"]:
+        raise EvidenceValidationError(
+            "source_mismatch", "The cited document type does not match the stored source."
+        )
     chunks = (
         store.rows(
             "finn_research_chunks",
@@ -171,6 +214,7 @@ def resolve_context(store, symbol, reference):
         else []
     )
     if documents and citation.get("evidence_scope") == "page":
+        chunks = []  # A stale page hash must not fall back to an unrelated chunk.
         pages = store.rows(
             "finn_document_pages",
             document_id="eq." + citation["document_id"],
@@ -200,13 +244,26 @@ def resolve_context(store, symbol, reference):
                         "metadata": {"evidence_scope": "page", "page_hash": digest},
                     }
                 ]
+    if chunks and (
+        chunks[0]["id"] != ref["citation_id"]
+        or chunks[0]["document_id"] != citation["document_id"]
+        or chunks[0]["pdf_page"] != citation["pdf_page"]
+    ):
+        raise EvidenceValidationError(
+            "source_mismatch", "The cited PDF page does not match the original stored passage."
+        )
     quote = resolve_source_quote(citation["quote"], chunks[0]["body"]) if chunks else None
     if not quote:
-        raise ValueError(
-            "The original evidence has changed or is unavailable. Refresh the company research before following it up."
+        raise EvidenceValidationError(
+            "passage_mismatch",
+            "The original evidence has changed or is unavailable. Refresh the company research before following it up.",
         )
     doc, chunk = documents[0], chunks[0]
-    date = document_date(store, doc)
+    try:
+        date = document_date(store, doc)
+    except (DependencyError, httpx.HTTPError):
+        # Optional chronology is not the already-verified passage itself.
+        date = {}
     anchor = {
         **chunk,
         "chunk_id": chunk["id"],
@@ -227,12 +284,14 @@ def resolve_context(store, symbol, reference):
         **date,
     }
     context = {
+        "verification": {"state": "verified", "scope": "stored_source"},
         **ref,
         "claim_index": claim_index,
         "symbol": symbol,
         "claim": claim["statement"],
         "citation": {
             **citation,
+            "kind": doc["kind"],
             "quote": quote,
             "source_url": doc["source_url"],
             "document_url": doc["final_url"],

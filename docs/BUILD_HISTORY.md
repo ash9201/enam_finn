@@ -1,5 +1,20 @@
 # Build history summary
 
+### Evidence reliability and read-only submission checks (2 November)
+
+- Preserved existing source/claim ownership and quote/page-hash checks. Added typed
+  validation versus storage-outage responses, malformed/page/version checks, bounded
+  drawer verification and retry, and verification-only follow-up gates. Missing date
+  metadata and unavailable financial previews no longer imply passage failure.
+- Added `scripts/verify_submission.py`: reuses targeted regressions/build, directory,
+  cache, RLS, retrieval and existing secret scanning. Remote checks are read-only;
+  no research POST, Gemini call, quota reservation, ingestion or backfill. The policy
+  probe uses document pages' composite key rather than a nonexistent `id` column.
+- Combined check: 22 PASS / 0 FAIL / 2 SKIP, including 184 targeted regression tests.
+  Browser replays cover verification faults and existing evidence/numerical workflows
+  at desktop/mobile sizes in both themes. Details and commands: DEPLOYMENT.md and
+  EVIDENCE_WORKFLOW.md. No schema, financial calculations or ranking changes.
+
 ### Compact evidence controls (2 November)
 
 - Unified Research evidence-opening controls as compact, themed button chips with a

@@ -119,3 +119,67 @@ GitHub's account restriction has been resolved. Hosted CI and a full source work
 passed on standard Ubuntu runners; [GitHub scheduling](GITHUB_AUTOMATION.md) is enabled.
 Both [Supabase fallback schedules](SUPABASE_CRON.md) are verified inactive. Retain their
 configuration for recovery, but do not reactivate them alongside GitHub scheduling.
+
+## Pre-submission sanity check
+
+From the repository root, with the existing virtual environment/dependencies:
+
+```powershell
+# Local regression tests + frontend build/scan, then configured live checks:
+.\.venv\Scripts\python.exe scripts/verify_submission.py
+
+# Separate local checks from read-only live checks:
+.\.venv\Scripts\python.exe scripts/verify_submission.py --local-only
+.\.venv\Scripts\python.exe scripts/verify_submission.py --live-only
+
+# Explicit production API; allow a bounded cold-start wait if needed:
+.\.venv\Scripts\python.exe scripts/verify_submission.py --live-only --api-url https://finn-api-source-test.onrender.com --timeout 75
+
+# Omit privileged database/operator checks even when local credentials exist:
+.\.venv\Scripts\python.exe scripts/verify_submission.py --live-only --public-only
+```
+
+API configuration is `--api-url`, otherwise `FINN_DEPLOYED_API_URL`, then
+`VITE_API_BASE_URL`. Existing `.env.local` server/publishable credentials enable the
+private checks; never supply keys in command-line arguments or logs.
+`FINN_DEPLOYED_WEB_URL` enables the deployed asset scan. `--symbols INFY CCL TMCV`
+selects canonical companies (these are the defaults). Request deadlines default to
+20 seconds, configurable from 1 to 120; no indefinite retries are performed.
+
+The report prints **PASS / FAIL / SKIP**, followed by totals. Any failed check returns
+exit code 1. Missing credentials, absent saved cases and intentionally untested model
+calls are explicit SKIPs; a zero exit code does not turn skipped checks into proof.
+Unknown/unavailable coverage is never replaced with invented answers.
+
+The default is read-only against deployed services. Local tests/builds create only
+ordinary local artifacts. Live API calls are GETs: health, companies, prepared answers,
+search coverage, and evidence. Prepared answers are read twice to check stable IDs,
+timestamps and source references. **No `POST /research` is used**, since even its
+cached fast path writes a job row and may schedule indexing.
+
+Private checks reuse the existing directory, cache, citation and retrieval functions:
+canonical symbol/ISIN provenance without contacting NSE; RLS and anonymous read denial;
+saved quarterly/numerical metadata; read-only fast-cache repeats; actual index counts;
+and keyword fallback against the production corpus. The Supabase client blocks writes
+and all unaudited RPCs. Only existing SELECT-only functions are allowed (PostgREST
+uses POST for read-only RPCs). No budget reservation, embeddings, background work,
+fresh discovery, source refresh or model generation is permitted.
+
+Hybrid **eligibility** is based on actual ready/total counts, not the flag alone.
+Complete-index quota failure is deliberately injected in local retrieval code using
+the production corpus; the checker does not execute paid/live semantic queries.
+The budget check reads the application ledger, not Gemini's current provider quota.
+Source verification is against stored source text; external PDF availability and
+uncached generation are deliberately outside this lightweight check.
+
+The existing secret scanner is reused for both local and deployed JS/CSS assets.
+Local regressions cover evidence, company directory, general Research, quarterly
+figures, numerical metrics and hybrid fallback; existing company-search tests cover
+name/alias/ambiguity selection. The checker installs no dependencies or migrations.
+
+Observed on 2 November: the combined command passed **22 checks**, failed none, and
+skipped two: TMCV has no current public prepared answer (private numerical caches
+remain available), and live Gemini generation/semantic ranking is deliberately not
+called. Local regressions passed **184 tests**; the frontend build and scans passed.
+At that check CCL was 707/707 indexed, INFY 877/1160 and TMCV 811/1208. These are
+dated observations; rerun for current coverage, including any further automatic indexing.

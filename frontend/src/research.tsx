@@ -315,45 +315,68 @@ const QUESTIONS = [
 ]
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const stamp = (date: string) =>
-  new Intl.DateTimeFormat('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'Asia/Kolkata',
-  }).format(new Date(date)) + ' IST'
+  !date || Number.isNaN(Date.parse(date))
+    ? 'Not established'
+    : new Intl.DateTimeFormat('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: 'Asia/Kolkata',
+      }).format(new Date(date)) + ' IST'
 
-async function api(path: string, body?: unknown) {
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status = 0,
+    public code = 'connection_unavailable',
+    public retryable = true,
+  ) {
+    super(message)
+  }
+}
+
+async function api(
+  path: string,
+  body?: unknown,
+  options: { timeout?: number; signal?: AbortSignal; retry?: boolean } = {},
+) {
   let response: Response
   const request = () =>
     fetch(`${apiBase}${path}`, {
       method: body === undefined ? 'GET' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(100000),
+      signal: options.signal
+        ? AbortSignal.any([options.signal, AbortSignal.timeout(options.timeout || 100000)])
+        : AbortSignal.timeout(options.timeout || 100000),
     })
   try {
     try {
       response = await request()
     } catch (error) {
-      if (body !== undefined) throw error
+      if (body !== undefined || options.retry === false || options.signal?.aborted) throw error
       // A sleeping/redeploying free service can close a status connection. GET is
       // safe to retry; never automatically resubmit an ambiguous model request.
       await new Promise((resolve) => setTimeout(resolve, 700))
       response = await request()
     }
   } catch {
-    throw new Error(
+    throw new ApiError(
       'FINN could not connect. Check your connection or site-specific content-blocking settings, then retry.',
     )
   }
   if (!response.ok) {
     const data = await response.json().catch(() => ({}))
-    throw new Error(
-      typeof data.detail === 'string'
-        ? data.detail
-        : 'The research service is unavailable. Please retry.',
+    const detail = data.detail
+    throw new ApiError(
+      typeof detail === 'string'
+        ? detail
+        : detail?.message || 'The research service is unavailable. Please retry.',
+      response.status,
+      detail?.code || 'request_failed',
+      detail?.retryable ?? (response.status >= 500 || response.status === 429),
     )
   }
   return response.json()
@@ -374,8 +397,12 @@ function Evidence({
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [citation, setCitation] = useState(selection.claim.citation)
-  const [verification, setVerification] = useState('Verifying source details…')
-  const [unavailable, setUnavailable] = useState(false)
+  const [verification, setVerification] = useState<
+    'loading' | 'verified' | 'unavailable' | 'failed'
+  >('loading')
+  const [verificationError, setVerificationError] = useState('')
+  const [retry, setRetry] = useState(0)
+  const [imageError, setImageError] = useState(false)
   const [showImage, setShowImage] = useState(false)
   useEffect(() => {
     const panel = dialog.current
@@ -383,34 +410,75 @@ function Evidence({
     panel?.showModal()
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    let active = true
-    api(
-      `/research/${selection.answer.id}/evidence/${selection.claim.citation.id}?symbol=${encodeURIComponent(selection.answer.symbol)}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`,
-    )
-      .then((data) => {
-        if (active) {
-          setCitation(data.citation)
-          setVerification('Passage verified against the stored original document.')
-        }
-      })
-      .catch((err) => {
-        if (active) {
-          setVerification('Showing the saved excerpt. ' + err.message)
-          setUnavailable(
-            /no longer|does not belong|changed|unavailable for this company/.test(err.message),
-          )
-        }
-      })
     return () => {
-      active = false
       document.body.style.overflow = previousOverflow
       panel?.close()
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
         previousFocus.focus({ preventScroll: true })
     }
   }, [selection])
-  const target = citation.document_url || citation.source_url
-  const safeUrl = target.startsWith('https://') ? target.split('#')[0] : undefined
+  useEffect(() => {
+    const controller = new AbortController()
+    let active = true
+    setCitation(selection.claim.citation)
+    setVerification('loading')
+    setVerificationError('')
+    setShowImage(false)
+    setImageError(false)
+    api(
+      `/research/${selection.answer.id}/evidence/${selection.claim.citation.id}?symbol=${encodeURIComponent(selection.answer.symbol)}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`,
+      undefined,
+      { timeout: 15000, signal: controller.signal, retry: false },
+    )
+      .then((data) => {
+        if (active) {
+          if (
+            !data.citation ||
+            typeof data.citation.quote !== 'string' ||
+            !data.citation.quote.trim() ||
+            (data.symbol && data.symbol !== selection.answer.symbol) ||
+            (data.research_id && data.research_id !== selection.answer.id) ||
+            data.citation.id !== selection.claim.citation.id ||
+            data.citation.document_id !== selection.claim.citation.document_id ||
+            data.citation.pdf_page !== selection.claim.citation.pdf_page
+          )
+            throw new ApiError(
+              'The returned citation does not match the selected stored source.',
+              422,
+              'citation_invalid',
+              false,
+            )
+          setCitation(data.citation)
+          setVerification('verified')
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setVerification(err instanceof ApiError && !err.retryable ? 'failed' : 'unavailable')
+          setVerificationError(err.message || 'The stored source could not be reached.')
+        }
+      })
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [selection, retry])
+  const target = citation.document_url || citation.source_url || ''
+  let safeUrl: string | undefined
+  try {
+    const url = new URL(target)
+    if (
+      url.protocol === 'https:' &&
+      !url.username &&
+      !url.password &&
+      Number.isInteger(citation.pdf_page) &&
+      citation.pdf_page > 0
+    )
+      safeUrl = url.href.split('#')[0]
+  } catch {
+    /* Incomplete source metadata must not produce an unsafe link. */
+  }
+  const unavailable = verification !== 'verified'
   return (
     <dialog
       className="evidence-dialog"
@@ -444,6 +512,25 @@ function Evidence({
         </p>
       </div>
       <div className="evidence-scroll">
+        <p className="fine-print" role="status" data-verification-state={verification}>
+          {verification === 'loading'
+            ? 'Verifying source details…'
+            : verification === 'verified'
+              ? 'Passage verified against the stored original document.'
+              : verification === 'unavailable'
+                ? 'Saved passage shown. The stored source cannot currently be rechecked; it has not been reverified.'
+                : 'Source verification failed. This saved passage cannot be used for follow-up research.'}
+          {verificationError && <> {verificationError}</>}
+        </p>
+        {verification === 'unavailable' && (
+          <button
+            type="button"
+            className="text-chip"
+            onClick={() => setRetry((value) => value + 1)}
+          >
+            Retry verification
+          </button>
+        )}
         {citation.financial_evidence && (
           <section className="financial-cell-evidence" aria-label="Selected financial source cell">
             <p className="eyebrow">SELECTED SOURCE CELL</p>
@@ -484,9 +571,11 @@ function Evidence({
           </div>
         )}
         <p className="eyebrow">
-          {citation.financial_evidence?.image_verification?.method === 'two_image_reads'
-            ? 'VERIFIED PAGE-IMAGE TRANSCRIPTION'
-            : 'EXACT SUPPORTING PASSAGE'}
+          {verification !== 'verified'
+            ? 'SAVED PASSAGE · NOT REVERIFIED'
+            : citation.financial_evidence?.image_verification?.method === 'two_image_reads'
+              ? 'VERIFIED PAGE-IMAGE TRANSCRIPTION'
+              : 'EXACT SUPPORTING PASSAGE'}
         </p>
         <blockquote>{citation.quote}</blockquote>
         {citation.financial_evidence && (
@@ -503,25 +592,29 @@ function Evidence({
                 The original page is available below.
               </p>
             )}
-            <button type="button" className="text-chip" onClick={() => setShowImage(!showImage)}>
+            <button
+              type="button"
+              className="text-chip"
+              disabled={unavailable}
+              onClick={() => setShowImage(!showImage)}
+            >
               {showImage ? 'Hide statement page' : 'View original statement page'}
             </button>
             {showImage && (
               <img
                 src={`${apiBase}/research/${selection.answer.id}/evidence/${citation.id}/image?symbol=${encodeURIComponent(selection.answer.symbol)}${selection.claimIndex !== undefined ? `&claim_index=${selection.claimIndex}` : ''}`}
                 alt={`Original ${selection.answer.symbol} statement, PDF page ${citation.pdf_page}`}
-                onError={() =>
-                  setVerification(
-                    'The page preview is unavailable. Open the original PDF using the link below.',
-                  )
-                }
+                onError={() => setImageError(true)}
               />
             )}
           </div>
         )}
-        <p className="fine-print" role="status">
-          {verification}
-        </p>
+        {imageError && (
+          <p className="fine-print">
+            The page preview is unavailable. Use the original PDF link below. Passage verification
+            is unchanged.
+          </p>
+        )}
         <dl>
           {citation.speaker && (
             <div>
@@ -534,7 +627,7 @@ function Evidence({
               </dd>
             </div>
           )}
-          {citation.document_date && (
+          {citation.document_date && !Number.isNaN(Date.parse(citation.document_date)) && (
             <div>
               <dt>
                 {citation.document_date_basis === 'Repeated call header'
@@ -553,11 +646,11 @@ function Evidence({
           )}
           <div>
             <dt>Reporting period</dt>
-            <dd>{citation.reporting_period || 'Not verified'}</dd>
+            <dd>{citation.reporting_period || 'Not established'}</dd>
           </div>
           <div>
             <dt>Publication date</dt>
-            <dd>{citation.published_at ? stamp(citation.published_at) : 'Not verified'}</dd>
+            <dd>{citation.published_at ? stamp(citation.published_at) : 'Not established'}</dd>
           </div>
           <div>
             <dt>Document retrieved</dt>
@@ -566,7 +659,9 @@ function Evidence({
         </dl>
         <p className="fine-print">
           The index label is shown separately from verified dates. PDF page numbers may differ from
-          printed pages. An exact quote still needs your judgment about what it supports.
+          printed pages. An exact quote still needs your judgment about what it supports.{' '}
+          Verification checks stored source text, not the external website. Missing reporting dates
+          are separate metadata limitations.
         </p>
         <div className="evidence-paths" aria-label="Evidence investigation paths">
           <p className="eyebrow">FOLLOW THE EVIDENCE</p>

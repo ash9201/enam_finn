@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from uuid import uuid4
 
 import pytest
+import httpx
 from finn import api, evidence, jobs, research
 from pydantic import ValidationError
 
@@ -138,6 +139,109 @@ def test_primary_header_date_is_separate_from_discovery_label():
     assert context["citation"]["published_at"] is None
     assert anchor["document_date"] == "2026-05-25"
     assert anchor["document_date_basis"] == "Repeated call header"
+
+
+def test_verification_does_not_require_complete_date_metadata(monkeypatch):
+    from finn.services import DependencyError
+
+    monkeypatch.setattr(
+        evidence,
+        "document_date",
+        lambda *a: (_ for _ in ()).throw(DependencyError("Metadata temporarily unavailable")),
+    )
+    context, _ = evidence.resolve_context(Store(), "CCL", ref())
+    assert context["verification"] == {"state": "verified", "scope": "stored_source"}
+    assert context["citation"]["reporting_period"] is None
+    assert not context["citation"].get("document_date")
+
+
+@pytest.mark.parametrize(
+    "field,value", [("pdf_page", 0), ("quote", None), ("document_id", "bad-id")]
+)
+def test_malformed_stored_citations_fail_explicitly(field, value):
+    store = Store()
+    store.claims[0]["citation"][field] = value
+    with pytest.raises(evidence.EvidenceValidationError) as error:
+        evidence.resolve_context(store, "CCL", ref())
+    assert error.value.code == "citation_invalid"
+
+
+def test_wrong_page_missing_document_and_changed_version_are_not_verified():
+    store = Store()
+    store.claims[0]["citation"]["pdf_page"] = 99
+    with pytest.raises(evidence.EvidenceValidationError, match="PDF page"):
+        evidence.resolve_context(store, "CCL", ref())
+    store = Store()
+    original = store.rows
+    store.rows = lambda table, **kw: [] if table == "finn_documents" else original(table, **kw)
+    with pytest.raises(evidence.EvidenceValidationError) as error:
+        evidence.resolve_context(store, "CCL", ref())
+    assert error.value.code == "document_missing"
+    store = Store()
+    store.claims[0]["citation"]["metric_evidence"] = {"document_sha256": "old"}
+    with pytest.raises(evidence.EvidenceValidationError) as error:
+        evidence.resolve_context(store, "CCL", ref())
+    assert error.value.code == "source_version_mismatch"
+
+
+def test_stale_page_hash_cannot_fall_back_to_matching_chunk():
+    store = Store()
+    store.claims[0]["citation"].update(evidence_scope="page", page_hash="old-page-hash")
+    with pytest.raises(evidence.EvidenceValidationError) as error:
+        evidence.resolve_context(store, "CCL", ref())
+    assert error.value.code == "passage_mismatch"
+
+
+def test_evidence_endpoint_distinguishes_storage_timeout_from_validation(monkeypatch):
+    from fastapi.testclient import TestClient
+    from finn.main import app
+
+    store = Store()
+
+    @contextmanager
+    def opened():
+        yield store
+
+    monkeypatch.setattr(api, "open_store", opened)
+    client = TestClient(app)
+    url = f"/research/{PARENT}/evidence/{CHUNK}"
+    assert client.get(url, params={"symbol": "CCL"}).json()["verification"]["state"] == "verified"
+    rejected = client.get(url, params={"symbol": "INFY"})
+    assert rejected.status_code == 422 and not rejected.json()["detail"]["retryable"]
+    store.rows = lambda *a, **kw: (_ for _ in ()).throw(
+        httpx.ReadTimeout("sensitive upstream URL must not be echoed")
+    )
+    unavailable = client.get(url, params={"symbol": "CCL"})
+    assert unavailable.status_code == 503 and unavailable.json()["detail"]["retryable"]
+    assert "sensitive" not in unavailable.text
+
+
+def test_unverified_followup_never_creates_or_submits_a_job(monkeypatch):
+    from fastapi import HTTPException
+
+    store = Store()
+
+    @contextmanager
+    def opened():
+        yield store
+
+    monkeypatch.setattr(api, "open_store", opened)
+    monkeypatch.setattr(
+        jobs, "submit", lambda *a, **kw: pytest.fail("Unverified follow-up reached a worker")
+    )
+    request = api.ResearchRequest(
+        symbol="CCL",
+        question="Explain the selected evidence.",
+        context=evidence.EvidenceReference(**ref()),
+    )
+    store.body = "A different original passage."
+    with pytest.raises(HTTPException) as rejected:
+        api.start_research(request)
+    assert rejected.value.status_code == 422 and not store.inserted
+    store.rows = lambda *a, **kw: (_ for _ in ()).throw(httpx.ReadTimeout("temporary"))
+    with pytest.raises(HTTPException) as unavailable:
+        api.start_research(request)
+    assert unavailable.value.status_code == 503 and not store.inserted
 
 
 def test_multiple_claims_on_one_passage_preserve_the_selected_claim():

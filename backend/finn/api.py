@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field, field_validator
 from finn import jobs
 from finn.config import supabase_configuration
 from finn.corpus import now
-from finn.evidence import EvidenceReference, resolve_context
+from finn.evidence import EvidenceReference, EvidenceValidationError, resolve_context
 from finn.research import DEFAULT_QUESTION
 from finn.services import DependencyError, MissingConfiguration
 from finn.source_sync import run_sync, scheduled_mode
@@ -252,6 +252,15 @@ def start_research(request: ResearchRequest):
                     resolve_context(store, request.symbol, context_request)
                 except ValueError as exc:
                     raise HTTPException(422, str(exc)) from None
+                except (DependencyError, MissingConfiguration, httpx.HTTPError):
+                    raise HTTPException(
+                        503,
+                        {
+                            "code": "source_temporarily_unavailable",
+                            "message": "The selected evidence cannot currently be rechecked. Retry verification before following it up.",
+                            "retryable": True,
+                        },
+                    ) from None
             security = store.rpc("finn_research_security_status", {})
             if (
                 len(security.get("rls", {})) != 7
@@ -366,10 +375,21 @@ def evidence_details(
                 ),
             )
             return context
+    except EvidenceValidationError as exc:
+        raise HTTPException(
+            422, {"code": exc.code, "message": str(exc), "retryable": False}
+        ) from None
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from None
-    except (DependencyError, MissingConfiguration) as exc:
-        raise HTTPException(503, jobs.safe_error(exc)) from None
+    except (DependencyError, MissingConfiguration, httpx.HTTPError):
+        raise HTTPException(
+            503,
+            {
+                "code": "source_temporarily_unavailable",
+                "message": "The stored source cannot currently be rechecked. Retry verification shortly.",
+                "retryable": True,
+            },
+        ) from None
 
 
 @router.get("/companies/{symbol}/search-status")

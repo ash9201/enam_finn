@@ -23,6 +23,7 @@
     "test:theme": "node scripts/verify-theme.mjs",
     "test:evidence": "node scripts/verify-evidence.mjs",
     "test:evidence-controls": "node scripts/verify-evidence-controls.mjs",
+    "test:evidence-reliability": "node scripts/verify-evidence-reliability.mjs",
     "test:financial": "node scripts/verify-financial-results.mjs",
     "test:metrics": "node scripts/verify-numerical-metrics.mjs",
     "test:research-experience": "node scripts/verify-research-experience.mjs",

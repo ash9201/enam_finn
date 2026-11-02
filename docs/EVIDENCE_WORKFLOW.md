@@ -1,5 +1,51 @@
 # Evidence-first company research
 
+## Verification reliability (2 November 2026)
+
+Already present: server-resolved company/answer/claim ownership, original stored
+quotation matching, immutable page hashes, and another server verification before
+contextual research starts. Browser-supplied quotations are not trusted.
+
+The remaining gaps are now handled explicitly:
+
+- The drawer distinguishes loading, verified stored source, temporarily unavailable
+  rechecking, and genuine validation failure. The status is visible before the passage.
+- Verification uses one bounded 15-second request, cancelled on close/source changes.
+  A temporary failure retains a labelled saved passage and safe original PDF link.
+  **Retry verification** calls only the existing evidence endpoint, without a new job.
+- Follow-up actions require successful verification. The server also rejects invalid
+  or unavailable contexts before inserting/submitting a job; the UI is not the guard.
+- Invalid references, missing documents, wrong pages/types, changed document hashes
+  where pinned, and stale page hashes are non-retryable validation failures (422).
+  Database/network failures are safe, retryable responses (503), not proof of mismatch.
+- Optional date-lookup failure does not invalidate a successfully checked passage.
+  Missing dates say **Not established**. Page-preview errors have their own message
+  and cannot overwrite source verification status.
+
+Successful evidence responses add `verification: {state: "verified", scope:
+"stored_source"}`. Verification checks stored source text and existing pinned hashes;
+it does not re-download the external PDF, regenerate embeddings, ingest documents,
+or invoke Gemini/OCR. The original external website can still be inaccessible.
+
+Focused browser regression (existing recorded real-source artifacts required):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/npm.py run test:evidence-reliability
+.\.venv\Scripts\python.exe scripts/npm.py run test:evidence-controls
+.\.venv\Scripts\python.exe scripts/npm.py run test:metrics
+```
+
+These use transport replays/fault injection, not live generation. They cover all four
+verification states, accelerated timeout, metadata uncertainty, wrong citations,
+retry without new research, financial page-preview failure, keyboard/source switching,
+contextual follow-up, original links and desktop/mobile light/dark rendering. Existing
+real fixtures are ignored artifacts; use the read-only submission command below for
+live checks without generating those artifacts again.
+
+See [deployment sanity commands](DEPLOYMENT.md#pre-submission-sanity-check).
+
+## Research workflow
+
 The [latest research experience release](RESEARCH_IMPROVEMENTS.md) adds richer
 multi-source points, source switching, original financial page images, complete
 management speech and dated live index checks. A canonical citation may bind to an
