@@ -106,18 +106,13 @@
   border-radius: 9px !important;
 }
 .coverage-footnote {
-  margin-top: 34px;
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
+  margin-top: 12px;
   color: var(--text-muted);
-  font-size: 10px;
-  line-height: 1.9;
-}
-.coverage-footnote strong {
-  font-weight: 550;
+  font-size: 11px;
+  line-height: 1.6;
 }
 .coverage-footnote p {
-  margin-top: 8px;
+  margin: 0;
 }
 .coverage-warning {
   border: 1px solid var(--warning-border);

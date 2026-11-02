@@ -1,3 +1,4 @@
+import EvidenceButton, { type EvidenceCitation } from './evidence-button'
 import './financial-metrics.css'
 
 type Figure = {
@@ -36,9 +37,11 @@ const unitLabel = (figure: Partial<Figure>) =>
 function InputSources({
   figures,
   onEvidence,
+  citations,
 }: {
   figures: Figure[]
   onEvidence: (index: number) => void
+  citations: EvidenceCitation[]
 }) {
   return (
     <ul>
@@ -47,12 +50,13 @@ function InputSources({
           <strong>{input.name}:</strong> {input.display_value} {unitLabel(input)} ·{' '}
           {input.period_end} · {input.basis}{' '}
           {input.claim_index !== undefined && (
-            <button className="citation-button" onClick={() => onEvidence(input.claim_index!)}>
-              Source
-            </button>
+            <EvidenceButton
+              citation={citations[input.claim_index]}
+              onClick={() => onEvidence(input.claim_index!)}
+            />
           )}
           {!!input.inputs?.length && (
-            <InputSources figures={input.inputs} onEvidence={onEvidence} />
+            <InputSources figures={input.inputs} onEvidence={onEvidence} citations={citations} />
           )}
         </li>
       ))}
@@ -63,9 +67,11 @@ function InputSources({
 export default function FinancialMetrics({
   data,
   onEvidence,
+  citations,
 }: {
   data: MetricData
   onEvidence: (index: number) => void
+  citations: EvidenceCitation[]
 }) {
   return (
     <section className="metric-answers" aria-label="Verified financial metrics">
@@ -102,17 +108,22 @@ export default function FinancialMetrics({
                 <details className="metric-formula">
                   <summary>Formula and verified inputs</summary>
                   <p>{result.formula}</p>
-                  <InputSources figures={result.inputs || []} onEvidence={onEvidence} />
+                  <InputSources
+                    figures={result.inputs || []}
+                    onEvidence={onEvidence}
+                    citations={citations}
+                  />
                   <small>All inputs retain their original citations in the evidence panel.</small>
                 </details>
               )}
-              <button
-                className="citation-button"
+              <EvidenceButton
+                citation={
+                  result.claim_index !== undefined ? citations[result.claim_index] : undefined
+                }
                 onClick={() => result.claim_index !== undefined && onEvidence(result.claim_index)}
               >
-                {result.method === 'calculated' ? 'Inspect input sources' : 'View source evidence'}{' '}
-                <span aria-hidden="true">↗</span>
-              </button>
+                {result.method === 'calculated' ? 'Inspect input sources' : 'View evidence'}
+              </EvidenceButton>
               {result.support === 'dated_reported_only' && (
                 <p className="metric-period">Dated reported value · Not a live valuation</p>
               )}

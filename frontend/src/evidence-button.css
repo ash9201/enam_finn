@@ -1,0 +1,36 @@
+.research-app .evidence-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.evidence-button svg {
+  flex: 0 0 auto;
+}
+.research-app .evidence-button:hover:not(:disabled) {
+  background: var(--accent-fill);
+  border-color: var(--accent-border);
+}
+.research-app .evidence-button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.research-app .evidence-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

@@ -288,7 +288,6 @@ export default function BriefingApp({
           )}
           {!portfolio && (
             <div className="coverage-footnote">
-              <strong>Know the coverage.</strong>
               <p>
                 Recent NSE RSS and filings captured since monitoring began
                 {filingsSync?.captured_since ? ` (${dateTime(filingsSync.captured_since)})` : ''}.

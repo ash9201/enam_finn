@@ -1,3 +1,4 @@
+import EvidenceButton, { type EvidenceCitation } from './evidence-button'
 import { useRef, useState } from 'react'
 import './financial-results.css'
 
@@ -116,7 +117,7 @@ export default function FinancialResults({
 }: {
   data: ResultsData
   onEvidence: (index: number) => void
-  claims?: { statement: string }[]
+  claims?: { statement: string; citation?: EvidenceCitation }[]
 }) {
   const available = ['consolidated', 'standalone'].filter((basis) =>
     data.bases[basis]?.rows.some((row) => Object.keys(row.figures).length > 0),
@@ -212,19 +213,18 @@ export default function FinancialResults({
                 <summary>Inspect supporting figures</summary>
                 <div className="performance-sources">
                   {note.claim_indices.map((index) => (
-                    <button
+                    <EvidenceButton
                       type="button"
-                      className="text-chip"
                       key={index}
                       onClick={() => onEvidence(index)}
+                      citation={claims?.[index]?.citation}
                     >
                       {statement.rows.flatMap((row) =>
                         Object.entries(row.figures)
                           .filter(([, figure]) => figure.claim_index === index)
                           .map(([role]) => `${row.metric} · ${quarterDate(data.periods[role])}`),
-                      )[0] || `Figure ${index + 1}`}{' '}
-                      ↗
-                    </button>
+                      )[0] || `Figure ${index + 1}`}
+                    </EvidenceButton>
                   ))}
                 </div>
               </details>
@@ -243,13 +243,13 @@ export default function FinancialResults({
                   >
                     {claims[index].statement}
                   </button>
-                  <button
+                  <EvidenceButton
                     type="button"
-                    className="citation-button"
                     onClick={() => onEvidence(index)}
+                    citation={claims?.[index]?.citation}
                   >
-                    Inspect original filing passage ↗
-                  </button>
+                    Inspect original filing passage
+                  </EvidenceButton>
                   <small>
                     These are disclosed items for this quarter, not a complete attribution of the
                     change.
@@ -396,23 +396,28 @@ export default function FinancialResults({
             Calculations use unrounded source values. Displayed figures are rounded to two decimals.
           </p>
           <div>
-            <button
-              className="text-chip"
+            <EvidenceButton
               onClick={() => onEvidence(calculation.row.figures.latest.claim_index)}
+              citation={claims?.[calculation.row.figures.latest.claim_index]?.citation}
             >
-              Latest figure evidence ↗
-            </button>
-            <button
-              className="text-chip"
+              Latest figure evidence
+            </EvidenceButton>
+            <EvidenceButton
               onClick={() =>
                 onEvidence(
                   calculation.row.figures[calculation.kind === 'qoq' ? 'previous' : 'year_ago']
                     .claim_index,
                 )
               }
+              citation={
+                claims?.[
+                  calculation.row.figures[calculation.kind === 'qoq' ? 'previous' : 'year_ago']
+                    .claim_index
+                ]?.citation
+              }
             >
-              Base figure evidence ↗
-            </button>
+              Base figure evidence
+            </EvidenceButton>
             <button className="text-chip" onClick={() => setCalculation(null)}>
               Close calculation
             </button>

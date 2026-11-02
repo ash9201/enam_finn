@@ -1,3 +1,4 @@
+import EvidenceButton from './evidence-button'
 import { useEffect, useRef, useState } from 'react'
 import { AppFooter, PageHeading } from './layout'
 import { publicRead } from './data'
@@ -1088,9 +1089,8 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
               </button>
             </div>
             <p>{context.claim}</p>
-            <button
+            <EvidenceButton
               type="button"
-              className="citation-button"
               disabled={busy}
               onClick={() =>
                 setSelected({
@@ -1103,9 +1103,8 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                   claimIndex: context.claim_index,
                 })
               }
-            >
-              {context.citation.document_label} · PDF p. {context.citation.pdf_page} ↗
-            </button>
+              citation={context.citation}
+            />
             <small>
               This passage is the starting point. FINN searches other {context.symbol} reports and
               calls too.
@@ -1357,6 +1356,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
           {current.financial_metrics ? (
             <FinancialMetrics
               data={current.financial_metrics}
+              citations={current.claims.map((claim) => claim.citation)}
               onEvidence={(index) => {
                 const claim = current.claims[index]
                 if (claim) setSelected(evidenceSelection(current, claim))
@@ -1415,8 +1415,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                     </button>
                     <div className="claim-sources">
                       {(claim.citations || [claim.citation]).map((citation, sourceIndex) => (
-                        <button
-                          className="citation-button"
+                        <EvidenceButton
                           key={`${citation.id}-${sourceIndex}`}
                           onClick={() =>
                             setSelected({
@@ -1424,10 +1423,8 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                               claim: { ...claim, citation },
                             })
                           }
-                        >
-                          {citation.document_label} · PDF p. {citation.pdf_page}
-                          <span aria-hidden="true"> ↗</span>
-                        </button>
+                          citation={citation}
+                        />
                       ))}
                     </div>
                   </div>
@@ -1493,12 +1490,10 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                       >
                         {claim.statement}
                       </button>
-                      <button
-                        className="citation-button"
+                      <EvidenceButton
                         onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
-                      >
-                        {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
-                      </button>
+                        citation={claim.citation}
+                      />
                     </div>
                   )
                 })}
@@ -1515,8 +1510,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                       </button>
                       <div className="claim-sources">
                         {(claim.citations || [claim.citation]).map((citation) => (
-                          <button
-                            className="citation-button"
+                          <EvidenceButton
                             key={citation.id}
                             onClick={() =>
                               setSelected({
@@ -1524,9 +1518,8 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                                 claim: { ...claim, citation },
                               })
                             }
-                          >
-                            {citation.document_label} · PDF p. {citation.pdf_page} ↗
-                          </button>
+                            citation={citation}
+                          />
                         ))}
                       </div>
                     </div>
@@ -1569,12 +1562,10 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                   >
                     {claim.statement}
                   </button>
-                  <button
-                    className="citation-button"
+                  <EvidenceButton
                     onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
-                  >
-                    {claim.citation.document_label} · PDF p. {claim.citation.pdf_page} ↗
-                  </button>
+                    citation={claim.citation}
+                  />
                 </div>
               ))}
               <p className="fine-print">

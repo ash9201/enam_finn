@@ -61,11 +61,11 @@ try {
       if (symbol === 'V2RETAIL') {
         await panel.getByText('Formula and verified inputs', { exact: true }).click()
         await expect(panel.locator('.metric-formula')).toContainText('Revenue from operations')
-        const sources = panel.getByRole('button', { name: 'Source', exact: true })
+        const sources = panel.locator('.metric-formula .evidence-button')
         await expect(sources).toHaveCount(2)
         await sources.nth(1).click()
       } else {
-        await panel.getByRole('button', { name: /View source evidence/ }).click()
+        await panel.getByRole('button', { name: /View evidence/ }).click()
       }
       await expect(page.getByRole('dialog')).toBeVisible()
       await expect(

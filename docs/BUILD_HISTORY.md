@@ -1,5 +1,17 @@
 # Build history summary
 
+### Compact evidence controls (2 November)
+
+- Unified Research evidence-opening controls as compact, themed button chips with a
+  panel icon, source label and physical page. Existing handlers, drawer, verification
+  and external PDF anchors are unchanged, including numerical/quarterly/comparison views.
+- Removed the Briefing coverage heading and excess divider/spacing while preserving
+  the complete provenance and coverage paragraph.
+- Frontend build, credential scan and targeted real-fixture browser replays pass at
+  1440px/390px in light/dark themes: multi-source, keyboard/focus return, external
+  PDF destination, source switching, financial evidence and contextual follow-up.
+  No backend changes, ingestion or model evaluations.
+
 ### Credit classification and verified numerical research (2 November)
 
 - Replaced substring rating detection with credit/agency/action context; specific

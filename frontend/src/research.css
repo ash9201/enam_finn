@@ -221,9 +221,6 @@
   color: var(--text-secondary);
   margin-top: 3px;
 }
-.research-app .citation-button {
-  font-size: 11px !important;
-}
 .research-app .coverage-notes {
   font-size: 12px;
 }
@@ -621,16 +618,6 @@
   font-size: 15px;
   line-height: 1.7;
   margin: 0 0 12px;
-}
-.citation-button {
-  padding: 0 !important;
-  background: none !important;
-  color: var(--accent) !important;
-  gap: 8px !important;
-  font-size: 10px !important;
-  line-height: 1.5;
-  text-align: left;
-  white-space: normal;
 }
 .answer-bottom {
   display: flex;
@@ -1129,9 +1116,6 @@
   border-top: 1px solid var(--border);
   padding-top: var(--space-3);
   color: var(--text-secondary);
-}
-.citation-button {
-  min-height: 34px;
 }
 .filing-actions a,
 .filing-actions > button {
