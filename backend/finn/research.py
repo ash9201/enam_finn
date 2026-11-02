@@ -428,6 +428,12 @@ def fast_cached_research(store, symbol, question):
     from finn.financial_tables import VERSION as TABLE_VERSION
     from finn.financials import QUESTION as RESULTS_QUESTION
     from finn.financials import RESULTS_VERSION
+    from finn.metric_registry import financial_intent
+
+    if question != RESULTS_QUESTION and financial_intent(question):
+        from finn.metric_research import numerical_research
+
+        return numerical_research(store, symbol, question, cached_only=True)
 
     candidates = store.rows(
         "finn_research_cache",
@@ -515,6 +521,22 @@ def research_company(
         from finn.evidence import resolve_context
 
         context, anchor = resolve_context(store, symbol, context_reference)
+    from finn.metric_registry import financial_intent
+
+    numerical_intent = financial_intent(question)
+    if numerical_intent:
+        from finn.metric_research import numerical_research
+
+        return numerical_research(
+            store,
+            symbol,
+            question,
+            intent=numerical_intent,
+            refresh=refresh,
+            publish=publish,
+            context=context,
+            progress=progress,
+        )
     corpus_options = {"refresh": refresh, "progress": progress}
     if include_history:
         corpus_options["include_history"] = True

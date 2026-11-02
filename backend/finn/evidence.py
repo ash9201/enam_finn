@@ -240,11 +240,13 @@ def resolve_context(store, symbol, reference):
         },
         **(
             {
-                "financial_documents": answer["financial_results"]["document_ids"],
+                "financial_documents": (
+                    answer.get("financial_results") or answer["financial_metrics"]
+                )["document_ids"],
                 "financial_source_checked_at": answer["source_checked_at"],
                 "financial_context_policy": "quarter-context-v2",
             }
-            if answer.get("financial_results")
+            if answer.get("financial_results") or answer.get("financial_metrics")
             else {}
         ),
     }

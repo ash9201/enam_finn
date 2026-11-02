@@ -16,6 +16,80 @@ from finn.sources import announcement_feed, price_probe, public_client
 from finn.store import open_store
 
 
+def credit_rating_action(description: str) -> tuple[int, str] | None:
+    """Require credit context, never substrings such as operating/generating."""
+    text = description.casefold()
+    agency = r"\b(?:crisil|icra|care ratings|india ratings|acuit[eé]|fitch|moody['’]?s|brickwork|infomerics|s&p)\b"
+    action = r"\b(?:assign\w*|reaffirm\w*|affirm\w*|upgrad\w*|downgrad\w*|withdraw\w*|revis\w*|outlook|rating watch)\b"
+    if not re.search(r"\bcredit\b", text) and re.search(
+        r"\b(?:esg|sustainability|product|customer|star|buy|sell|hold|outperform|underperform)\s+ratings?\b",
+        text,
+    ):
+        return None
+    credit = bool(
+        re.search(
+            r"\bcredit[-\s]+ratings?\b|\bratings?\s+(?:action|assigned|reaffirmed|upgraded|downgraded|withdrawn|outlook)\b",
+            text,
+        )
+    )
+    if not credit and re.search(agency, text):
+        residual = re.sub(agency, "", text)
+        credit = bool(re.search(r"\bratings?\b", residual)) or bool(
+            re.search(action, text)
+            and re.search(
+                r"\b(?:bank facilities|debt|debentures|commercial paper|long[- ]term|short[- ]term)\b",
+                text,
+            )
+        )
+        credit = credit or bool(
+            re.search(
+                r"\b(?:revised|changed|placed)\b.{0,60}\boutlook\b.{0,35}\b(?:to|on)\b.{0,15}\b(?:negative|positive|stable)\b",
+                text,
+            )
+        )
+    if not credit:
+        return None
+    adverse = re.sub(
+        r"\b(?:no|not|without)\s+(?:a\s+)?(?:credit\s+)?(?:rating\s+)?(?:downgrad\w*|default\w*)\b",
+        "",
+        text,
+    )
+    if re.search(
+        r"\bdowngrad\w*\b|\b(?:payment default|defaulted)\b|issuer not cooperating", adverse
+    ):
+        return (
+            3,
+            "Credit rating downgraded or adverse credit status disclosed; review the agency rationale.",
+        )
+    if re.search(
+        r"\b(?:outlook|watch)\b.{0,90}\b(?:revised|changed|placed)\b.{0,90}(?:to|with)\s+(?:a\s+)?negative\b|\b(?:revis\w*|chang\w*|plac\w*)\b.{0,50}\b(?:outlook|watch)\b.{0,50}(?:to|on|with)\s+(?:a\s+)?negative\b|\bnegative\s+(?:rating\s+)?watch\b",
+        text,
+    ):
+        return (
+            3,
+            "Credit outlook changed to negative or negative watch disclosed; review the agency rationale.",
+        )
+    if re.search(r"\bwithdraw\w*\b", text):
+        repaid = bool(re.search(r"fully repaid|redemption|no outstanding|facilit\w* closed", text))
+        return (
+            (1 if repaid else 2),
+            "Credit rating withdrawn; inspect whether the facility was repaid or credit coverage ended.",
+        )
+    if re.search(r"\bupgrad\w*\b", text):
+        return 2, "Credit rating upgraded; review the revised grade and agency rationale."
+    if re.search(
+        r"\boutlook\b.{0,90}\b(?:revis\w*|chang\w*)\b|\b(?:revis\w*|chang\w*)\b.{0,90}\boutlook\b",
+        text,
+    ):
+        return 2, "Credit-rating outlook changed; inspect the direction and agency rationale."
+    if re.search(r"\breaffirm\w*\b|\baffirm\w*\b", text):
+        return (
+            1,
+            "Credit rating reaffirmed; no upgrade or downgrade is established by this disclosure.",
+        )
+    return 1, "Credit-rating disclosure; inspect the grade, outlook and agency action."
+
+
 def classify_filing(description: str) -> tuple[str, int, str]:
     text = description.lower()
     if re.search(r"newspaper|publication of.*results|published.*newspaper", text):
@@ -83,12 +157,9 @@ def classify_filing(description: str) -> tuple[str, int, str]:
             3,
             "Review the scope and potential exposure in the original disclosure.",
         )
-    if "rating" in text:
-        return (
-            "credit_rating",
-            3 if "downgrad" in text else 1,
-            "A rating change can affect funding risk; distinguish a downgrade from a reaffirmation.",
-        )
+    rating = credit_rating_action(description)
+    if rating:
+        return "credit_rating", *rating
     if (
         re.search(r"schedule|invitation|intimation", text)
         and re.search(r"(?:earnings|conference|analyst|investor).*(?:call|meet|discussion)", text)

@@ -237,6 +237,7 @@ def candidate_table(words, page_number):
         "unit": unit,
         "header": header,
         "columns": columns,
+        "column_bounds": boundaries,
         "rows": rows,
         "sector_note": "Financial-sector revenue/EBITDA may be inapplicable."
         if re.search(

@@ -1,5 +1,26 @@
 # Build history summary
 
+### Credit classification and verified numerical research (2 November)
+
+- Replaced substring rating detection with credit/agency/action context; specific
+  downgrade/outlook/upgrade/withdrawal/reaffirmation priorities. Added regression
+  negatives for operating, generating, integrating, agency commentary and ESG/equity
+  ratings. The idempotent dry-run audit found no retained records requiring repair.
+  `python -m finn.filing_reclassification --apply` patches only related classification
+  fields and preserves IDs, source links and review state.
+- Added a 147-metric registry and deterministic numerical intent recognition; conceptual
+  and CFO-person queries retain ordinary Research. Values use existing primary PDFs,
+  hybrid/keyword candidates, approved quarterly cells and Decimal calculations.
+- Added explicit intent completeness, source/version-aware caching and TMCV/TMPV
+  entity safeguards. General unverified LLM ratios remain prohibited. Every calculated
+  input has its own evidence interaction; existing quarterly comparisons are intact.
+- Verified real TMCV direct ratios and V2RETAIL calculated margin/source cells. Added
+  reported/calculated/unavailable cards using shared tokens, and desktop/mobile
+  light/dark browser checks. Full backend regression, build and secret scan pass.
+- Details, source links, support matrix and limits: QUARTERLY_RESULTS.md. Rating files:
+  `backend/finn/briefing.py`, `backend/finn/filing_reclassification.py`, and
+  `tests/test_credit_ratings.py`. No schema, dependency or environment changes needed.
+
 ### Production hybrid scope and rollout (2 November)
 
 - Verified production flag was disabled and Gemini embedding access worked; owner

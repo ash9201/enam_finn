@@ -1,0 +1,67 @@
+.metric-answers {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.metric-answer {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-read);
+  min-width: 0;
+}
+.metric-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.metric-title h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.metric-answer p {
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.metric-answer .metric-value {
+  font-size: 29px;
+  line-height: 1.25;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.metric-value span {
+  margin-left: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+.metric-answer .metric-period,
+.metric-formula small {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.metric-formula {
+  margin: 10px 0;
+  font-size: 12px;
+}
+.metric-formula summary {
+  cursor: pointer;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+}
+.metric-formula ul {
+  padding-left: 18px;
+  line-height: 1.7;
+}
+.metric-answer .citation-button {
+  margin-top: 4px;
+}
+.metric-missing {
+  color: var(--text-secondary);
+}

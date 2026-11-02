@@ -1,5 +1,151 @@
 # Quarterly financial results
 
+## Verified numerical research - 2 November 2026
+
+Custom numerical questions now use an approved deterministic pathway alongside the
+existing four-metric quarterly comparison. The general LLM prompt and its numerical
+validation guards are unchanged. No new database migration, dependency, model API,
+configuration variable or full embedding rebuild is required.
+
+### Routing and supported scope
+
+`metric_registry.py` contains **147 canonical metrics** across eight categories, with
+aliases, units, industry applicability, support status, dependencies, source
+requirements and accounting restrictions. Recognition is separate from successful
+extraction. `debt/equity`, `D/E`, `ROE`, `P/E`, natural metric requests, explicit
+periods/bases and profitability/financial-health questions are recognised. Definitions
+such as `Explain what ROE means`, revenue-model questions, employee turnover and the
+CFO's identity stay in ordinary Research. Generic CAGR/growth requests ask for the
+base metric rather than substituting revenue.
+
+- **Reported figures:** native PDF cells with explicit column dates, basis and units;
+  explicitly dated numerical prose; previously server-validated quarterly cells,
+  including matching two-image verification and original chunk evidence. Basic and
+  diluted EPS remain distinct reported metrics. Operating profit is separate from
+  explicitly reported EBIT; total income is separate from revenue from operations.
+  RONW is distinct from ROE, interest-service coverage from interest coverage, and
+  adjusted EBITDA/forward P/E from their standard counterparts. Unsupported adjusted
+  definitions return an explicit missing result rather than the standard metric.
+- **19 implemented calculation paths, conditional on compatible verified inputs:**
+  current + non-current borrowings; net debt/net cash; debt/equity and net-debt/equity;
+  current ratio and working capital; EBIT/interest expense coverage; gross, operating,
+  EBIT, EBITDA and net margins; effective tax rate; revenue/profit growth; ROE;
+  ROCE; free cash flow. No finance-cost total is silently substituted for interest
+  expense, or EBITDA for EBIT. No industrial formulas are applied to financial firms.
+- **Reported only:** other turnover/liquidity ratios, DSCR/gearing, ROA/ROIC,
+  CAGR, segment indicators, banking, insurance and industry operating metrics.
+  The engine attempts an explicit, unambiguous disclosure; no unsupported formula is
+  advertised. Recognition does not imply every report format or sector is supported.
+- **Dated reported values only for valuation:** P/E, forward P/E, P/B, EV ratios,
+  market cap and related metrics. No live-price, forward-earnings, PEG or market-value
+  calculation is implemented. Inaccessible or unstated valuation inputs remain missing.
+
+### Verification, calculations and caching
+
+Company identity is resolved first through the existing verified persistent NSE
+snapshot. Existing hybrid/keyword retrieval supplies candidate pages; deterministic
+label matching also finds actual disclosures beyond qualitative policy paragraphs.
+Only primary annual/quarterly PDFs and approved financial cells can supply values.
+Similarity, a citation alone, or a model-generated number cannot establish a fact.
+
+Native extraction reuses `grouped_lines`, `parse_number`, `parse_date`, the quarterly
+column validator and its date/basis rules. It preserves physical page, exact passage,
+source URLs, document hash, row label, column header and cell bounding box. The repeated
+annual-report navigation listing both bases is excluded from basis selection. The
+existing image-verified quarterly cache is reused through its original source chunks,
+not incorrectly checked against an empty scanned native-text page.
+
+The older quarterly extractor deliberately saves P&L pages. New requests may add up to
+12 relevant omitted balance-sheet/cash-flow/ratio pages from the already stored PDF,
+with deterministic chunk IDs and incremental background indexing. Existing evidence
+pages are not replaced. Up to 18 candidate pages per document are verified. This is
+bounded page-level verification, not a parallel PDF ingestion pipeline.
+
+Arithmetic uses Decimal and explicit definitions, retaining full precision and rounding
+only display values (two decimal places, half up). Money scales are converted without
+FX conversion. Every calculation checks entity, basis, currency, date and period kind.
+Flow ratios need matching full annual/quarterly durations; as-at balances and uncertain
+YTD/stub flows cannot stand in for income/cash-flow periods. Growth requires a positive
+comparison base; ratios reject zero/negative denominators where inappropriate.
+
+ROE uses profit attributable to owners and average opening/closing owners' equity,
+excluding interchangeable NCI-inclusive totals. ROCE uses reported EBIT divided by
+average opening/closing (assets minus current liabilities). Closing and average definitions
+are never switched silently. FCF adds an explicitly signed cash outflow for combined
+PPE/intangible purchases to CFO; accrual capex and ambiguous positive spending figures
+are not substituted. A company's clearly disclosed ratio takes precedence over a
+calculated alternative. Conflicting reported values/definitions are declined.
+
+Every requested metric must return a verified numerical value with its metadata or an
+explicit missing-data reason. This completeness check also applies to cached answers.
+Missing values are not zero. Separate claims preserve each calculation input, including
+two different cells on the same PDF page; source inspection and contextual follow-up
+reuse the existing evidence panel and source validation.
+
+The existing private research-cache table is keyed by verified ISIN, canonical intent,
+requested dates/years/frequency/basis, document IDs/hashes/extraction versions, approved
+quarterly-cache revision, parser/validation/calculation versions and optional evidence
+context. Alias repeats reuse the answer without PDF verification, generation or
+embedding work. Source timestamps retain their original dates.
+
+### Entity safeguards and remaining limits
+
+Cover identity/ISIN mismatches stop extraction. TMCV and TMPV have separate verified
+ISIN policies; the new-company/changed-name cover must match the current issuer.
+Automatic use of pre-1-October-2025 Tata figures is declined, with no inferred demerger
+recast. The appointed/effective dates are documented in the
+[official NSE information memorandum](https://nsearchives.nseindia.com/corporates/offerdocument/scheme/IM_TMCV.pdf).
+This is a conservative guard, not a complete historical corporate-action engine.
+
+Native headers must establish dates, units and basis; fiscal-year-only or damaged
+headers, unreadable currency glyphs, ambiguous sections, unsupported scanned tables and
+conflicting definitions can produce an unavailable result. Existing approved quarterly
+image cells remain usable; this new route does not launch fresh ratio/annual-table OCR
+or vision generation. Broad sector calculations, current valuations, historical entity
+recasts and mixed-basis comparisons are not implemented. Ask for one basis per custom
+numerical question; existing quarterly basis controls remain available.
+
+### Actual primary-document checks
+
+No financial value is hardcoded in application code.
+
+| Request | Verified outcome | Original physical PDF page |
+| --- | --- | --- |
+| TMCV `debt to equity ratio` | 0.13 times, standalone, 30 September 2026 | [Quarterly filing, p.10](https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=09b74181-7f44-4aed-b9f0-c12d57fa5474.pdf#page=10) |
+| TMCV FY2026 consolidated | 0.38 times, 31 March 2026 | [Annual report, p.222](https://www.bseindia.com/xml-data/corpfiling/AttachHis/c733587d-fcc8-432d-89fe-1e37630d8896.pdf#page=222) |
+| TMCV FY2026 standalone | 0.22 times, 31 March 2026 | [Annual report, p.451](https://www.bseindia.com/xml-data/corpfiling/AttachHis/c733587d-fcc8-432d-89fe-1e37630d8896.pdf#page=451) |
+| V2RETAIL quarterly net margin | 4.20% from compatible consolidated PAT and revenue, 30 June 2026 | [Quarterly filing, p.11](https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=a11441e0-2a87-4072-bc6c-b0cd51475381.pdf#page=11) |
+| TMCV ROIC FY2019 | Explicit unavailable result | No old combined-company figure substituted |
+
+Each observation retains its own entity, basis and period; compatible inputs are
+required for calculations. Both V2RETAIL input sources were resolved independently
+through the existing evidence validator. Browser checks use these actual verified
+results, not invented financial numbers.
+
+Reproducible checks (configured server credentials, existing prepared documents):
+
+```powershell
+.venv/Scripts/python scripts/verify_numerical_research.py
+.venv/Scripts/python scripts/npm.py run build
+.venv/Scripts/python scripts/npm.py run test:metrics
+```
+
+The opt-in verification script uses process-local keyword candidate search and cached
+primary documents, with zero generation/embedding calls. It writes ignored snapshots
+and source contexts for the browser check. Browser checks cover desktop 1440px/mobile
+390px, both themes, reported/calculated/unavailable states, formula inputs, separate
+source cells, contextual follow-up and horizontal overflow. Existing quarterly,
+general Research and evidence regression checks pass. No unrelated ingestion or LLM
+evaluation sweep was run.
+
+Changed implementation: `backend/finn/metric_registry.py`, `metric_evidence.py`,
+`metric_calculations.py`, `metric_research.py`; integration in `research.py`,
+`evidence.py`, and an additive column-boundary field in `financial_tables.py`.
+Frontend: `frontend/src/financial-metrics.tsx`, `financial-metrics.css`, `research.tsx`,
+`frontend/package.json`, `frontend/scripts/verify-numerical-metrics.mjs`.
+Tests: `tests/test_numerical_metrics.py`; live check: `scripts/verify_numerical_research.py`.
+
+
 The [1 November investor QA release](INVESTOR_QA.md) adds concise deterministic
 performance observations, directly cited current-quarter note context where verified,
 additive preservation of missing native financial pages, and fixes repeated results

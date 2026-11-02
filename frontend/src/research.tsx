@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AppFooter, PageHeading } from './layout'
 import { publicRead } from './data'
 import CompanyPicker from './company-picker'
+import FinancialMetrics, { type MetricData } from './financial-metrics'
 import FinancialResults, {
   RESULTS_QUESTION,
   type ResultsData,
@@ -116,6 +117,7 @@ type Answer = {
   }
   timings?: { queue_ms: number; processing_ms: number; span_ms: Record<string, number> }
   financial_results?: ResultsData
+  financial_metrics?: MetricData
   reading_version?: string
   question_coverage?: { aspect: string; label: string; status: string; note: string | null }[]
   evidence_context?: EvidenceContext
@@ -162,7 +164,12 @@ function ResearchDetails({ answer }: { answer: Answer }) {
     <details
       className="coverage-notes research-details"
       onToggle={(event) => {
-        if (event.currentTarget.open && answer.retrieval_mode !== 'validated_financial_cells')
+        if (
+          event.currentTarget.open &&
+          !['validated_financial_cells', 'verified_financial_metrics'].includes(
+            answer.retrieval_mode,
+          )
+        )
           checkHealth()
       }}
     >
@@ -179,7 +186,9 @@ function ResearchDetails({ answer }: { answer: Answer }) {
             <li key={note}>{note}</li>
           ))}
       </ul>
-      {answer.retrieval_mode !== 'validated_financial_cells' && (
+      {!['validated_financial_cells', 'verified_financial_metrics'].includes(
+        answer.retrieval_mode,
+      ) && (
         <div className="search-status">
           <strong>
             Search used for this answer: {answer.retrieval_mode === 'hybrid' ? 'Hybrid' : 'Keyword'}
@@ -897,11 +906,13 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                   ? `Saving evidence for document ${document}…`
                   : `Collecting and reading document ${document}…`
         setStage(
-          job.stage.startsWith('visual:')
-            ? `Reading and cross-checking the original statement image · PDF p. ${document}`
-            : job.stage.startsWith('extraction:')
-              ? extractionStage
-              : stages[job.stage] || 'Preparing your research…',
+          job.stage.startsWith('financial_metrics:')
+            ? 'Verifying reported figures and compatible financial inputs…'
+            : job.stage.startsWith('visual:')
+              ? `Reading and cross-checking the original statement image · PDF p. ${document}`
+              : job.stage.startsWith('extraction:')
+                ? extractionStage
+                : stages[job.stage] || 'Preparing your research…',
         )
       }
       throw new Error(
@@ -1343,7 +1354,15 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
               {current.investigation.assessment}
             </p>
           )}
-          {current.financial_results ? (
+          {current.financial_metrics ? (
+            <FinancialMetrics
+              data={current.financial_metrics}
+              onEvidence={(index) => {
+                const claim = current.claims[index]
+                if (claim) setSelected(evidenceSelection(current, claim))
+              }}
+            />
+          ) : current.financial_results ? (
             <FinancialResults
               key={answerIdentity(current)}
               data={current.financial_results}
