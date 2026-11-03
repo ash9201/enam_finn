@@ -1,5 +1,17 @@
 # Build history summary
 
+### Research results presentation (3 November)
+
+- Grouped the selected quarterly result's disclosed items under one Additional
+  disclosures heading and qualification, retaining individual evidence references.
+  No aggregation across companies, periods or accounting bases.
+- General/comparison prose is selectable paragraph text; dedicated evidence buttons
+  retain the original drawer actions. Interactive financial figures are unchanged.
+- Frontend build, secret scan and recorded-source browser checks pass at desktop/mobile
+  sizes in both themes, including Sun Pharma's two items, a single-item presentation,
+  basis switching, text selection, keyboard evidence inspection and original links.
+  No backend tests, ingestion, retrieval or answer generation were rerun.
+
 ### Evidence reliability and read-only submission checks (2 November)
 
 - Preserved existing source/claim ownership and quote/page-hash checks. Added typed

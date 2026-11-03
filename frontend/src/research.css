@@ -461,6 +461,7 @@
   font-weight: 650;
 }
 .claim-list .claim-statement {
+  margin: 0;
   line-height: 1.75;
   font-weight: 450;
 }
@@ -769,6 +770,9 @@
   margin-top: 6px;
 }
 .claim-statement {
+  margin: 0;
+  max-width: none;
+  user-select: text;
   display: block !important;
   background: none !important;
   padding: 0 0 var(--space-2) !important;
@@ -779,12 +783,6 @@
   font-weight: 400 !important;
   border-radius: 3px !important;
   width: 100%;
-}
-.claim-statement:hover {
-  color: var(--accent-strong) !important;
-  text-decoration: underline;
-  text-decoration-color: var(--accent-border);
-  text-underline-offset: 4px;
 }
 .claim-list li > div {
   min-width: 0;
@@ -1101,7 +1099,7 @@
   border-top: 1px solid var(--border);
   padding-top: var(--space-3);
 }
-.comparison-sides > div > p:not(.eyebrow) {
+.comparison-sides > div > p:not(.eyebrow):not(.claim-statement) {
   font-size: 14px;
   line-height: 1.7;
   margin-bottom: 14px;

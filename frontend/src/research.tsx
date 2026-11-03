@@ -1501,13 +1501,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                           : ''}
                       </span>
                     )}
-                    <button
-                      className="claim-statement"
-                      onClick={() => setSelected(evidenceSelection(current, claim))}
-                      aria-label={`Review evidence: ${claim.statement}`}
-                    >
-                      {claim.statement}
-                    </button>
+                    <p className="claim-statement">{claim.statement}</p>
                     <div className="claim-sources">
                       {(claim.citations || [claim.citation]).map((citation, sourceIndex) => (
                         <EvidenceButton
@@ -1579,12 +1573,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                   return (
                     <div key={heading as string}>
                       <p className="eyebrow">{heading as string}</p>
-                      <button
-                        className="claim-statement"
-                        onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
-                      >
-                        {claim.statement}
-                      </button>
+                      <p className="claim-statement">{claim.statement}</p>
                       <EvidenceButton
                         onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
                         citation={claim.citation}
@@ -1597,12 +1586,7 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                 <div className="comparison-analysis" aria-label="What the evidence indicates">
                   {comparisonAnswer.comparison.analysis_claims.map((claim) => (
                     <div key={claim.citation.id + claim.statement}>
-                      <button
-                        className="claim-statement"
-                        onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
-                      >
-                        {claim.statement}
-                      </button>
+                      <p className="claim-statement">{claim.statement}</p>
                       <div className="claim-sources">
                         {(claim.citations || [claim.citation]).map((citation) => (
                           <EvidenceButton
@@ -1629,8 +1613,10 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
               {comparisonAnswer.financial_context && (
                 <aside className="comparison-context">
                   <p className="eyebrow">REPORTED QUARTER CONTEXT</p>
-                  <button
-                    className="claim-statement"
+                  <p className="claim-statement">
+                    {comparisonAnswer.financial_context.claim.statement}
+                  </p>
+                  <EvidenceButton
                     onClick={() => {
                       const f = comparisonAnswer.financial_context!
                       setSelected({
@@ -1643,20 +1629,14 @@ export default function ResearchApp({ active = true }: { active?: boolean }) {
                         claimIndex: f.claim_index,
                       })
                     }}
-                  >
-                    {comparisonAnswer.financial_context.claim.statement}
-                  </button>
+                    citation={comparisonAnswer.financial_context.claim.citation}
+                  />
                   <p className="fine-print">{comparisonAnswer.financial_context.note}</p>
                 </aside>
               )}
               {comparisonAnswer.comparison.additional_context?.map((claim) => (
                 <div className="comparison-context" key={claim.citation.id}>
-                  <button
-                    className="claim-statement"
-                    onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
-                  >
-                    {claim.statement}
-                  </button>
+                  <p className="claim-statement">{claim.statement}</p>
                   <EvidenceButton
                     onClick={() => setSelected(evidenceSelection(comparisonAnswer, claim))}
                     citation={claim.citation}

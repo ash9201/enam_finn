@@ -154,7 +154,12 @@ try {
       await page.locator('.answer-context').scrollIntoViewIfNeeded()
       await screenshot(page, `${size}-${theme}-later-answer`)
       const nextIndex = Math.min(1, liveResult.claims.length - 1)
-      await page.locator('.claim-list .claim-statement').nth(nextIndex).click()
+      await page
+        .locator('.claim-list > li')
+        .nth(nextIndex)
+        .locator('.evidence-button')
+        .first()
+        .click()
       await expect(
         dialog.getByText('Passage verified against the stored original document.'),
       ).toBeVisible({ timeout: 30000 })

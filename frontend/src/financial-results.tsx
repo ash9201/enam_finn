@@ -138,6 +138,8 @@ export default function FinancialResults({
   }
   const basis = available.includes(choice) ? choice : available[0]
   const statement = data.bases[basis]
+  // These indices already belong to this result's selected basis and latest period.
+  const contextIndices = (statement?.context_claim_indices || []).filter((index) => claims?.[index])
   if (!statement)
     return (
       <div className="empty-evidence">
@@ -231,31 +233,25 @@ export default function FinancialResults({
             </div>
           ))}
           <small>{data.performance_caveat}</small>
-          {statement.context_claim_indices?.map(
-            (index) =>
-              claims?.[index] && (
-                <div className="disclosed-context" key={index}>
-                  <p className="eyebrow">DISCLOSED CONTEXT</p>
-                  <button
-                    type="button"
-                    className="claim-statement"
-                    onClick={() => onEvidence(index)}
-                  >
-                    {claims[index].statement}
-                  </button>
-                  <EvidenceButton
-                    type="button"
-                    onClick={() => onEvidence(index)}
-                    citation={claims?.[index]?.citation}
-                  >
-                    Inspect original filing passage
-                  </EvidenceButton>
-                  <small>
-                    These are disclosed items for this quarter, not a complete attribution of the
-                    change.
-                  </small>
-                </div>
-              ),
+          {contextIndices.length > 0 && (
+            <section className="disclosed-context" aria-label="Additional disclosures">
+              <p className="eyebrow">ADDITIONAL DISCLOSURES</p>
+              <ul className="disclosure-list">
+                {contextIndices.map((index) => (
+                  <li key={index}>
+                    <p>{claims![index].statement}</p>
+                    <EvidenceButton
+                      onClick={() => onEvidence(index)}
+                      citation={claims![index].citation}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <small>
+                These are disclosed items for this quarter, not a complete attribution of the
+                change.
+              </small>
+            </section>
           )}
         </aside>
       ) : null}

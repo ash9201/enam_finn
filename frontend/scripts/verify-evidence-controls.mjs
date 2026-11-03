@@ -13,6 +13,7 @@ const answers = [
   fixtures['CCL:results'],
   root,
   followup,
+  fixtures['SUNPHARMA:results'],
 ]
 const allClaims = (answer) => [
   ...answer.claims,
@@ -33,20 +34,30 @@ try {
       const page = await context.newPage()
       const errors = [],
         requests = []
+      let singleDisclosure = false
       page.on('pageerror', (error) => errors.push(error.message))
       await page.route('**/rest/v1/**', (route) => route.fulfill({ json: [] }))
       await page.route('**/research', async (route) => {
         const body = route.request().postDataJSON()
         requests.push(body)
-        const answer = answers.find((a) => a.symbol === body.symbol && a.question === body.question)
+        let answer = answers.find((a) => a.symbol === body.symbol && a.question === body.question)
         if (!answer) throw new Error('No recorded answer for ' + body.question)
+        if (singleDisclosure && answer.symbol === 'SUNPHARMA') {
+          // A one-item presentation fixture, retaining the same real claim/evidence.
+          answer = structuredClone(answer)
+          answer.financial_results.bases.consolidated.context_claim_indices =
+            answer.financial_results.bases.consolidated.context_claim_indices.slice(0, 1)
+        }
         await route.fulfill({ json: { state: 'completed', result: answer, job_id: answer.id } })
       })
       await page.route('**/research/*/evidence/*', async (route) => {
         const url = new URL(route.request().url()),
           parts = url.pathname.split('/')
         const answer = answers.find((a) => a.id === parts[2])
-        const citation = allClaims(answer)
+        const claims = url.searchParams.has('claim_index')
+          ? [allClaims(answer)[Number(url.searchParams.get('claim_index'))]]
+          : allClaims(answer)
+        const citation = claims
           .flatMap((c) => c.citations || [c.citation])
           .find((c) => c.id === parts[4])
         if (!citation) throw new Error('Unknown original citation')
@@ -79,6 +90,30 @@ try {
       }
       const overview = answers[0]
       await ask(overview)
+      const paragraph = page.locator('.claim-list .claim-statement').first()
+      expect(
+        await paragraph.evaluate((element) => ({
+          tag: element.tagName,
+          cursor: getComputedStyle(element).cursor,
+          decoration: getComputedStyle(element).textDecorationLine,
+          selectable: getComputedStyle(element).userSelect,
+          handler: element.onclick,
+        })),
+      ).toEqual({ tag: 'P', cursor: 'auto', decoration: 'none', selectable: 'text', handler: null })
+      await paragraph.click()
+      await expect(page.getByRole('dialog')).not.toBeVisible()
+      expect(
+        await paragraph.evaluate((element) => {
+          const range = document.createRange()
+          range.selectNodeContents(element)
+          const selection = window.getSelection()
+          selection.removeAllRanges()
+          selection.addRange(range)
+          const text = selection.toString()
+          selection.removeAllRanges()
+          return text
+        }),
+      ).toBe(overview.claims[0].statement)
       const index = overview.claims.findIndex((c) => c.citations?.length > 1)
       const claim = overview.claims[index],
         chips = page.locator('.claim-list > li').nth(index).locator('.evidence-button')
@@ -118,6 +153,13 @@ try {
           fullPage: true,
         })
       await ask(answers[1])
+      expect(
+        await page
+          .locator('.comparison-content .claim-statement')
+          .evaluateAll((elements) =>
+            elements.every((element) => element.tagName === 'P' && !element.onclick),
+          ),
+      ).toBe(true)
       await expect(page.locator('.comparison-sides .evidence-button')).toHaveCount(2)
       await inspect(
         page.locator('.comparison-sides .evidence-button').first(),
@@ -131,6 +173,37 @@ try {
       await latest.click()
       await expect(page.getByRole('dialog')).toBeVisible()
       await page.keyboard.press('Escape')
+      const sun = fixtures['SUNPHARMA:results']
+      await ask(sun)
+      const disclosures = page.getByRole('region', { name: 'Additional disclosures', exact: true })
+      await expect(disclosures).toBeVisible()
+      await expect(disclosures.getByText('ADDITIONAL DISCLOSURES', { exact: true })).toHaveCount(1)
+      await expect(disclosures.locator('.disclosure-list > li')).toHaveCount(2)
+      await expect(disclosures.getByText(/not a complete attribution/)).toHaveCount(1)
+      const contextIndices = sun.financial_results.bases.consolidated.context_claim_indices
+      for (let i = 0; i < contextIndices.length; i++) {
+        await inspect(
+          disclosures.locator('.evidence-button').nth(i),
+          sun.claims[contextIndices[i]].citation,
+        )
+        await page.keyboard.press('Escape')
+      }
+      if ((width === 1440 && theme === 'dark') || (width === 390 && theme === 'light')) {
+        await disclosures.scrollIntoViewIfNeeded()
+        await page.screenshot({
+          path: new URL(`disclosures-${width}-${theme}.png`, output).pathname.replace(
+            /^\/(\w:)/,
+            '$1',
+          ),
+        })
+      }
+      await page.getByRole('button', { name: 'Standalone', exact: true }).click()
+      await expect(disclosures).toHaveCount(0)
+      singleDisclosure = true
+      await ask(sun)
+      await expect(disclosures.locator('.disclosure-list > li')).toHaveCount(1)
+      await expect(disclosures.getByText(/not a complete attribution/)).toHaveCount(1)
+      singleDisclosure = false
       await ask(root)
       const anchorIndex = root.claims.findIndex(
         (c) => c.citation.id === followup.evidence_context.citation_id,
@@ -164,7 +237,7 @@ try {
           width,
           theme,
           checks:
-            'multi-source, keyboard/focus, original PDF, source switching, comparison, financial, follow-up, footer, no overflow/layout shift',
+            'selectable plain prose, grouped/single disclosures, basis isolation, multi-source, keyboard/focus, original PDF, financial figures, follow-up, no overflow',
         }),
       )
       await context.close()
