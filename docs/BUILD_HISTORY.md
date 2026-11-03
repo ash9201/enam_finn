@@ -1,5 +1,24 @@
 # Build history summary
 
+### Final submission-readiness documentation (3 November)
+
+- Read the local four-page challenge and three-page glossary; mapped mandatory scope,
+  illustrative examples and owner-only delivery items. Owner confirmed extension to
+  3 November EOD and the current Free hosting/provider plans. No history export was recreated.
+- Replaced the phase-log README with the evaluator guide, source/refresh matrix,
+  architecture, setup, exact model roles, partial indexing and explicit limits.
+  Updated covering note/checklist and clarified superseded statements without deleting history.
+- Security: 50 reachable commits / 611 blobs / 7.8 MB and current tracked files scanned;
+  no configured private credential or common key-format findings. Backup ignore rules
+  added. No force-push, secret rotation or infrastructure change was required.
+- Relevant local tests: 184 pass, production build/search/secret checks pass. First
+  20-second cold liveness probe timed out; read-only 75-second retry: 19 PASS / 0 FAIL /
+  2 explicit SKIP. Physical phone review/email attachments remain owner actions.
+- Live light-desktop/dark-mobile smoke checks passed for all three pages, 15 companies
+  and source verification, with zero generated jobs/page errors. Scheduled workflows
+  are active, but the observed filing completion was hours behind configured cadence;
+  the actual time is retained in README/checklist. No source/model/indexing runs started.
+
 ### Research results presentation (3 November)
 
 - Grouped the selected quarterly result's disclosed items under one Additional

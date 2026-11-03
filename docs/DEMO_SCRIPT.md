@@ -1,5 +1,8 @@
 # FINN demo: approximately 90 seconds
 
+Current scope and source limits: [README](../README.md). This walkthrough is optional
+backup, not a requirement to record a new video before submission.
+
 Open https://finn-web-yb14.onrender.com on a phone. Use a fresh browser session and
 inspect the displayed source dates rather than expecting a particular alert forever.
 
@@ -7,8 +10,8 @@ inspect the displayed source dates rather than expecting a particular alert fore
 | --- | --- | --- |
 | 0–15 s | Open Briefing, inspect a price/volume signal and one filing. | Investor attention, completed-session dates, explainable priority and direct sources. |
 | 15–30 s | Expand routine filings; switch 24 hours to seven days; adjust alert thresholds. | Useful Push controls and retained local preferences. |
-| 30–55 s | Investigate INFY, POLYCAB or CCL. Open a claim's evidence drawer and its original PDF. | Concise Pull research, exact excerpt, page number, source link and honest metadata coverage. |
-| 55–75 s | On INFY, inspect the earlier-statement/later-evidence panel and both citations. | Management narrative checked against evidence; incomplete target-period support yields “not yet assessable.” |
+| 30–55 s | Investigate INFY, POLYCAB or CCL. Open a View evidence chip and its drawer and its original PDF. | Concise Pull research, exact excerpt, page number, source link and honest metadata coverage. |
+| 55–75 s | On CCL, use Track management statements and inspect the earlier/later panel and both citations. | Management narrative checked against evidence; incomplete target-period support yields “not yet assessable.” |
 | 75–90 s | Ask a suggested question or enter an NSE ticker. Show progress if uncached. | Same generic discovery/retrieval pipeline; specific errors rather than invented answers. |
 
 Prepared answers load independently of the API. A sleeping API can take about a
@@ -45,8 +48,7 @@ See [verified real-source cases](EVIDENCE_WORKFLOW.md).
 
 Optional financial segment: open POLYCAB → **Quarterly results**, compare the three
 reported quarter columns, inspect a QoQ calculation, and open either source figure.
-Switch accounting basis to see explicitly labelled restated comparatives. CCL shows
-why source validation matters: damaged native cells remain missing. EBITDA remains
-unreported in these filings. Ask about a figure to investigate primary company
+Switch accounting basis to see explicitly labelled restated comparatives. CCL demonstrates bounded recovery of damaged native cells, with unresolved values
+still unavailable. EBITDA is shown only where actually reported and verified. Ask about a figure to investigate primary company
 commentary, keeping other-period statements distinct from proven quarter drivers.
 See [quarterly policies and verified examples](QUARTERLY_RESULTS.md).

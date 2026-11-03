@@ -56,7 +56,7 @@ requests retain the persisted job/polling contract. Prepared-answer workers are
 separate from source acquisition. Ordinary questions reuse dated documents; explicit
 refresh checks for new sources. These changes supersede older timing/cache assumptions.
 
-Claims and citation chips open the same evidence panel: selected claim, exact stored
+Answer prose is ordinary selectable text. Dedicated citation chips open the evidence panel: selected claim, exact stored
 source passage, original document, PDF page, dates and original PDF link. It is a right
 drawer on desktop and a scrolling bottom sheet on mobile, with a persistent follow-up
 action, keyboard dismissal, focus restoration and background-scroll locking. Both
@@ -137,7 +137,9 @@ commentary and distinguishes repetition from delivery. Follow-ups additionally w
 quotes ending mid-sentence, which source review exposed in an early generated result.
 Citation existence and chronology
 checks do not mechanically prove semantic support; source review remains necessary.
-Financial table comparisons remain disabled.
+Unvalidated free-form financial table comparisons remain disabled. The approved
+[quarterly/numerical pathways](QUARTERLY_RESULTS.md) now support verified figures;
+that later work supersedes the original narrative-only scope.
 
 ## Verification: 31 October 2026
 

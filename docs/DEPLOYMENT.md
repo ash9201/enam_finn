@@ -1,8 +1,12 @@
-# Milestone 0: Render setup
+# Deployment and operational checks
 
-The user has deployed both services, and dependency, browser/CORS and public-cache
-checks pass. This guide records how the services are configured. The existing URLs
-remain in local configuration; no hostname is invented. See [acceptance](ACCEPTANCE.md).
+Current evaluator entry point: [README](../README.md). The active API is
+`https://finn-api-source-test.onrender.com` (Singapore), frontend
+`https://finn-web-yb14.onrender.com`, repository `ash9201/enam_finn`, branch `main`.
+The owner confirmed API Free / static frontend / Supabase Free / Gemini free quota
+on 3 November; billing dashboards are not available to the agent. This setup guide
+preserves the original service-creation recipe; redeploy existing services rather
+than creating another regional test API. See [final checklist](RELEASE_CHECKLIST.md).
 
 ## 1. Push the source
 
@@ -34,7 +38,7 @@ Backend environment variables:
 | `GEMINI_API_KEY` | Existing key from `.env.local` |
 | `GEMINI_LITE_MODEL` | `gemini-3.5-flash-lite` |
 | `GEMINI_REASONING_MODEL` | `gemini-3.8-flash` |
-| `FINN_ENABLE_SEMANTIC_SEARCH` | `false` |
+| `FINN_ENABLE_SEMANTIC_SEARCH` | `true` on the active API; `false` for a new unprepared database or keyword rollback |
 | `SUPABASE_URL` | Project URL, locally named `NEXT_PUBLIC_SUPABASE_URL` |
 | `SUPABASE_SECRET_KEY` | Server-only secret; never prefix it `VITE_` or `NEXT_PUBLIC_` |
 | `SUPABASE_PUBLISHABLE_KEY` | Publishable key |

@@ -1,5 +1,10 @@
 # FINN implementation plan
 
+Historical approved design and estimates. For the final implemented scope, exact
+model roles and partial coverage, use [README](../README.md) and the
+[final checklist](RELEASE_CHECKLIST.md). The owner confirmed a 3 November EOD extension
+to the original deadline recorded below.
+
 Status: approved direction with the user's retrieval/extraction amendments incorporated.
 Milestone 0 dependency/deployment checks have been verified and the user has authorised
 continuation. The first working prototype now includes portfolio Push, primary-source

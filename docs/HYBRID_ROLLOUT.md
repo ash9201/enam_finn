@@ -1,10 +1,15 @@
-# Production hybrid rollout ? 2 November 2026
+# Production hybrid rollout - 2 November 2026
 
 The owner applied `0011_production_hybrid_scope.sql` and enabled the active Singapore
 Render API with `FINN_ENABLE_SEMANTIC_SEARCH=true` and
 `GEMINI_EMBEDDING_MODEL=gemini-embedding-001`. The embedding API was verified live.
 The publishable key cannot read the search-document view or invoke the inventory RPC.
 A stale-body batch write was rejected without changing a chunk.
+
+Read-only recheck on 3 November: 3,299 / 20,028 current chunks, 17 / 75
+fully indexed documents, 21 collected companies. CCL/GOKEX/V2RETAIL remain complete;
+other companies retain keywords. No backfill was started for this check. Older counts
+below are explicitly dated snapshots, not claims of full-corpus indexing.
 
 ## Implementation
 
@@ -155,7 +160,7 @@ The flag means **hybrid when this company's active index is complete**. It does 
 force semantic retrieval over partially embedded documents. Rollback is the same API
 variable set to `false`, followed by a deploy. Stored vectors survive rollback.
 
-## Current active-manifest coverage
+## Historical 31 October active-manifest coverage
 
 | Company | Ready / total chunks | New research mode |
 | --- | ---: | --- |
@@ -219,7 +224,8 @@ prioritising these companies, since alphabetical unprepared corpora can consume
 the allowance first.
 
 With production enabled, normal company ingestion/reuse also schedules bounded
-background backfills. This requires a request; there is no midnight scheduler.
+background backfills. At that 31 October checkpoint this required a request; the daily maintenance
+workflow was added later, as described in the current section above.
 Free Render sleep/restarts can interrupt a worker, so the CLI is preferable for a
 deliberate bulk pass. No additional backfill is required before using the two ready
 companies today. Incomplete companies remain fully usable through keyword research.

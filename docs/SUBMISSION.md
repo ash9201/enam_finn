@@ -1,71 +1,54 @@
-# Submission draft
+# Covering email draft - owner review required
+
+To: **assessment@enam.com**
 
 Subject: **ENAM - IIT screening - 2027**
 
 Hi ENAM team,
 
-I built FINN, a mobile-first attention inbox and primary-source research tool.
+Please find my FINN submission for the AI Engineer Build Challenge:
 
 - Prototype: https://finn-web-yb14.onrender.com
 - Repository: https://github.com/ash9201/enam_finn
-- AI build history: [add the redacted conversation export or share links]
-- Demo recording: [attach a short phone-sized walkthrough]
+- AI build history: **[attach the redacted Markdown conversation export / insert its share link]**
+- Optional demo backup: **[attach/link only if including a reviewed recording]**
 
-The prototype follows 15 NSE companies. It prioritises real exchange filings, collapses
-routine notices, and applies configurable EOD price/volume rules. From a filing or a
-company ticker, investors can ask for research grounded in annual reports and call
-transcripts, with original-source links and PDF-page quotes. Three prepared companies
-use the same discovery/extraction/retrieval pipeline as an unfamiliar ticker.
+FINN is an investor attention inbox with evidence-backed company research. Briefing
+prioritises exchange announcements across a 15-company NSE watchlist, retains routine
+filings and applies configurable EOD price/volume rules. Portfolio makes company activity
+and dated share prices easy to compare without inventing investment returns.
 
-The narrative/evidence example puts an earlier management statement beside later call
-evidence. It deliberately withholds a delivery verdict when a completed, comparable
-target period is not established. This shows the distinction between reading management
-and evaluating what the evidence can support.
+Research uses original annual reports, call transcripts and quarterly filings. Evidence
+buttons reveal source passages/pages and support contextual investigation across documents.
+Quarterly comparisons and common numerical questions use validated figures and deterministic
+arithmetic; missing or incompatible data remains unavailable. Management-statement tracking
+separates repetition, progress and outcomes rather than forcing a delivery verdict.
 
-Quarterly results add source-validated figures and deterministic QoQ/YoY changes,
-with accounting-basis controls and evidence for each figure and calculation. POLYCAB
-validates cleanly; bounded image recovery now restores CCL native-damaged cells. All 15
-portfolio companies have some verified figures, with explicit remaining gaps. EBITDA stays
-unavailable where the primary filing does not report it.
+I chose React/TypeScript, FastAPI and Supabase, with Render hosting and GitHub Actions
+updates. Company-filtered PostgreSQL keyword search combines with Gemini/pgvector/RRF
+only when a company's index is complete. Partial indexing, free-tier quotas and source
+failures retain keyword research and explicit limitations. Hash/version-aware caches,
+private source storage and bounded model use keep the implementation focused and economical.
+Screener supplies primary-document links, not secondary research conclusions.
 
-I used React/TypeScript, FastAPI, Supabase, and free Render hosting. PostgreSQL keyword
-retrieval is complemented by a feature-flagged Gemini/pgvector/RRF implementation with
-incremental indexing and keyword fallback. The small CCL study and a later unprepared
-GOKEX check with frozen settings improve early reference-page recall, with a modest
-observed answer-quality difference and higher latency. Production enables hybrid for
-complete company indexes, with keyword fallback otherwise; incomplete backfills remain
-bounded by the free allowance. Gemini Flash-Lite handles grounded explanations, bounded financial image extraction
-and the reviewed management comparisons. Completed indexes use hybrid without making
-keyword research wait for bulk backfills.
-GitHub Actions drives automatic source updates; its full filing scan and 15-company
-price refresh were verified. A tested Supabase Cron fallback is retained but inactive.
+I deliberately left out trading/P&L, live prices, broad OCR, biographies, external
+notifications and a full four-quarter guidance dashboard. Next I would broaden independently
+verified extraction and longitudinal management analysis, measuring retrieval benefits
+before increasing complexity. The README explains actual coverage, schedules and limits.
 
-Reliability choices include source hashes, page-level provenance, exact source-slice
-citation checks, RLS/private PDFs, saved research, visible fetch failures, and a clearly
-labelled recorded snapshot. Figures with unresolved periods, units, or accounting basis
-do not become financial comparisons.
-
-I left out trading, P&L, real-time prices, broad OCR, voice, and external notifications.
-Next I would expand independently verified financial extraction and four-quarter
-statement/outcome tracking, and retain hybrid retrieval only where tests show a benefit.
-Frontend build and secret checks pass; the final backend regression covers 190 passing tests. Deployed
-phone/desktop browser checks also pass. Free-hosting cold starts and upstream failures
-remain visible.
-When Yahoo omits a completed session's closing price, FINN checks NSE's exact-date
-official daily file, validates the symbol/ISIN, and displays that source explicitly.
-An older response cannot overwrite a newer saved trading session.
+The responsive demo, builds and regression checks pass. The Free Render API can need
+about a minute to wake after idle time; the static frontend and saved data are separate.
+Please allow the first API request to wake it and retry if necessary.
 
 Best,
-[Your name]
+
+**[Your name]**
 
 ---
-Before sending: verify the prototype on a phone/incognito session; ensure reviewers can
-access the repository; include the actual build-history export and recording; remove
-placeholders above. This file is a draft, not a sent email.
 
-Technical acceptance: hosted CI and a real full-source GitHub run passed, and the
-[scheduler switch](GITHUB_AUTOMATION.md) is complete. Supabase fallback schedules
-are inactive. Live unfamiliar-ticker discovery passes on
-Singapore and the frontend uses that API. Final manual items are the real-device
-review, name/attachments, and the required redacted conversation export; see
-[RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). This draft has not been sent.
+This draft has not been sent. Before sending, remove unused optional lines, replace
+placeholders, attach the **already-exported** and redacted conversation history, and
+check the link on a physical phone. Do not attach private `.env`/SQL/artifact dumps.
+The owner confirmed an extension to **3 November 2026 EOD**; the original PDF says
+1 November. See the [final checklist](RELEASE_CHECKLIST.md). No final delivery is implied
+by a successful GitHub push.

@@ -20,3 +20,9 @@ Thumbs.db
 .DS_Store
 # Keep the supplied assessment documents local unless their owner approves publication.
 /*.pdf
+
+# Avoid accidentally publishing editor/configuration backup copies.
+*.bak
+*.backup
+*.orig
+*~

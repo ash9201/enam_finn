@@ -1,5 +1,11 @@
 # Research workspace redesign — 1 November 2026
 
+Final presentation update (3 November): answer/comparison prose is selectable text;
+View evidence buttons retain source inspection. Quarterly disclosed context is grouped
+per selected result/basis with one qualification. See [README](../README.md); the
+phase-specific implementation and validation record below is retained.
+
+
 Research now uses the shared compact layout, with company discovery, a custom
 question and four immediate actions together. Backend identity, retrieval,
 generation, citation validation and financial calculations are unchanged.

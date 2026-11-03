@@ -1,5 +1,13 @@
 # GitHub Actions recovery and scheduler switch
 
+Current verification (3 November): scheduled portfolio sync and bounded indexing
+runs on `main` succeeded. Filings run at 17/47 UTC minutes, EOD at 12:45 UTC
+weekdays; indexing maintenance is separately gated and runs at 08:45 UTC daily.
+Both Supabase fallback schedules were rechecked inactive. The 31 October recovery
+record below preserves the original billing resolution/test counts; current scope
+and variables are in [README](../README.md).
+
+
 The research-experience release adds **Resume document indexing**, daily 14:15 IST
 and manual dispatch on standard ubuntu-latest. The owner configured GEMINI_API_KEY
 and FINN_ENABLE_SEMANTIC_BACKFILL=true; existing Supabase secrets are reused. It resumes

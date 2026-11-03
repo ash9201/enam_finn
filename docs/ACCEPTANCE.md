@@ -1,5 +1,17 @@
 # Working-prototype acceptance
 
+## Final submission-readiness pass - 3 November 2026
+
+The final [README](../README.md) is the evaluator entry point; the
+[checklist](RELEASE_CHECKLIST.md) maps the seven locally read PDF pages to features
+and remaining owner deliverables. Current source passed 336 hosted regression tests;
+the final read-only check passed 184 relevant local tests/build/scan and, after the
+expected cold-start retry allowance, 19 live checks with zero failures and two
+explicit skips. No source acquisition, model generation or indexing was rerun.
+The original 1 November deadline was extended to 3 November EOD according to the owner.
+All earlier sections below retain their dated phase-specific results.
+
+
 ## Focused event-review and ordering follow-up — 2 November
 
 Briefing now uses event-level receipts/counts, stable company/chronology orders,
@@ -92,7 +104,7 @@ against Render, then repeats native cross-page checks without model generation.
 
 The phase records below are historical, with their original test counts and scope.
 
-**Briefing redesign (1 November, latest):** 209 backend and 12 frontend model tests
+**Briefing redesign (1 November phase):** 209 backend and 12 frontend model tests
 pass. Four targeted desktop/mobile Light/Dark scenes verify company/event/source
 grouping, combined filters, review/undo, chronology, independent EOD thresholds and
 keyboard/overflow behavior. Cached official-source detail and explicit headline-only
@@ -103,7 +115,7 @@ titles, shared spacing and System Status. Desktop/mobile Light/Dark checks cover
 section state/history, company links, figure evidence, keyboard access and reserved
 navigation space. Build and credential scan pass. [Scope and checks](SHARED_LAYOUT.md).
 
-**Investor QA (1 November, latest):** 190 backend tests pass, production build and
+**Investor QA (1 November phase):** 190 backend tests pass, production build and
 bundle credential scan pass. Reproduced and fixed duplicate cached NTPC results;
 four affected browser scenes verify one financial section, both bases, reserved
 navigation space, SUNPHARMA's working figures and interpretations, evidence controls,
@@ -111,7 +123,7 @@ unavailable-basis messaging and no page errors/overflow. Owner research question
 reviewed against real primary documents. M&M numeric contributions remain explicitly
 unverified. [Actual checks and limits](INVESTOR_QA.md).
 
-**Research experience release (31 October, latest):** **173 backend tests pass**,
+**Research experience release (31 October phase):** **173 backend tests pass**,
 TypeScript/Vite build and privileged-credential asset scan pass. One consolidated
 390x844 / 1440x1000 Light/Dark browser matrix passes contrast, overflow, figure evidence,
 source switching, original statement preview, context removal, a real follow-up and

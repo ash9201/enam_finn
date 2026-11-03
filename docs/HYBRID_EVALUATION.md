@@ -1,4 +1,4 @@
-# Retrieval evaluation ? current rollout and historical studies
+# Retrieval evaluation - current rollout and historical studies
 
 ## 2 November production-scope verification
 
@@ -12,7 +12,7 @@ retrieved but are excluded from Recall; this is not a new abstention-quality sco
 | Matched keyword | 0.5714 | 0.8571 | 688 ms |
 | Hybrid | 0.9286 | 0.9286 | 1,881 ms |
 
-Latency: 27 measurements per method (9 questions ? 3 alternating-order repeats),
+Latency: 27 measurements per method (9 questions x 3 alternating-order repeats),
 with stored query embeddings and zero embedding-provider calls. Measurements include
 workspace-to-Supabase round trips, not generation or a Render latency SLA. Some
 individual held-out questions gain no Recall@10; the small set supports retaining
@@ -108,7 +108,7 @@ this was not a blinded or independently adjudicated study.
 Semantic search improves how early the known supporting pages appear here. It did
 **not improve reviewed final-answer quality** over corrected keyword retrieval, and
 adds about 0.94 seconds to warmed retrieval. Broader evidence is needed before claiming
-an answer-quality advantage. The default rollout flag remains off; the implementation
+an answer-quality advantage. At this initial evaluation the default rollout flag was off; the implementation
 supports a controlled trial on fully indexed companies and immediate keyword rollback.
 
 ## Source review and remaining issues
@@ -122,7 +122,8 @@ after these checks; generation used the same unchanged model/prompt for both met
 
 Both demand answers still need clearer attribution of management observations. Exact
 quotes and named-metric matching do not prove every paraphrase, causal statement or
-unit/period relationship. Financial table comparisons remain disabled. The review
+unit/period relationship. Unverified financial table comparisons remained disabled in this study; current
+approved numerical support is documented in [quarterly results](QUARTERLY_RESULTS.md). The review
 records this limitation rather than treating a valid quotation as complete entailment.
 
 ## Repeat the work
@@ -155,7 +156,7 @@ The quota RPC remains server-only, and embedding-table security checks pass. Cac
 CCL hybrid retrieval worked with zero provider calls; the deployed keyword job also
 completed successfully. After the daily reset, one bounded 24-chunk resume test
 advanced INFY from 264 to 288 of 1,125 chunks. This updates indexing progress, not the
-frozen evaluation scores above. Production's semantic flag remains off.
+frozen evaluation scores above. Production's semantic flag was off at this historical checkpoint; the later selective rollout is documented above.
 
 
 ## New-company validation after the quota reset
@@ -210,9 +211,11 @@ A font control character caused both methods to lose one paraphrased quotation u
 strict source-slice validation. A separate default-business answer included an excerpt
 starting inside a word at an overlap boundary; its fact was checked against the full
 primary page. Whole-word excerpts, cleaner attribution and less redundant generation
-remain worthwhile improvements. Financial table comparisons remain disabled.
+remain worthwhile improvements. Unverified financial table comparisons remained disabled in this study; current
+approved numerical support is documented in [quarterly results](QUARTERLY_RESULTS.md).
 
-The production flag remains off. These results support a controlled trial on complete
+At the time of this historical study the production flag remained off. The later
+[production rollout](HYBRID_ROLLOUT.md) enables complete indexes with keyword fallback. These results support a controlled trial on complete
 indexes, while broader coverage and independent human review remain unfinished.
 
 Reproduce the added check after the CCL collection/tuning commands above:
