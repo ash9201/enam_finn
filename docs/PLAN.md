@@ -1,145 +1,175 @@
-# FINN implementation plan
+# Architecture and technical design
 
-Historical approved design and estimates. For the final implemented scope, exact
-model roles and partial coverage, use [README](../README.md) and the
-[final checklist](RELEASE_CHECKLIST.md). The owner confirmed a 3 November EOD extension
-to the original deadline recorded below.
+FINN combines an investor attention inbox with primary-source company research.
+Briefing answers what deserves investigation; Research keeps the investor close to
+the underlying documents; Portfolio compares activity across a 15-company mock watchlist.
+The [README](../README.md) introduces the product and deployment.
 
-Status: approved direction with the user's retrieval/extraction amendments incorporated.
-Milestone 0 dependency/deployment checks have been verified and the user has authorised
-continuation. The first working prototype now includes portfolio Push, primary-source
-Pull, three prepared companies, and one conservative narrative/evidence comparison.
-One-company acceptance preceded scaling. Hybrid retrieval is implemented behind its
-rollout flag; the [measured CCL evaluation](HYBRID_EVALUATION.md) reports better early
-reference-page recall, equal reviewed answer quality and added latency. Broader indexing
-is limited by the free-tier input allowance. Keyword retrieval is working. Model timeouts and fallback choices
-are preserved in the evidence, not hidden behind fabricated answers.
+## Application boundaries
 
-## Requirements and product
+The React/TypeScript frontend is a Render Static Site. It reads intended public
+Supabase content directly so Briefing, Portfolio and published research can remain
+useful while the Python API wakes. FastAPI handles acquisition, research jobs,
+evidence verification and privileged writes. Supabase stores company identities,
+filings, EOD bars, document versions, pages/chunks, answers, jobs, vectors and usage.
+Private PDFs live in Supabase Storage rather than Render's ephemeral filesystem.
 
-The four-page main brief and three-page glossary remain the source of requirements.
-Deliver a mobile-first working prototype, GitHub repository, AI build history, and
-covering note. The deadline is Sunday, 1 November 2026; the brief supplies no cutoff
-time. Submit to assessment@enam.com with subject `ENAM - IIT screening - 2027`.
+Persisted jobs and polling avoid a separate queue service or WebSocket layer.
+Acquisition is serial and answer/indexing workers are bounded to respect free-instance
+memory and provider quotas. Restart recovery can reuse saved documents; this is not
+a distributed worker system that guarantees every in-process task completes.
 
-- Portfolio: 15–20 NSE/BSE-listed companies; initially 15 across sectors and sizes.
-- Push: proactively surface important portfolio changes, preserving access to routine
-  filings. Pull: company research grounded in annual reports and call transcripts.
-- Integrate EOD price/volume, exchange announcements, and primary company documents.
-- Use the same generic NSE ticker discovery and analysis pipeline for prepared and
-  unfamiliar companies. Do not introduce a demo-company allowlist.
-- The eight research sections, exact announcement categories, professional biographies,
-  results comparisons, and four-quarter tracker are examples rather than a checklist.
-- Evaluate judgment, creativity, product sense, architecture, reliability, and efficient
-  model use. Presentation should make the investor's task easier.
+The watchlist is APLAPOLLO, BHARTIARTL, CCL, HDFCBANK, INFY, ITC, KPITTECH, LT,
+M&M, NTPC, POLYCAB, RELIANCE, SUNPHARMA, TATASTEEL and TITAN. Research is not restricted
+to that list. Prepared and unfamiliar companies use the same resolution, discovery,
+ingestion and answering code.
 
-Keep the agreed attention-inbox direction over a research-first or chat-first product.
-Use Briefing, Research, and Portfolio navigation; progressive disclosure and concise
-cards with source links. Push delivery is in-app only.
+## Company identity and source acquisition
 
-Briefing defaults to 24 hours with seven-day/custom windows. Important items come first;
-routine items expand on demand. Separate actual results from meeting/publication
-notices. Price/volume alerts default to ±4% and 2× the prior 20 complete sessions' mean
-volume, excluding the current session. Preferences are browser-local. Show coverage,
-failed fetches, completion timestamps, and EOD session dates. Scheduled retrieval is not
-instantaneous exchange delivery.
+Resolution uses a verified persistent NSE directory snapshot, bundled official capture
+and trusted previously resolved identities. Symbol/ISIN conflicts are guarded; matching
+names alone cannot authorize another issuer's evidence. Browser autocomplete supports
+names, symbols, aliases, histories and minor typos; ambiguous matches require selection.
 
-Investigate opens company-scoped research from a card. Provide a business summary,
-selected dated financial facts, management commentary, uncertainties, suggested
-questions, and free-text questions. Citations reveal excerpts, original links, document
-dates, and PDF page numbers. First prove **one company end to end**, then prepare three
-companies with a recent annual report and two transcripts each.
+The source workflow attempts an official directory refresh at most daily when due.
+Malformed responses, HTTP 403 and storage failures preserve the last-known-good snapshot.
+Backend snapshot memory has a 15-minute TTL; the browser memoizes its loaded directory
+for the page lifetime. Source/check dates remain available in secondary details.
+Previously verified companies do not need a successful live directory request per question.
+Unknown listings can remain unresolved until verified data is available.
 
-Keep narrative versus evidence as the first differentiator after reliable Push/Pull:
-earlier statement → later observation → interpretation, with citations on both sides.
-Use compatible metrics, periods, currencies, units, and accounting bases. Distinguish
-an explicit target from commentary; return `not yet assessable` when appropriate.
+Screener is used only as an index of annual-report and earnings-call links. FINN
+downloads original company/exchange PDFs; broker reports, news, Screener-generated
+summaries/tables and model-memory company facts are excluded from Pull evidence.
+Initial acquisition targets one annual report and two calls; optional earlier-history
+acquisition requests two reports and four calls where available. This is a bounded
+active manifest, not an unlimited archive or scheduled whole-market document crawl.
 
-## Architecture and retrieval amendment
+Documents retain original/final URLs, hashes, fetch times, source dates and physical
+PDF pages. Discovery labels and fetch dates are not verified publication dates.
+Annual-report/transcript extraction is bounded to 50 MB and 1,600 pages. PDFium speeds
+large narrative extraction; pypdf layout and pdfplumber preserve financial-page/table
+candidates. Native handles are closed and serialized where required. Candidates are
+not approved financial facts. Quarterly statement processing has its own tighter bounds
+and [financial validation pathway](QUARTERLY_RESULTS.md).
 
-Retain React + TypeScript + Vite + Tailwind, Python 3.12 + FastAPI/Pydantic, Supabase
-Postgres/Storage, Render static frontend/free Python API, and GitHub Actions ingestion.
-The frontend reads explicitly public cached outputs; all writes and privileged keys
-remain server-side. Keep a visibly dated snapshot fallback, never a silent replacement
-for a failed live fetch. Render cold starts and Supabase inactivity are known free-tier
-constraints. Do not add another vector database or a RAG orchestration framework.
+## Research, generation and evidence
 
-Design retrieval for PostgreSQL **full-text search + pgvector + metadata filters +
-Reciprocal Rank Fusion (RRF)**, all inside Supabase:
+`POST /research` resolves a company, reuses or acquires its corpus, retrieves evidence,
+generates structured claims and validates them. It returns a completed cached answer
+or a persisted job identifier for polling. Prepared-answer GETs provide a read-only
+published path; even a cached Research POST may create a job and schedule indexing.
 
-1. Implement and verify keyword retrieval first, with company/document-type/date filters.
-2. Reserve nullable embeddings with a recorded model, dimensionality, and document hash.
-   Never mix incompatible embedding models or dimensions. Keep numerical table evidence
-   attached to its table/header context rather than embedding isolated cells.
-3. After the core works, test Gemini embedding access/quota, then add cosine retrieval
-   under the same metadata filters. Use document/query task types as supported by the
-   selected embedding model. Embedding generation is optional and separately budgeted.
-4. Fuse independently ranked keyword and semantic candidates using
-   `sum(1 / (60 + rank))`, equal initial weights, deterministic ties, then select the
-   final evidence set. Do not combine raw ts_rank and cosine scores directly.
-5. Missing embeddings, quota errors, or a disabled semantic flag retain functioning
-   keyword retrieval and report the actual retrieval mode. Empty keyword evidence must
-   abstain, not invite a model-memory answer.
-6. Compare keyword and hybrid search on the same small, manually labelled company-scoped
-   question set. Cap initial semantic work at about 90 minutes; retain it only if it
-   improves evidence recall/support without unacceptable latency or quota use.
+Keyword and optional hybrid search share company/document filters. Investor-aspect
+detection can supplement the main query with up to four focused keyword searches
+within the ten-passage budget. Requested aspects remain explicit in the answer plan;
+one bounded repair can address missing coverage from the same evidence. Missing
+support becomes a coverage limitation rather than a guessed numerical contribution.
+Business-model answers distinguish commercial mechanics from accounting policies.
+See [retrieval implementation](HYBRID_RETRIEVAL.md).
 
-The minimum later interfaces remain company search, time-filtered cached briefing,
-`POST /research`, persisted job status, and results with claims/citations/coverage/as-of.
-Job stages are discovery, extraction, analysis, completed, and failed. Use polling.
+Current ordinary generation, quarterly text/image extraction and management comparisons
+use `gemini-3.5-flash-lite`. `gemini-3.8-flash` remains a reasoning-model configuration
+option, not the current comparison runtime. Embeddings use `gemini-embedding-001`.
+Programming handles identity, dates, arithmetic, deduplication, thresholds, cache keys
+and schema/source validation. Downloaded text is untrusted input, not instructions.
 
-## Extraction, source integrity, and AI
+Each accepted claim binds to stored company-owned evidence. Quote normalization returns
+an original source slice; it cannot introduce new digits. Named-metric checks prevent,
+for example, a margin quotation from supporting an added EBITDA claim. General narrative
+generation cannot turn ambiguous table text into approved financial comparisons.
+Exact quotation presence does not prove semantic entailment; reviewed examples and
+conservative abstention supplement automated checks.
 
-Use pypdf for page-aware text and pdfplumber for table candidates. Preserve raw PDF
-hash, original and final URL, fetch time, source publication date (nullable), document
-type, company, PDF page, table bounding box, cell matrix, row/column headers, nearby
-caption/footnotes, period labels, currency/unit labels, and accounting-basis evidence.
-Unknown metadata remains unknown; the fetch date is not the reporting/publication date.
+### Evidence-first follow-ups
 
-Financial facts require evidence locating the value, metric, reporting period, unit,
-currency, standalone/consolidated basis, and actual/guidance status. Extraction produces
-candidates, not approved financial facts. Ambiguous headers, broken rows, conflicting
-periods, or unresolved units block numerical comparison. Preserve negative signs,
-parentheses, nil versus missing, percentages versus percentage points, and restatements.
-No financial-comparison generation from unvalidated table cells. Initially mark scans
-requiring OCR unsupported and expose that limitation.
+Answer prose is selectable text. Dedicated evidence chips open a desktop drawer or
+mobile bottom sheet with the exact passage, PDF page, date and distinct external PDF
+link. Source switching, keyboard dismissal, focus restoration and scroll locking keep
+inspection usable. Typed validation errors are distinct from temporary storage outages;
+unverified saved context cannot authorize a follow-up.
 
-Use Screener only to discover original report/transcript links, not its AI commentary
-or standardised tables as substitutes for primary evidence. Fetch NSE RSS/dated filings
-and accessible BSE/company-IR documents. Deduplicate identical documents and preserve
-revisions. Fetch/capture errors remain errors; cached/historical results carry their
-original dates and explicit labels. Do not bypass access controls.
+The drawer makes one bounded 15-second verification request, cancelled on source
+changes or close. A temporary outage retains labelled saved evidence and a retry;
+invalid ownership/page/hash references fail validation. Missing date metadata and a
+failed page preview do not independently invalidate a verified stored passage.
+Verification rechecks stored source evidence, not external PDF availability or model output.
 
-Gemini 3.5 Flash-Lite handles bulk classification/extraction and ordinary grounded
-answers. Gemini 3.8 Flash is preferred for the deeper comparison, with a bounded,
-explicit Flash-Lite fallback when unavailable. Actual model identity is recorded and
-the same source checks apply. The user reports 15 RPM/500
-RPD and 5 RPM/20 RPD respectively; verify real access without claiming a probe proves
-full daily capacity. Use structured output, bounded inputs/concurrency, retry delays,
-and document/task/prompt/model-aware caching. Respect zero budget and do not enable
-billing. Check exact-quote citation support; manually review semantic entailment.
+The client passes references rather than an authoritative quote:
 
-Programming handles identities, financial arithmetic, units, time windows, alerts,
-sorting, deduplication, source allowlisting, and schema validation. Treat source content
-as untrusted input; unsupported answers abstain. No fabricated figures or model-memory
-company facts.
+```json
+{
+  "symbol": "CCL",
+  "question": "What did later commentary say about this statement?",
+  "context": {
+    "research_id": "<answer UUID>",
+    "citation_id": "<citation UUID>",
+    "claim_index": 0,
+    "intent": "later"
+  },
+  "include_history": false,
+  "refresh": false
+}
+```
 
-## Milestones and acceptance gates
+The server resolves the saved claim, company and citation membership, then verifies
+the source quote/page version. A read-only evidence endpoint exposes the selected
+passage without returning the entire private document. Intent can be `question`,
+`repeated`, `later` or `perspective`. The anchor stays available while retrieval gives
+other documents space. Repetition excludes known duplicate calls. Later-evidence
+investigation requires independently verified chronology and abstains before generation
+if no suitable later source exists. A general follow-up does not require a dated anchor.
+Context can be removed to return to general company research.
 
-| Milestone | Work | Acceptance |
-| --- | --- | --- |
-| 0 (verified) | Feasibility and deployment foundation | Public price/feed/document access; one annual report and transcript discovered generically for one ticker; page/table extraction inspected; minimal model calls; Supabase DB/vector/FTS/storage probes; health endpoints/static frontend; deployed checks. Record pass/fail/blocked per dependency. |
-| 1 (working) | One-company research pipeline, then data scaling | Prove discovery → extraction → metadata-filtered keyword retrieval → grounded cited answer and repeatability for one company before expanding to 15 portfolio/three research companies. |
-| 2 (working) | Push | Windows, collapsed routine filings, hand-checked alert arithmetic, visible missing/stale data, idempotent ingestion. |
-| 3 (working; hybrid behind flag) | Pull and optional hybrid retrieval | Same generic pipeline for two previously unprepared tickers; invalid/missing sources abstain; measured retrieval results and quota limits are recorded. |
-| 4 (conservative example working) | Narrative versus evidence | One manually verified statement pair; delivery remains not assessable without a compatible completed-period outcome. |
-| 5 (verification and packaging) | Harden and package | Phone QA; throttling, unavailable/malformed documents, empty/weekend windows, restart/retry and cached-data labels; documentation, recording, build history, covering note. |
+Management tracking selects complete management speech with primary-document speaker
+roles, not analyst questions. CCL's reviewed example distinguishes reaffirmation from
+delivery. KPIT's incomplete units/full-year outcome prevent a numerical target verdict.
+This is statement-level analysis, not a comprehensive management score or guidance ledger.
 
-Milestone 0 requires actual dependency evidence, not just scaffold code or documented
-API capabilities. Missing credentials/deployment access leave the gate open. Do not
-declare the milestone complete or start later work to disguise a blocker.
+## Briefing and Portfolio semantics
 
-Keep native apps, accounts, broker integration, P&L, trading, real-time ticks, voice,
-external notifications, comprehensive OCR, autonomous frameworks, and comprehensive
-research coverage out of the first prototype. Extend to four quarters/results analysis
-only after the core works. Preserve AI build history and redact secrets before sharing.
+NSE RSS supplies recent announcements; accumulated capture is not a complete archive.
+Deterministic enrichment reads bounded native PDF/XML/feed details, preserving source
+hashes, pages and individual filing identities. Grouping needs explicit relationships:
+results period; director/effective date; dividend type/record date; or call date and
+recording URL. A common PDF packet, headline or publication day is insufficient.
+NTPC's results, dividend and debt disclosures therefore remain distinct developments.
+
+Enrichment limits PDFs to 30 MB/the first eight pages and XML to 2 MB, rejecting
+declared entities. Unchanged successful source fingerprints reuse saved details;
+failed attempts wait six hours before retry. This is bounded native extraction,
+not exhaustive OCR or detection of every unannounced same-URL replacement.
+
+Review receipts are event-level and browser-local. They record meaningful source
+versions; new or changed evidence becomes Updated since review, while identical
+duplicates/rescan times do not. Undo restores prior state. Legacy filing reviews are
+imported where possible but cannot reconstruct old content versions. Review never
+reshuffles the selected chronological/company ordering.
+
+Filing windows and review/category/significance filters apply to events, retaining
+their related sources. EOD alerts are separate watchlist-wide calculations: default
+±4% daily move and 2× previous-20-completed-session average volume. Split-affected
+comparisons are suppressed. Prices are unadjusted individual share prices. Portfolio
+recent-event indicators reuse actual captured events, not speculative financial signals.
+
+## Caching, failure handling and security
+
+Cache identity incorporates relevant document hashes/scope, prompt/model/extraction
+versions, financial calculation versions and evidence context. Superseded documents
+remain for existing citations. Failed refreshes retain dated data with errors; labelled
+recorded snapshots are recovery content, never silent substitutes for successful live work.
+
+RLS keeps documents, chunks, vectors, usage and unpublished database records private;
+only intended public outputs have anonymous read policies. Privileged keys stay on
+the server. The prototype has no user authentication: possession of research/job
+identifiers enables associated API reads. It is suitable for this public-document
+demo, not confidential uploads or multi-user authorization.
+
+Shared spacing/theme tokens, compact desktop navigation and safe-area-aware mobile
+navigation serve all three views. Session-mounted views preserve drafts, filters,
+workspaces and scroll; deliberate company links open the requested company. Inactive
+views pause polling and are inert. System Status is secondary, has a return action,
+and checks connectivity rather than claiming model/source freshness.
+
+See [deployment and refresh schedules](DEPLOYMENT.md), [testing and known gaps](EVALUATION.md),
+and [chronological decisions](BUILD_HISTORY.md).

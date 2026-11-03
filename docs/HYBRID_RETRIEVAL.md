@@ -1,150 +1,122 @@
 # Hybrid retrieval
 
-**Current rollout (2 November):** production uses the existing semantic flag and
-`gemini-embedding-001` / 768 dimensions. Migration 0011 extends the same private
-index/search scope to current quarterly filings as well as the active annual-report
-and transcript manifest. See [live coverage and verification](HYBRID_ROLLOUT.md).
+FINN uses PostgreSQL full-text search and pgvector cosine similarity inside Supabase.
+Gemini embeds text; Python combines independently ranked candidates using Reciprocal
+Rank Fusion (RRF). There is no separate vector database, embedding SDK or RAG framework.
+See [evaluation](HYBRID_EVALUATION.md) for the evidence behind the settings.
 
-The implementation stays in FastAPI and Supabase. Gemini `gemini-embedding-001`
-embeds text; PostgreSQL full-text search and pgvector cosine search retrieve primary
-passages. Python combines **ranks**, not incompatible raw scores, with Reciprocal
-Rank Fusion (RRF). No embedding SDK, additional database, or RAG framework was added.
+## Search scope and ranking
 
-## Evidence and filtering
+Both branches use the private `finn_search_documents` scope: active annual-report and
+transcript manifest documents plus the latest ready extraction per quarterly source URL.
+Superseded versions remain available for existing citations, but are not mixed into
+current search. Filters include company, document kind/IDs, verified publication-date
+bounds, reporting period and JSON metadata. Unknown dates cannot satisfy date filters.
+Discovery labels remain separate from verified dates.
 
-Both branches restrict results to the requested NSE company, its ready `finn_search_documents` scope: active manifest documents plus the
-latest ready extraction per quarterly source URL. Superseded documents remain intact
-for existing citations; they are not silently mixed into current search. Optional filters cover document kind, explicit document
-IDs, verified publication-date bounds, reporting period, and JSON metadata containment.
-Unknown publication dates cannot satisfy date filters. Discovery labels remain separate
-from verified dates. Metadata does not become more trustworthy because a passage has
-an embedding.
+Cosine search is exact after company/document filtering. These per-company corpora
+do not yet justify a global approximate index and its possible post-filter recall loss.
+Measure storage, latency and recall before adding HNSW or changing chunking.
 
-Search returns the original chunk body, PDF page and source metadata. Final PDF URLs
-are resolved from server-owned document records. Existing exact-quote, numeric support,
-and financial-table guards remain in force after generation. Evaluation also added a
-conservative named-metric check: a margin quote cannot validate added EBITDA/EBIT/EPS/
-PAT/PBT claims. Cached answers with that mismatch are regenerated. Financial table
-comparisons require the separate [validated quarterly pipeline](QUARTERLY_RESULTS.md);
-ordinary narrative generation cannot invent them. The specialised narrative/evidence comparison keeps its
-conservative statement selector and chronology/metric checks; it is not relabelled hybrid.
+| Setting | Value |
+| --- | --- |
+| Candidates per retrieval branch | 30 |
+| Final evidence budget | 10 passages |
+| RRF constant | 10 |
+| Keyword / semantic weights | 1 / 2 |
+| Page diversity | At most two passages per page |
+| Document diversity | Adaptive cap; a single eligible document can fill the budget |
 
-Cosine search is exact **after** company/document filtering. Current per-company corpora
-are small enough to avoid an approximate global index and its post-filter recall risks.
-Measure before adding HNSW or changing chunking.
+For each candidate, fusion sums `weight / (k + rank)` across branches. Raw keyword
+and cosine scores are not directly comparable. Shared diversity selection follows
+fusion. Investor-aspect supplements and contextual follow-ups reuse the same company
+and source restrictions; the separate management-comparison selector retains its
+conservative speaker/chronology rules rather than claiming to be hybrid retrieval.
 
-## Embeddings and resumable indexing
+Returned passages retain original chunk bodies, PDF pages and server-owned source URLs.
+Existing quote, named-metric and unvalidated-financial-table guards still apply after
+generation. Embeddings do not validate a figure or make uncertain metadata authoritative.
+Approved financial comparisons use the [financial pipeline](QUARTERLY_RESULTS.md).
 
-- 768 dimensions; `RETRIEVAL_DOCUMENT` for passages, `RETRIEVAL_QUERY` for questions.
-  Shortened `embedding-001` vectors are normalised in Python. Invalid dimensions,
-  non-finite values, zero vectors and incomplete batches are rejected.
-- Cache namespace: model, dimensions, task, input version, SHA-256 of exact input text.
-  Query text is not stored in this cache. Raw documents stay in the existing private
-  tables/bucket; private vectors and quota accounting have RLS and no public grants.
-- Each chunk has a database-generated body hash. A conditional write rejects embedding
-  results if its text changed during the provider request. Retrieval requires the
-  current model/version/dimensions/hash; incompatible vector spaces are never mixed.
-- Batches start at 24 inputs, with actual token counting, conservative token reservation,
-  smaller batches when needed, and no silent input truncation. Completed embeddings
-  are cached before chunk updates. Retries reuse those vectors after a connection loss.
-- Shared database reservations count **individual embedded texts**, including those in
-  batches: 80 input units/minute, 850/day for bulk backfill, up to 900/day for foreground
-  questions, and 27,000 reserved tokens/minute. These are below the owner's stated
-  100/1,000/30,000 limits. Token-count HTTP calls conservatively reserve one unit too;
-  token counts are reused within
-  a worker. Daily accounting follows the provider's Pacific date. Other applications
-  using the project can still consume its allowance.
-- Minute/provider throttling waits are bounded and interruptible. Daily exhaustion or
-  unsupported input stops the run with explicit pending status. Google `QuotaFailure`
-  and `RetryInfo` distinguish a daily stop from a short throttle. Cached query vectors
-  remain usable during a provider cooldown. No paid capacity is enabled.
+## Embedding lifecycle
 
-After primary-document activation the generic ingestion path schedules indexing for
-that company. Quarterly ingestion and cached financial research also schedule it. Reused corpora also resume missing embeddings.
-One background I/O worker per API process handles these tasks. Completed chunk state
-survives restarts; another company request or the CLI resumes unfinished work. A free
-Render instance can sleep before a large backfill finishes. Use the CLI for the initial
-bulk pass; research remains usable through keyword retrieval while indexing proceeds.
+- Model: `gemini-embedding-001`, 768 dimensions, L2-normalized in Python.
+  Documents use `RETRIEVAL_DOCUMENT`; questions use `RETRIEVAL_QUERY`.
+  Invalid dimensions, non-finite/zero vectors and incomplete batches are rejected.
+- Cache identity includes model, dimensions, task, input version and exact-input SHA-256.
+  Query text is not stored in this vector cache. Vectors/cache/quota tables are private
+  under RLS, with no public grants.
+- Database-generated body hashes guard writes and reads. Conditional atomic writes
+  accept up to 32 vectors; changed text cannot receive a stale result. Retrieval never
+  mixes incompatible model/version/dimension/hash combinations.
+- Provider batches start at 24 inputs, count tokens, shrink when needed and never silently
+  truncate oversized input. Completed vectors are cached before chunk updates, so a
+  storage interruption can resume without buying the same embeddings again.
+- Generic document activation/reuse and quarterly research schedule missing embeddings.
+  Per-company leases prevent duplicate workers. Expired leases do not remain running.
+  Checkpoints survive restarts; another request, maintenance job or CLI can resume them.
+
+Shared reservations count individual texts inside a batch, not just HTTP envelopes.
+Application ceilings are 80 input units/minute, 27,000 reserved tokens/minute, 850 daily
+bulk units and 900 daily foreground units. The configured project allowance is
+100 RPM / 30,000 TPM / 1,000 daily inputs; other applications can consume it too.
+Token-count calls conservatively reserve units. Daily accounting follows the provider's
+Pacific date. Minute waits are bounded; daily exhaustion stops with resumable pending
+status rather than repeatedly retrying. Cached query vectors can survive provider cooldowns.
+
+Daily GitHub maintenance prioritizes nearly complete watchlist corpora, then other
+already collected companies, including quarterly-only companies. It does not crawl the
+NSE universe. A sleeping API may interrupt a long backfill; independent maintenance
+and persistent checkpoints avoid depending on an always-awake web process.
 
 ```powershell
 .venv\Scripts\python -m finn.embeddings --symbol CCL --status
 .venv\Scripts\python -m finn.embeddings --symbol CCL --max-batches 100
 .venv\Scripts\python -m finn.embeddings --symbol ALL --max-batches 400
-# --no-wait returns pending immediately on a quota/storage interruption.
 ```
 
-The CLI is an explicit indexing operation and can run while the rollout flag is off.
-It does not rediscover/download documents or change source dates. `ALL` selects active
-ready corpora, not archived document versions.
+Status is inspection; backfill commands consume available embedding quota and write
+private index state. `ALL` selects current ready corpora, not archived versions.
+`--no-wait` returns pending immediately on quota/storage interruptions.
 
-## Rollout and rollback
+## Selective rollout and rollback
 
-1. Apply `supabase/migrations/0006_hybrid_retrieval.sql` with RLS enabled. The owner
-   applied it successfully. Apply `0007_embedding_input_quota.sql` too; the owner has
-   now applied and verified it. Apply remaining migrations through 0011 in order;
-   0011 supplies the shared current-document scope, batch writes and private inventory.
-   The current production project has applied these. Original keyword RPCs remain available.
-   Run `python scripts/verify_embedding_quota.py` to verify input accounting with isolated,
-   promptly removed audit reservations; it never calls Gemini.
-2. Backfill and inspect status, then run the evaluation below. For a new deployment,
-   keep `FINN_ENABLE_SEMANTIC_SEARCH=false` until reviewed results justify rollout.
-   The current project has passed this gate for selective complete-index rollout.
-3. In the **Singapore API** Render environment, set `GEMINI_EMBEDDING_MODEL` to
-   `gemini-embedding-001` and `FINN_ENABLE_SEMANTIC_SEARCH=true`; redeploy. No frontend
-   secret or Gemini key belongs in Vite. No new GitHub Actions secret is required.
-4. Ask a new question about a fully indexed company and inspect `retrieval_mode`,
-   actual citations and limitations. Prepared historical answers retain their actual
-   search mode and original dates.
-5. Roll back with `FINN_ENABLE_SEMANTIC_SEARCH=false` and redeploy. New retrieval uses
-   keyword search without any embedding/status calls. Previously generated answers
-   remain valid cached records; toggling the flag does not rewrite their history.
+Production enables `FINN_ENABLE_SEMANTIC_SEARCH=true` and
+`GEMINI_EMBEDDING_MODEL=gemini-embedding-001`. New databases should apply the migrations
+and review a complete-index evaluation before enabling the flag. Rollback sets the
+flag to `false` and redeploys the API; keyword retrieval then avoids embedding/status calls.
+No frontend setting is required. [Deployment](DEPLOYMENT.md) covers configuration.
 
-Full-company embedding coverage is required for semantic search. An incomplete index
-uses keyword search with an explicit note. Missing credentials, quota denial, malformed
-vectors, provider/network failures or semantic-RPC failure also fall back to keywords.
-The keyword branch still needs PostgreSQL; a database outage cannot be repaired by
-semantic fallback. Failed semantic attempts are never cached under a hybrid answer key.
+A company needs complete current embedding coverage before semantic search is eligible.
+Incomplete coverage, missing credentials, quota denial, malformed vectors, provider
+failure, semantic SQL failure or unusable semantic results preserve the keyword path
+with actual mode/limitations. An empty eligible scope is distinct from a semantic error.
+A PostgreSQL outage cannot be repaired by keyword fallback because both branches share it.
 
-Hybrid answer-cache identity includes model, embedding/input version, retrieval settings
-and the completed index fingerprint. Index completion invalidates a preparing-state
-keyword answer. Flag-off requests retain compatibility with the original keyword cache.
+Cache identity includes document scope, embedding/input versions, retrieval settings
+and completed-index fingerprint. Adding a current PDF invalidates stale source-scope
+answers before its embeddings finish. Partial batch progress does not invalidate every
+keyword answer; index completion does. Semantic failure is not cached under a hybrid
+identity. Existing published answers keep their actual generation dates and retrieval modes.
 
-## Reproducible evaluation
+## Coverage and verification
 
-`evals/retrieval_cases.json` now contains thirteen answerable questions (five development,
-eight hold-out) and three unsupported questions, with primary-source PDF page links and
-support notes. The original CCL study selected settings; the later GOKEX study used
-those frozen settings without retuning. Source-review timing is recorded in the labels.
+A dated read-only inventory on **3 November 2026** counted **3,299 / 20,028 current
+chunks** and **17 / 75 fully indexed documents**, across 21 companies with documents.
+CCL, GOKEX and V2RETAIL had complete indexes; INFY, TMCV, POLYCAB and other incomplete
+companies retained keyword retrieval. These are a checkpoint, not permanent production
+counts or a claim that the entire watchlist/NSE is semantically indexed.
 
-Recall@5/@10 uses **curated reference pages**, not exhaustive relevance annotation of
-thousands of pages: retrieved chunks occupy ranking slots; duplicate reference pages
-count once. A different valid page may support a good answer without increasing this
-reference-page recall. Review answer support separately. This is a small engineering
-check, not an independently human-rated or statistically representative benchmark.
+Rollout checks exercised a fresh CCL answer, cached GOKEX answer and partial-index
+keyword fallback. Later V2RETAIL acquisition used the generic quarterly path, indexed
+25/25 chunks and produced a three-claim hybrid evidence follow-up with original PDF
+pages 9/10/12. Controlled provider/SQL failures, stale-body writes and flag rollback
+were checked without weakening source or financial validation.
 
-```powershell
-.venv\Scripts\python scripts/evaluate_retrieval.py collect
-.venv\Scripts\python scripts/evaluate_retrieval.py tune
-.venv\Scripts\python scripts/evaluate_retrieval.py answers
-```
-
-Use `--symbols CCL` for the original evaluation. To reproduce the new-company check,
-run `collect --symbols GOKEX`, `score --symbols GOKEX`, `answers --symbols GOKEX`, and
-`latency --symbols GOKEX` after the CCL tuning run. `score` reads the previously selected
-settings and never tunes on its selected cases. The full-set run remains pending
-additional indexing. These commands opt into semantic search **only in their process**, never change Render
-or `.env.local`, and require live credentials/complete indexes. Raw candidates, generated
-drafts and timings stay under ignored `artifacts/retrieval/`. Collection refuses a keyword
-substitution when hybrid is unavailable, and resumes completed cases. The original
-keyword baseline is frozen explicitly. Twelve bounded RRF configurations are selected
-using development queries only; hold-out scores do not select settings. A matched
-keyword ablation separates candidate-budget changes from semantic gains. Generation
-uses the same existing model, prompt and validators for both methods. Ratings must be
-reviewed against the actual excerpts, including alternative supporting pages and abstention.
-
-Latency includes client-to-Supabase/model round trips on the operator's connection,
-not just SQL execution. First-use and warmed query-cache latency are measured separately;
-document ingestion/backfill is excluded. See the actual [evaluation and limitations](HYBRID_EVALUATION.md).
+The opt-in `scripts/verify_hybrid_rollout.py` exercises live behavior and can generate
+answers/use quota; it is not a read-only smoke test. Evaluation commands and their
+limits are documented separately in [retrieval evaluation](HYBRID_EVALUATION.md).
+For lightweight checks use [testing and reliability](EVALUATION.md).
 
 References: [Gemini embeddings](https://ai.google.dev/gemini-api/docs/embeddings),
 [REST API](https://ai.google.dev/api/embeddings),
